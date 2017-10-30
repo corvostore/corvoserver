@@ -1,5 +1,7 @@
-describe("jasmine", () => {
-  it("1 equals 1", () => {
-    expect(1).toBe(1)
+import HelloWorld from "../index.js";
+
+describe("testMethod", () => {
+  it("returns hello world", () => {
+    expect(HelloWorld.testMethod()).toBe("hello world")
   });
 });
