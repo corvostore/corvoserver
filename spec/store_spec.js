@@ -6,7 +6,7 @@ describe("corvo node", () => {
   it("exists as a class", () => {
     let testNode = new CorvoNode();
     expect(testNode.constructor).toBe(CorvoNode);
-  })
+  });
 
   it("takes val argument", () => {
     let val = "My value";
@@ -36,22 +36,66 @@ describe("corvo linked list", () => {
   it("exists as a class", () => {
     let testList = new CorvoLinkedList();
     expect(testList.constructor).toBe(CorvoLinkedList);
-  })
+  });
 
   it("new with no argument creates an empty linked list", () => {
     let testList = new CorvoLinkedList();
     expect(testList.head).toBe(null);
     expect(testList.tail).toBe(null);
-  })
+  });
 
-  it("is added to list on append", () => {
+  it("is added to list on append for single node", () => {
     let newNode = new CorvoNode(100);
     let testList = new CorvoLinkedList(newNode);
     let newNode2 = new CorvoNode(200);
     testList.append(newNode2);
     const head = testList.head;
     expect(head.nextNode).toBe(newNode2);
-  })
+    expect(testList.tail).toBe(newNode2);
+  });
+
+  it("is prepended to list on prepend for single node", () => {
+    let newNode = new CorvoNode(100);
+    let testList = new CorvoLinkedList(newNode);
+    let newNode2 = new CorvoNode(200);
+    testList.prepend(newNode2);
+    const head = testList.head;
+    expect(head).toBe(newNode2);
+    expect(head.nextNode).toBe(newNode);
+  });
+
+  it("is added to list on append for multiple nodes", () => {
+    let startNode = new CorvoNode(100);
+    let testList = new CorvoLinkedList(startNode);
+    let endNode = new CorvoNode(200);
+
+    for (var i = 0; i < 50; i++) {
+      let intermediateNode = new CorvoNode(50);
+      testList.append(intermediateNode);
+    }
+
+    testList.append(endNode);
+    const head = testList.head;
+    expect(head).toBe(startNode);
+    expect(testList.tail).toBe(endNode);
+  });
+
+  it("is prepended to list on prepend for multiple nodes", () => {
+    let startNode = new CorvoNode(100);
+    let testList = new CorvoLinkedList(startNode);
+    let endNode = new CorvoNode(200);
+
+    for (var i = 0; i < 50; i++) {
+      let intermediateNode = new CorvoNode(50);
+      testList.prepend(intermediateNode);
+    }
+
+    testList.prepend(endNode);
+    const head = testList.head;
+    expect(head).toBe(endNode);
+    expect(testList.tail).toBe(startNode);
+  });
+
 });
 
 describe("store", () => {
