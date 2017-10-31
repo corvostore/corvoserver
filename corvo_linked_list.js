@@ -15,6 +15,25 @@ class CorvoLinkedList {
     this.tail = inputNode;
   }
 
+  remove(inputNode) {
+    if (this.head === this.tail) {
+      this.head = null;
+      this.tail = null;
+    } else if (inputNode === this.head) {
+      this.head = inputNode.nextNode;
+      this.head.prevNode = null;
+    } else if (inputNode === this.tail) {
+      const tempPrevNode = this.tail.prevNode;
+      tempPrevNode.nextNode = null;
+      this.tail = tempPrevNode;
+    } else {
+      const tempPrevNode = inputNode.prevNode;
+      const tempNextNode = inputNode.nextNode;
+      tempPrevNode.nextNode = tempNextNode;
+      tempNextNode.prevNode = tempPrevNode;
+    }
+  }
+
   prepend(inputNode) {
     let dummy = this.head;
     inputNode.nextNode = dummy;

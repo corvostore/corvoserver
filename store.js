@@ -14,6 +14,15 @@ class Store {
   }
 
   getString(key) {
+    const accessedNode = this.mainHash[key];
+    if (accessedNode === undefined) {
+      return null;
+    }
+
+    const returnValue = accessedNode.val;
+    this.mainList.remove(accessedNode);
+    this.mainList.append(accessedNode);
+    return returnValue;
   }
 }
 

@@ -139,4 +139,45 @@ describe("store", () => {
     expect(testStore.mainList.head.val).toBe(value1);
     expect(testStore.mainList.tail.val).toBe(value2);
   })
+
+  it("uses getString method to retrieve corresponding value for a key", () => {
+    const testStore = new Store();
+    const key1 = "key1";
+    const value1 = "this-is-the-value-1";
+
+    testStore.setString(key1, value1);
+    const valueFromStore = testStore.getString(key1);
+    expect(valueFromStore).toBe(value1);
+  })
+
+  it("getString method moves most recently accessed key to tail of list", () => {
+    const testStore = new Store();
+    const key1 = "key1";
+    const value1 = "this-is-the-value-1";
+    const key2 = "key2";
+    const value2 = "this-is-the-value-2";
+    const key3 = "key3";
+    const value3 = "this-is-the-value-3";
+    const key4 = "key4";
+    const value4 = "this-is-the-value-4";
+
+    testStore.setString(key1, value1);
+    testStore.setString(key2, value2);
+    testStore.setString(key3, value3);
+    testStore.setString(key4, value4);
+    expect(testStore.mainList.tail.val).toBe(value4);
+    const valueFromStore = testStore.getString(key2);
+    expect(valueFromStore).toBe(value2);
+    expect(testStore.mainList.tail.val).toBe(value2);
+  })
+
+  it("returns null when getString called for non-existent key", () => {
+    const testStore = new Store();
+    const key1 = "key1";
+    const value1 = "this-is-the-value-1";
+
+    testStore.setString(key1, value1);
+    const valueFromStore = testStore.getString("non-existent-key");
+    expect(valueFromStore).toBe(null);
+  })
 });
