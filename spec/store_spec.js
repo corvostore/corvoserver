@@ -99,10 +99,6 @@ describe("corvo linked list", () => {
 });
 
 describe("store", () => {
-  it("true equals true", () => {
-    expect(true).toBe(true);
-  });
-
   it("exists as a class", () => {
     let testStore = new Store();
     expect(testStore.constructor).toBe(Store);
@@ -126,6 +122,20 @@ describe("store", () => {
     expect(testStore.mainList.tail.val).toBe(value);
   });
 
+  it("uses setString method to overwrite one value in store", () => {
+    const testStore = new Store();
+    const key = "key1";
+    const value1 = "this-is-the-value1";
+    const value2 = "this-is-the-value2";
+
+    testStore.setString(key, value1);
+    expect(testStore.getString(key)).toBe(value1);
+
+    testStore.setString(key, value2);
+    expect(testStore.getString(key)).toBe(value2);
+    expect(testStore.mainList.head).toBe(testStore.mainList.tail);
+  });
+
   it("uses setString method to set two key/value items in store", () => {
     const testStore = new Store();
     const key1 = "key1";
@@ -138,6 +148,49 @@ describe("store", () => {
     expect(testStore.mainHash[key2].val).toBe(value2);
     expect(testStore.mainList.head.val).toBe(value1);
     expect(testStore.mainList.tail.val).toBe(value2);
+  });
+
+  it("uses setStringX to overwrite a single key/value in store", () => {
+    const testStore = new Store();
+    const key = "key";
+    const value1 = "this-is-the-value1";
+    const value2 = "this-is-the-value2";
+
+    testStore.setString(key, value1);
+    expect(testStore.getString(key)).toBe(value1);
+    testStore.setStringX(key, value2);
+    expect(testStore.getString(key)).toBe(value2);
+  });
+
+  it("can't use setStringX method to create new key/value in store", () => {
+    const testStore = new Store();
+    const key = "key";
+    const value = "this-is-the-value";
+
+    expect(testStore.setStringX(key, value)).toBe(null);
+    expect(testStore.getString(key)).toBe(null);
+  });
+
+  it("uses setStringNX method to create new key/value in store", () => {
+    const testStore = new Store();
+    const key = "key";
+    const value = "this-is-the-value";
+
+    testStore.setStringNX(key, value);
+
+    expect(testStore.getString(key)).toBe(value);
+  });
+
+  it("can't use setStringNX method to overwrite key/value in store", () => {
+    const testStore = new Store();
+    const key = "key";
+    const value1 = "this-is-the-value1";
+    const value2 = "this-is-the-value2";
+
+    testStore.setStringNX(key, value1);
+    expect(testStore.getString(key)).toBe(value1);
+    expect(testStore.setStringNX(key, value2)).toBe(null);
+    expect(testStore.getString(key)).toBe(value1);
   });
 
   it("uses getString method to retrieve corresponding value for a key", () => {
@@ -208,7 +261,7 @@ describe("store", () => {
     expect(testStore.getString(key)).toBe(result);
   });
 
-  it("returns number representation of string length", () => {
+  it("uses getStrLen to return number representation of string length", () => {
     const testStore = new Store();
     const key = "key1";
     const value = "123456789";
@@ -216,5 +269,32 @@ describe("store", () => {
     testStore.setString(key, value);
     const len = testStore.getStrLen(key);
     expect(len).toBe(value.length);
+  });
+
+  it("uses strIncr to incremement number stored as string", () => {
+    const testStore = new Store();
+    const key = 'key';
+    const value = '1';
+
+    testStore.setString(key, value);
+    testStore.strIncr(key);
+    expect(testStore.getString(key)).toBe('2');
+  });
+
+  it("uses strIncr to create a new key/value of 0 and then increment it", () => {
+    const testStore = new Store();
+    const key = 'key';
+
+    testStore.strIncr(key);
+    expect(testStore.getString(key)).toBe('1');
+  });
+
+  it("uses strIncr to incremement number stored as string", () => {
+    const testStore = new Store();
+    const key = 'key';
+    const value = 'Aw heck';
+
+    testStore.setString(key, value);
+    expect(testStore.strIncr(key)).toBe(null);
   });
 });
