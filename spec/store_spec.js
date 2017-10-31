@@ -107,4 +107,36 @@ describe("store", () => {
     let testStore = new Store();
     expect(testStore.constructor).toBe(Store);
   })
+
+  it("has mainHash and mainLinkedList initialized", () => {
+    const testStore = new Store();
+    expect(Object.keys(testStore.mainHash).length).toBe(0);
+    expect(testStore.mainList.constructor).toBe(CorvoLinkedList);
+    expect(testStore.mainList.head).toBe(null);
+    expect(testStore.mainList.tail).toBe(null);
+  })
+
+  it("uses setString method to set one key/value in store", () => {
+    const testStore = new Store();
+    const key = "key1";
+    const value = "this-is-the-value";
+    testStore.setString(key, value);
+    expect(testStore.mainHash[key].val).toBe(value);
+    expect(testStore.mainList.head.val).toBe(value);
+    expect(testStore.mainList.tail.val).toBe(value);
+  })
+
+  it("uses setString method to set two key/value items in store", () => {
+    const testStore = new Store();
+    const key1 = "key1";
+    const value1 = "this-is-the-value-1";
+    const key2 = "key2";
+    const value2 = "this-is-the-value-2";
+    testStore.setString(key1, value1);
+    testStore.setString(key2, value2);
+    expect(testStore.mainHash[key1].val).toBe(value1);
+    expect(testStore.mainHash[key2].val).toBe(value2);
+    expect(testStore.mainList.head.val).toBe(value1);
+    expect(testStore.mainList.tail.val).toBe(value2);
+  })
 });

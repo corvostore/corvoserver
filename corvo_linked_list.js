@@ -5,9 +5,13 @@ class CorvoLinkedList {
   }
 
   append(inputNode) {
-    let dummy = this.tail;
-    dummy.nextNode = inputNode;
-    inputNode.prevNode = dummy;
+    if (this.tail === null) {
+      this.head = inputNode;
+    } else {
+      this.tail.nextNode = inputNode;
+      inputNode.prevNode = this.tail;
+    }
+
     this.tail = inputNode;
   }
 
