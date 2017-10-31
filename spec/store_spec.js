@@ -101,12 +101,12 @@ describe("corvo linked list", () => {
 describe("store", () => {
   it("true equals true", () => {
     expect(true).toBe(true);
-  })
+  });
 
   it("exists as a class", () => {
     let testStore = new Store();
     expect(testStore.constructor).toBe(Store);
-  })
+  });
 
   it("has mainHash and mainLinkedList initialized", () => {
     const testStore = new Store();
@@ -114,7 +114,7 @@ describe("store", () => {
     expect(testStore.mainList.constructor).toBe(CorvoLinkedList);
     expect(testStore.mainList.head).toBe(null);
     expect(testStore.mainList.tail).toBe(null);
-  })
+  });
 
   it("uses setString method to set one key/value in store", () => {
     const testStore = new Store();
@@ -124,7 +124,7 @@ describe("store", () => {
     expect(testStore.mainHash[key].val).toBe(value);
     expect(testStore.mainList.head.val).toBe(value);
     expect(testStore.mainList.tail.val).toBe(value);
-  })
+  });
 
   it("uses setString method to set two key/value items in store", () => {
     const testStore = new Store();
@@ -138,7 +138,7 @@ describe("store", () => {
     expect(testStore.mainHash[key2].val).toBe(value2);
     expect(testStore.mainList.head.val).toBe(value1);
     expect(testStore.mainList.tail.val).toBe(value2);
-  })
+  });
 
   it("uses getString method to retrieve corresponding value for a key", () => {
     const testStore = new Store();
@@ -148,7 +148,7 @@ describe("store", () => {
     testStore.setString(key1, value1);
     const valueFromStore = testStore.getString(key1);
     expect(valueFromStore).toBe(value1);
-  })
+  });
 
   it("getString method moves most recently accessed key to tail of list", () => {
     const testStore = new Store();
@@ -169,7 +169,7 @@ describe("store", () => {
     const valueFromStore = testStore.getString(key2);
     expect(valueFromStore).toBe(value2);
     expect(testStore.mainList.tail.val).toBe(value2);
-  })
+  });
 
   it("returns null when getString called for non-existent key", () => {
     const testStore = new Store();
@@ -179,5 +179,32 @@ describe("store", () => {
     testStore.setString(key1, value1);
     const valueFromStore = testStore.getString("non-existent-key");
     expect(valueFromStore).toBe(null);
-  })
+  });
+
+  it("moves touched key value to end of linked list", () => {
+    const testStore = new Store();
+    const key = "key";
+    const value = "this-is-the-value";
+
+    for (var i = 0; i < 50; i++) {
+      testStore.setString("key" + i, "Some val");
+    }
+
+    testStore.setString(key, value);
+    testStore.touch(key);
+    expect(testStore.mainList.tail.val).toBe(value)
+  });
+
+  it("appends string value to value in memory with appendString", () => {
+    const testStore = new Store();
+    const key = "key1";
+    const valueA = "Hello, ";
+    const valueB = "World!";
+    const result = "Hello, World!";
+
+    testStore.setString(key, valueA);
+    testStore.appendString(key, valueB);
+
+    expect(testStore.getString(key)).toBe(result);
+  });
 });

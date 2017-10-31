@@ -20,9 +20,27 @@ class Store {
     }
 
     const returnValue = accessedNode.val;
-    this.mainList.remove(accessedNode);
-    this.mainList.append(accessedNode);
+    this.touch(key);
     return returnValue;
+  }
+
+  appendString(key, valueToAppend) {
+    const accessedNode = this.mainHash[key];
+    if (accessedNode === undefined) {
+      return null;
+    }
+
+    this.touch(key);
+
+    accessedNode.val += valueToAppend;
+  }
+
+  touch(key) {
+    const accessedNode = this.mainHash[key];
+    if (accessedNode !== undefined) {
+      this.mainList.remove(accessedNode);
+      this.mainList.append(accessedNode);
+    }
   }
 }
 
