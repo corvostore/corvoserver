@@ -6,36 +6,20 @@ class CorvoNode {
   }
 
   get prevNode() {
-    return this.getPrevNode;
+    return this._prevNode;
   }
 
   get nextNode() {
-    return this.getNextNode;
-  }
-
-  getPrevNode() {
-    return this.prevNode;
-  }
-
-  getNextNode() {
-    return this.nextNode;
+    return this._nextNode;
   }
 
   set prevNode(node) {
-    // this.prevNode = node;
+    this._prevNode = node;
   }
-
-  // setPrevNode(node) {
-  //   this.prevNode = node;
-  // }
 
   set nextNode(node) {
-    // this.nextNode = node;
+    this._nextNode = node;
   }
-
-  // setNextNode(node) {
-  //   this.nextNode = node;
-  // }
 }
 
 export default CorvoNode;
