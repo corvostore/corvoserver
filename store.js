@@ -42,6 +42,15 @@ class Store {
       this.mainList.append(accessedNode);
     }
   }
+
+  getStrLen(key) {
+    const accessedNode = this.mainHash[key];
+    if (accessedNode === undefined) {
+      
+    }
+
+
+  }
 }
 
 export default Store;

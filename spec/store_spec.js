@@ -207,4 +207,14 @@ describe("store", () => {
 
     expect(testStore.getString(key)).toBe(result);
   });
+
+  it("returns number representation of string length", () => {
+    const testStore = new Store();
+    const key = "key1";
+    const value = "123456789";
+
+    testStore.setString(key, value);
+    const len = testStore.getStrLen(key);
+    expect(len).toBe(value.length);
+  });
 });
