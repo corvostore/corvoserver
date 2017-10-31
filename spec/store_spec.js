@@ -271,7 +271,7 @@ describe("store", () => {
     expect(len).toBe(value.length);
   });
 
-  it("uses strIncr to incremement number stored as string", () => {
+  it("uses strIncr to increment number stored as string", () => {
     const testStore = new Store();
     const key = 'key';
     const value = '1';
@@ -289,12 +289,39 @@ describe("store", () => {
     expect(testStore.getString(key)).toBe('1');
   });
 
-  it("uses strIncr to incremement number stored as string", () => {
+  it("it returns null if strIncr used on non-number string", () => {
     const testStore = new Store();
     const key = 'key';
     const value = 'Aw heck';
 
     testStore.setString(key, value);
     expect(testStore.strIncr(key)).toBe(null);
+  });
+
+  it("uses strDecr to decrement number stored as string", () => {
+    const testStore = new Store();
+    const key = 'key';
+    const value = '1';
+
+    testStore.setString(key, value);
+    testStore.strDecr(key);
+    expect(testStore.getString(key)).toBe('0');
+  });
+
+  it("uses strDecr to create a new key/value of 0 and then decrement it", () => {
+    const testStore = new Store();
+    const key = 'key';
+
+    testStore.strDecr(key);
+    expect(testStore.getString(key)).toBe('-1');
+  });
+
+  it("it returns null if strDecr used on non-number string", () => {
+    const testStore = new Store();
+    const key = 'key';
+    const value = 'Aw heck';
+
+    testStore.setString(key, value);
+    expect(testStore.strDecr(key)).toBe(null);
   });
 });
