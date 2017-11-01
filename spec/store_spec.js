@@ -383,4 +383,8 @@ describe("store", () => {
     expect(testStore.mainList.tail.val).toBe(value2);
     expect(testStore.mainHash[key1]).toBe(undefined);
   });
+
+  it("uses lruEvictToMaxMemory to bring total store memory below threshold", () => {
+    
+  });
 });
