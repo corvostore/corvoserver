@@ -335,4 +335,6 @@ describe("store", () => {
     testStore.setString(key, value);
     expect(testStore.strDecr(key)).toBe(null);
   });
+
+
 });
