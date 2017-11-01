@@ -15,7 +15,7 @@ class Store {
     const accessedNode = this.mainHash[key];
 
     if (accessedNode === undefined) {
-      const newNode = new CorvoNode(value);
+      const newNode = new CorvoNode(key, value);
       this.mainHash[key] = newNode;
       this.mainList.append(newNode);
       this.memoryTracker.incrementMemoryUsed(key, value);
@@ -46,7 +46,7 @@ class Store {
     const accessedNode = this.mainHash[key];
 
     if (accessedNode === undefined) {
-      const newNode = new CorvoNode(value);
+      const newNode = new CorvoNode(key, value);
       this.mainHash[key] = newNode;
       this.mainList.append(newNode);
       this.memoryTracker.incrementMemoryUsed(key, value);
@@ -132,6 +132,10 @@ class Store {
     accessedNode.val = (parseInt(accessedNode.val, 10) - 1).toString();
     this.memoryTracker.updateMemoryUsed(key, oldValue, accessedNode.val);
     this.touch(accessedNode);
+  }
+
+  lruEvict() {
+
   }
 }
 

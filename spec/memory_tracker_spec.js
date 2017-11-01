@@ -129,4 +129,11 @@ describe("MemoryTracker", () => {
 
     expect(testTracker.maxMemoryExceeded()).toBe(true);
   });
+
+  it("uses maxMemoryExceeded to return false if maxMemory is not exceeded", () => {
+    const testTracker = new MemoryTracker(30);
+    testTracker.memoryUsed = 20;
+
+    expect(testTracker.maxMemoryExceeded()).toBe(false);
+  });
 });

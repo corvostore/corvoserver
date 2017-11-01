@@ -10,24 +10,27 @@ describe("corvo node", () => {
   });
 
   it("takes val argument", () => {
-    let val = "My value";
-    let testNode = new CorvoNode(val);
+    const val = "My value";
+    const key = "key";
+    const testNode = new CorvoNode(key, val);
     expect(testNode.val).toBe(val);
   });
 
   it("takes all constructor arguments", () => {
-    let val = "My value";
-    let preceedingNode = new CorvoNode(null);
-    let succeedingNode = new CorvoNode(null);
-    let testNode = new CorvoNode(val, preceedingNode, succeedingNode);
+    const val = "My value";
+    const key = "key";
+    const preceedingNode = new CorvoNode(null, null);
+    const succeedingNode = new CorvoNode(null, null);
+    const testNode = new CorvoNode(key, val, preceedingNode, succeedingNode);
     expect(testNode.val).toBe(val);
     expect(testNode.nextNode).toBe(succeedingNode);
     expect(testNode.prevNode).toBe(preceedingNode);
   });
 
   it("has null default constructor arguments", () => {
-    let val = "My value";
-    let testNode = new CorvoNode(val);
+    const val = "My value";
+    const key = "key";
+    const testNode = new CorvoNode(key, val);
     expect(testNode.nextNode).toBe(null);
     expect(testNode.prevNode).toBe(null);
   });
@@ -40,15 +43,20 @@ describe("corvo linked list", () => {
   });
 
   it("new with no argument creates an empty linked list", () => {
-    let testList = new CorvoLinkedList();
+    const testList = new CorvoLinkedList();
     expect(testList.head).toBe(null);
     expect(testList.tail).toBe(null);
   });
 
   it("is added to list on append for single node", () => {
-    let newNode = new CorvoNode(100);
-    let testList = new CorvoLinkedList(newNode);
-    let newNode2 = new CorvoNode(200);
+    const key1 = "key1";
+    const key2 = "key2";
+    const value1 = 100;
+    const value2 = 200;
+
+    const newNode = new CorvoNode(key1, value1);
+    const testList = new CorvoLinkedList(newNode);
+    const newNode2 = new CorvoNode(key2, value2);
     testList.append(newNode2);
     const head = testList.head;
     expect(head.nextNode).toBe(newNode2);
@@ -56,9 +64,14 @@ describe("corvo linked list", () => {
   });
 
   it("is prepended to list on prepend for single node", () => {
-    let newNode = new CorvoNode(100);
-    let testList = new CorvoLinkedList(newNode);
-    let newNode2 = new CorvoNode(200);
+    const key1 = "key1";
+    const key2 = "key2";
+    const value1 = 100;
+    const value2 = 200;
+
+    const newNode = new CorvoNode(key1, value1);
+    const testList = new CorvoLinkedList(newNode);
+    const newNode2 = new CorvoNode(key2, value2);
     testList.prepend(newNode2);
     const head = testList.head;
     expect(head).toBe(newNode2);
@@ -66,12 +79,17 @@ describe("corvo linked list", () => {
   });
 
   it("is added to list on append for multiple nodes", () => {
-    let startNode = new CorvoNode(100);
-    let testList = new CorvoLinkedList(startNode);
-    let endNode = new CorvoNode(200);
+    const key1 = "key1";
+    const key2 = "key2";
+    const value1 = 100;
+    const value2 = 200;
+
+    const startNode = new CorvoNode(key1, value1);
+    const testList = new CorvoLinkedList(startNode);
+    const endNode = new CorvoNode(key2, value2);
 
     for (var i = 0; i < 50; i++) {
-      let intermediateNode = new CorvoNode(50);
+      const intermediateNode = new CorvoNode('k' + i, 50);
       testList.append(intermediateNode);
     }
 
@@ -82,12 +100,17 @@ describe("corvo linked list", () => {
   });
 
   it("is prepended to list on prepend for multiple nodes", () => {
-    let startNode = new CorvoNode(100);
-    let testList = new CorvoLinkedList(startNode);
-    let endNode = new CorvoNode(200);
+    const key1 = "key1";
+    const key2 = "key2";
+    const value1 = 100;
+    const value2 = 200;
+
+    const startNode = new CorvoNode(key1, value1);
+    const testList = new CorvoLinkedList(startNode);
+    const endNode = new CorvoNode(key2, value2);
 
     for (var i = 0; i < 50; i++) {
-      let intermediateNode = new CorvoNode(50);
+      const intermediateNode = new CorvoNode('k' + i, 50);
       testList.prepend(intermediateNode);
     }
 
@@ -327,7 +350,7 @@ describe("store", () => {
     expect(testStore.getString(key)).toBe('-1');
   });
 
-  it("it returns null if strDecr used on non-number string", () => {
+  it("returns null if strDecr used on non-number string", () => {
     const testStore = new Store();
     const key = 'key';
     const value = 'Aw heck';
@@ -336,5 +359,28 @@ describe("store", () => {
     expect(testStore.strDecr(key)).toBe(null);
   });
 
+  it("evicts least-recently touched key/value from store when lruEvict is invoked", () => {
+    const testStore = new Store();
+    const key = 'key';
+    const value = 'Aw heck';
 
+    testStore.setString(key, value);
+    testStore.lruEvict();
+    expect(testStore.mainList.tail).toBe(null);
+    expect(testStore.mainHash[key]).toBe(undefined);
+  });
+
+  it("evicts least-recently touched key/value from store when lruEvict is invoked", () => {
+    const testStore = new Store();
+    const key1 = 'key1';
+    const key2 = 'key2';
+    const value1 = 'Some val';
+    const value2 = 'another val';
+
+    testStore.setString(key1, value1);
+    testStore.setString(key2, value2);
+    testStore.lruEvict();
+    expect(testStore.mainList.tail.val).toBe(value2);
+    expect(testStore.mainHash[key1]).toBe(undefined);
+  });
 });
