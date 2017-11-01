@@ -1,3 +1,7 @@
+const REFERENCE_SIZE_BYTES = 8;
+const STRING_ONE_CHAR_BYTES = 2;
+const NODE_NUM_REFS = 3;
+
 class MemoryTracker {
   constructor(maxMemory) {
     this.maxMemory = maxMemory,
@@ -5,15 +9,13 @@ class MemoryTracker {
   }
 
   calculateHashItemSize(key) {
-    const keyBytes = 2 * key.length;
-    const ref = 8;
-    return keyBytes + ref;
+    const keyBytes = STRING_ONE_CHAR_BYTES * key.length;
+    return keyBytes + REFERENCE_SIZE_BYTES;
   }
 
   calculateNodeSize(val) {
-    const ref = 8;
-    const total_refs = ref * 3;
-    const valueBytes = 2 * val.length;
+    const total_refs = REFERENCE_SIZE_BYTES * 3;
+    const valueBytes = STRING_ONE_CHAR_BYTES * val.length;
     return total_refs + valueBytes;
   }
 
@@ -26,7 +28,7 @@ class MemoryTracker {
   }
 
   updateMemoryUsed(key, oldVal, newVal) {
-
+    this.memoryUsed += (newVal.length - oldVal.length) * STRING_ONE_CHAR_BYTES;
   }
 
 }

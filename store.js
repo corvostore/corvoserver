@@ -20,7 +20,9 @@ class Store {
       this.mainList.append(newNode);
       this.memoryTracker.incrementMemoryUsed(key, value);
     } else {
+      const oldValue = accessedNode.val;
       accessedNode.val = value;
+      this.memoryTracker.updateMemoryUsed(key, oldValue, value);
       this.touch(accessedNode);
     }
   }
@@ -30,7 +32,9 @@ class Store {
     const accessedNode = this.mainHash[key];
 
     if (accessedNode !== undefined) {
+      const oldValue = accessedNode.val;
       accessedNode.val = value;
+      this.memoryTracker.updateMemoryUsed(key, oldValue, value);
       this.touch(accessedNode);
     } else {
       return null;
@@ -45,6 +49,7 @@ class Store {
       const newNode = new CorvoNode(value);
       this.mainHash[key] = newNode;
       this.mainList.append(newNode);
+      this.memoryTracker.incrementMemoryUsed(key, value);
     } else {
       return null;
     }
@@ -68,8 +73,9 @@ class Store {
     }
 
     this.touch(key);
-
+    const oldValue = accessedNode.val;
     accessedNode.val += valueToAppend;
+    this.memoryTracker.updateMemoryUsed(key, oldValue, accessedNode.val);
   }
 
   touch(key) {
