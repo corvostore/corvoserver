@@ -135,7 +135,11 @@ class Store {
   }
 
   lruEvict() {
+    const head = this.mainList.head;
+    const headKey = head.key;
 
+    this.mainList.remove(head);
+    delete this.mainHash[headKey];
   }
 }
 
