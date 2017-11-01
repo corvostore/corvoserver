@@ -31,6 +31,10 @@ class MemoryTracker {
     this.memoryUsed += (newVal.length - oldVal.length) * STRING_ONE_CHAR_BYTES;
   }
 
+  decrementMemoryUsed(key, val) {
+    this.memoryUsed -= this.calculateStoreItemSize(key, val);
+  }
+
   maxMemoryExceeded() {
     return this.memoryUsed > this.maxMemory;
   }

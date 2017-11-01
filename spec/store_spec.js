@@ -384,7 +384,14 @@ describe("store", () => {
     expect(testStore.mainHash[key1]).toBe(undefined);
   });
 
-  it("uses lruEvictToMaxMemory to bring total store memory below threshold", () => {
-    
+  it("uses lruCheckAndEvictToMaxMemory to bring total store memory below threshold", () => {
+    const testStore = new Store({maxMemory: 1001});
+    for (var i = 0; i < 10; i++) {
+      testStore.setString("key" + i, "abcdefghijklmnopqrstuvwxyzabc" + i);
+    }
+    expect(testStore.mainList.head.key).toBe("key0");
+    testStore.setString("key-xyz", "xyz");
+    expect(testStore.mainList.head.key).toBe("key1");
   });
+
 });

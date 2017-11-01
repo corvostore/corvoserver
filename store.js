@@ -25,6 +25,7 @@ class Store {
       this.memoryTracker.updateMemoryUsed(key, oldValue, value);
       this.touch(accessedNode);
     }
+    this.lruCheckAndEvictToMaxMemory();
   }
 
   setStringX(key, value) {
@@ -39,6 +40,7 @@ class Store {
     } else {
       return null;
     }
+    this.lruCheckAndEvictToMaxMemory();
   }
 
   setStringNX(key, value) {
@@ -53,6 +55,7 @@ class Store {
     } else {
       return null;
     }
+    this.lruCheckAndEvictToMaxMemory();
   }
 
   getString(key) {
@@ -76,6 +79,8 @@ class Store {
     const oldValue = accessedNode.val;
     accessedNode.val += valueToAppend;
     this.memoryTracker.updateMemoryUsed(key, oldValue, accessedNode.val);
+
+    this.lruCheckAndEvictToMaxMemory();
   }
 
   touch(key) {
@@ -112,6 +117,8 @@ class Store {
     accessedNode.val = (parseInt(accessedNode.val, 10) + 1).toString();
     this.memoryTracker.updateMemoryUsed(key, oldValue, accessedNode.val);
     this.touch(accessedNode);
+
+    this.lruCheckAndEvictToMaxMemory();
   }
 
   strDecr(key) {
@@ -132,6 +139,8 @@ class Store {
     accessedNode.val = (parseInt(accessedNode.val, 10) - 1).toString();
     this.memoryTracker.updateMemoryUsed(key, oldValue, accessedNode.val);
     this.touch(accessedNode);
+
+    this.lruCheckAndEvictToMaxMemory();
   }
 
   lruEvict() {
@@ -139,7 +148,15 @@ class Store {
     const headKey = head.key;
 
     this.mainList.remove(head);
+    const currentVal = this.mainHash[headKey];
     delete this.mainHash[headKey];
+    this.memoryTracker.decrementMemoryUsed(headKey, currentVal);
+  }
+
+  lruCheckAndEvictToMaxMemory() {
+    while (this.memoryTracker.maxMemoryExceeded()) {
+      this.lruEvict();
+    }
   }
 }
 
