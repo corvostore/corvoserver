@@ -1,6 +1,7 @@
 import Store from "../store.js";
 import CorvoLinkedList from "../corvo_linked_list.js";
 import CorvoNode from "../corvo_node.js";
+import MemoryTracker from "../memory_tracker";
 
 describe("corvo node", () => {
   it("exists as a class", () => {
@@ -110,6 +111,16 @@ describe("store", () => {
     expect(testStore.mainList.constructor).toBe(CorvoLinkedList);
     expect(testStore.mainList.head).toBe(null);
     expect(testStore.mainList.tail).toBe(null);
+  });
+
+  it("has a new instance of memory tracker", () => {
+    const testStore = new Store();
+    expect(testStore.memoryTracker.constructor).toBe(MemoryTracker);
+  });
+
+  it("sets a default max memory value of 100 megabytes", () => {
+    const testStore = new Store();
+    expect(testStore.memoryTracker.maxMemory).toBe(104857600);
   });
 
   it("uses setString method to set one key/value in store", () => {

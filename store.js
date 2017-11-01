@@ -1,10 +1,14 @@
 import CorvoLinkedList from './corvo_linked_list';
 import CorvoNode from './corvo_node';
+import MemoryTracker from './memory_tracker';
+const DEFAULT_MAX_MEMORY = 104857600; // equals 100MB
 
 class Store {
-  constructor() {
+  constructor(options={maxMemory: DEFAULT_MAX_MEMORY}) {
     this.mainHash = {};
     this.mainList = new CorvoLinkedList();
+
+    this.memoryTracker = new MemoryTracker(options.maxMemory);
   }
 
   setString(key, value) {
@@ -14,6 +18,7 @@ class Store {
       const newNode = new CorvoNode(value);
       this.mainHash[key] = newNode;
       this.mainList.append(newNode);
+      this.memoryTracker.incrementMemoryUsed(key, value);
     } else {
       accessedNode.val = value;
       this.touch(accessedNode);
@@ -98,6 +103,24 @@ class Store {
     }
 
     accessedNode.val = (parseInt(accessedNode.val, 10) + 1).toString();
+    this.touch(accessedNode);
+  }
+
+  strDecr(key) {
+    function isNumberString(strInput) {
+      return ((parseInt(strInput)).toString() === strInput);
+    }
+
+    let accessedNode = this.mainHash[key];
+
+    if (accessedNode === undefined) {
+      this.setString(key, '0');
+      accessedNode = this.mainHash[key];
+    } else if (!isNumberString(accessedNode.val)) {
+      return null;
+    }
+
+    accessedNode.val = (parseInt(accessedNode.val, 10) - 1).toString();
     this.touch(accessedNode);
   }
 }
