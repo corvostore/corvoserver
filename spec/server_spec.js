@@ -11,4 +11,25 @@ describe("CorvoServer", () => {
     const server = new CorvoServer();
     expect(server.store.constructor).toBe(Store);
   });
+
 });
+
+// describe("Server test", () => {
+//   let server;
+//   beforeEach(function() {
+//     server = new CorvoServer();
+//   });
+//   afterEach(function() {
+//     server.tempServer.close();
+//   });
+//
+//   it("starts a server", () => {
+//     let started = false;
+//     server.tempServer.on('listening', function() {
+//       started = true;
+//     });
+//     server.startServer();
+//     expect(started).toBe(true);
+//   });
+//
+// });

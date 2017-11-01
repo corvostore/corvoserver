@@ -10,12 +10,16 @@ class CorvoServer {
   }
   startServer() {
     const server = Net.createServer();
-    server.on('connection', handleConnection);
+    server.on('connection', this.handleConnection.bind(this));
 
-    server.listen(PORT, HOST, function() {
+    server.listen(DEFAULT_PORT, DEFAULT_HOST, function() {
       console.log('server listening to %j', server.address());
     });
 
+  }
+
+  handleConnection(conn) {
+    return "handleConnection called";
   }
 
 
@@ -60,7 +64,7 @@ export default CorvoServer;
 //         conn.end();
 //         break;
 //       default:
-//         responseText = "Command not implmeneted yet";
+//         responseText = "Command not implemented yet";
 //     }
 //
 //     return responseText + "\r\n";
