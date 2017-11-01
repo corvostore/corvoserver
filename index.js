@@ -1,8 +1,4 @@
-class HelloWorld {
-  static testMethod() {
-    return "hello world";
-  }
+import CorvoServer from './corvo_server';
 
-}
-
-export default HelloWorld;
+var server = new CorvoServer();
+server.startServer();
