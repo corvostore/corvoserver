@@ -108,7 +108,9 @@ class Store {
       return null;
     }
 
+    const oldValue = accessedNode.val;
     accessedNode.val = (parseInt(accessedNode.val, 10) + 1).toString();
+    this.memoryTracker.updateMemoryUsed(key, oldValue, accessedNode.val);
     this.touch(accessedNode);
   }
 
@@ -126,7 +128,9 @@ class Store {
       return null;
     }
 
+    const oldValue = accessedNode.val;
     accessedNode.val = (parseInt(accessedNode.val, 10) - 1).toString();
+    this.memoryTracker.updateMemoryUsed(key, oldValue, accessedNode.val);
     this.touch(accessedNode);
   }
 }

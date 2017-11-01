@@ -78,4 +78,48 @@ describe("MemoryTracker", () => {
     testStore.appendString(key, newValue);
     expect(testStore.memoryTracker.memoryUsed).toBe(96);
   });
+
+  it("doesn't change memory used for strIncr operation that doesn't increase length of string", () => {
+    const testStore = new Store();
+    const key = 'key';
+    const value = '1';
+
+    testStore.setString(key, value);
+    expect(testStore.memoryTracker.memoryUsed).toBe(40);
+    testStore.strIncr(key);
+    expect(testStore.memoryTracker.memoryUsed).toBe(40);
+  });
+
+  it("changes memory used for strIncr operation that increases length of string", () => {
+    const testStore = new Store();
+    const key = 'key';
+    const value = '9';
+
+    testStore.setString(key, value);
+    expect(testStore.memoryTracker.memoryUsed).toBe(40);
+    testStore.strIncr(key);
+    expect(testStore.memoryTracker.memoryUsed).toBe(42);
+  });
+
+  it("doesn't change memory used for strDecr operation that doesn't decrease length of string", () => {
+    const testStore = new Store();
+    const key = 'key';
+    const value = '1';
+
+    testStore.setString(key, value);
+    expect(testStore.memoryTracker.memoryUsed).toBe(40);
+    testStore.strDecr(key);
+    expect(testStore.memoryTracker.memoryUsed).toBe(40);
+  });
+
+  it("changes memory used for strDecr operation that decreases length of string", () => {
+    const testStore = new Store();
+    const key = 'key';
+    const value = '10';
+
+    testStore.setString(key, value);
+    expect(testStore.memoryTracker.memoryUsed).toBe(42);
+    testStore.strDecr(key);
+    expect(testStore.memoryTracker.memoryUsed).toBe(40);
+  });
 });
