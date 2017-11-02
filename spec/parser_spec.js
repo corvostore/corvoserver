@@ -156,4 +156,65 @@ describe("Parser", () => {
     const command = '*3\r\n$3\r\nSET\r\n$1\r\nk\r\n$1\r\n2\r\n';
     expect(Parser.processIncomingString(command)).toEqual(['SET', 'k', '2']);
   });
+
+  it("returns an error if number of arguments for APPEND command is more than expected", () => {
+    const command = '*4\r\n$6\r\nAPPEND\r\n$1\r\na\r\n$1\r\n1\r\n$3\r\naaa\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for APPEND command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("throws an error if number of arguments for APPEND command is less than expected", () => {
+    const command = '*1\r\n$6\r\nAPPEND\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for APPEND command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("returns array of tokens for valid APPEND command", () => {
+    const command = '*3\r\n$6\r\nAPPEND\r\n$1\r\nk\r\n$1\r\n2\r\n';
+    expect(Parser.processIncomingString(command)).toEqual(['APPEND', 'k', '2']);
+  });
+
+  it("throws an error if number of arguments for STRLEN command is less than expected", () => {
+    const command = '*1\r\n$6\r\nSTRLEN\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for STRLEN command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("returns array of tokens for valid STRLEN command", () => {
+    const command = '*2\r\n$6\r\nSTRLEN\r\n$1\r\nk\r\n';
+    expect(Parser.processIncomingString(command)).toEqual(['STRLEN', 'k']);
+  });
+
+  it("throws an error if number of arguments for TOUCH command is not valid", () => {
+    const command = '*1\r\n$5\r\nTOUCH\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for TOUCH command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("returns array of tokens for valid TOUCH command", () => {
+    const command = '*2\r\n$5\r\nTOUCH\r\n$1\r\nk\r\n';
+    expect(Parser.processIncomingString(command)).toEqual(['TOUCH', 'k']);
+  });
+
+  it("throws an error if number of arguments for INCR command is not valid", () => {
+    const command = '*1\r\n$4\r\nINCR\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for INCR command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("returns array of tokens for valid INCR command", () => {
+    const command = '*2\r\n$4\r\nINCR\r\n$1\r\nk\r\n';
+    expect(Parser.processIncomingString(command)).toEqual(['INCR', 'k']);
+  });
+
+  it("throws an error if number of arguments for DECR command is not valid", () => {
+    const command = '*1\r\n$4\r\nDECR\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for DECR command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("returns array of tokens for valid DECR command", () => {
+    const command = '*2\r\n$4\r\nDECR\r\n$1\r\nk\r\n';
+    expect(Parser.processIncomingString(command)).toEqual(['DECR', 'k']);
+  });
 });

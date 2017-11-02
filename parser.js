@@ -23,6 +23,46 @@ class Parser {
     }
   }
 
+  static processAppendRequest(tokens) {
+    if (tokens.length === 3) {
+      return tokens;
+    } else {
+      throw new Error("ParseError: Wrong number of arguments for APPEND command");
+    }
+  }
+
+  static processStrlenRequest(tokens) {
+    if (tokens.length === 2) {
+      return tokens;
+    } else {
+      throw new Error("ParseError: Wrong number of arguments for STRLEN command");
+    }
+  }
+
+  static processTouchRequest(tokens) {
+    if (tokens.length >= 2) {
+      return tokens;
+    } else {
+      throw new Error("ParseError: Wrong number of arguments for TOUCH command");
+    }
+  }
+
+  static processIncrRequest(tokens) {
+    if (tokens.length === 2) {
+      return tokens;
+    } else {
+      throw new Error("ParseError: Wrong number of arguments for INCR command");
+    }
+  }
+
+  static processDecrRequest(tokens) {
+    if (tokens.length === 2) {
+      return tokens;
+    } else {
+      throw new Error("ParseError: Wrong number of arguments for DECR command");
+    }
+  }
+
   static chomp(s) {
     return s.slice().replace(/[\n|\r]*$/, '');
   }
@@ -93,7 +133,12 @@ class Parser {
 
 const commandMap = {
   'GET': Parser.processGetRequest,
-  'SET': Parser.processSetRequest
+  'SET': Parser.processSetRequest,
+  'APPEND': Parser.processAppendRequest,
+  'STRLEN': Parser.processStrlenRequest,
+  'TOUCH': Parser.processTouchRequest,
+  'INCR': Parser.processIncrRequest,
+  'DECR': Parser.processDecrRequest,
 };
 
 export { commandMap, Parser };
