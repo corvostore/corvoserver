@@ -76,6 +76,8 @@ class Parser {
       return tokens;
     } else {
       throw new Error("ParseError: Wrong number of arguments for RENAME command");
+    }
+  }
 
   static processRenameNXRequest(tokens) {
     if (tokens.length === 3) {

@@ -238,7 +238,8 @@ describe("Parser", () => {
   it("returns array of tokens for valid RENAME command", () => {
     const command = '*3\r\n$6\r\nRENAME\r\n$2\r\nkA\r\n$2\r\nkB\r\n';
     expect(Parser.processIncomingString(command)).toEqual(['RENAME', 'kA', 'kB']);
-
+  });
+  
   it("throws an error if number of arguments for RENAMEX command is not valid", () => {
     const command = '*2\r\n$8\r\nRENAMENX\r\n$1\r\nk\r\n';
     const errorMessage = "ParseError: Wrong number of arguments for RENAMENX command";
