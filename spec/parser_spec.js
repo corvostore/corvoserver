@@ -125,10 +125,35 @@ describe("Parser", () => {
 
   it("processIncomingString returns an object", () => {
     const command = '*2\r\n$3\r\nGET\r\n$1\r\nk\r\n';
-    expect(Parser.processIncomingString(command)).toEqual({
-      isValid: true,
-      error: "",
-      tokens: ['GET', 'k']
-    });
+    expect(Parser.processIncomingString(command)).toEqual(['GET', 'k']);
+  });
+
+  it("throws an error if number of arguments for GET command is not valid", () => {
+    const command = '*1\r\n$3\r\nGET\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for GET command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("throws an error if flag is invalid for SET command", () => {
+    const command = '*4\r\n$3\r\nSET\r\n$1\r\nk\r\n$1\r\n2\r\n$2\r\nXN\r\n';
+    const errorMessage = "ParseError: syntax error - invalid flag on SET command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("returns array of tokens for valid flag for SET command", () => {
+    const command = '*4\r\n$3\r\nSET\r\n$1\r\nk\r\n$1\r\n2\r\n$2\r\nNX\r\n';
+
+    expect(Parser.processIncomingString(command)).toEqual(['SET', 'k', '2', 'NX']);
+  });
+
+  it("throws an error if number of arguments for SET command is not valid", () => {
+    const command = '*1\r\n$3\r\nSET\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for SET command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("returns array of tokens for valid number of arguments for SET command", () => {
+    const command = '*3\r\n$3\r\nSET\r\n$1\r\nk\r\n$1\r\n2\r\n';
+    expect(Parser.processIncomingString(command)).toEqual(['SET', 'k', '2']);
   });
 });

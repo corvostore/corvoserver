@@ -1,22 +1,26 @@
 class Parser {
 
-  static processSetRequest() {
-
-  }
-
-  static commandProcessor() {
-    return commandProcessor;
+  static processSetRequest(tokens) {
+    if (tokens.length === 4) {
+      const flag = tokens[3].toUpperCase();
+      if (flag !== 'NX' && flag !== 'XX') {
+        throw new Error("ParseError: syntax error - invalid flag on SET command");
+      } else {
+        return tokens;
+      }
+    } else if (tokens.length === 3) {
+      return tokens;
+    } else {
+      throw new Error("ParseError: Wrong number of arguments for SET command");
+    }
   }
 
   static processGetRequest(tokens) {
     if (tokens.length === 2) {
-      return {
-        isValid: true,
-        error: "",
-        tokens
-      }
+      return tokens;
+    } else {
+      throw new Error("ParseError: Wrong number of arguments for GET command");
     }
-
   }
 
   static chomp(s) {
@@ -82,14 +86,8 @@ class Parser {
   static processIncomingString(s) {
     const tokens = this.convertRespStringToTokens(s);
     const command = tokens[0].toUpperCase();
-    let result;
 
-    switch(command) {
-      case 'GET':
-        result = this.processGetRequest(tokens);
-        break;
-    }
-    return result;
+    return commandMap[command](tokens);
   }
 }
 
