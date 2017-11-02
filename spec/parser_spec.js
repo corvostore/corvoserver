@@ -217,4 +217,26 @@ describe("Parser", () => {
     const command = '*2\r\n$4\r\nDECR\r\n$1\r\nk\r\n';
     expect(Parser.processIncomingString(command)).toEqual(['DECR', 'k']);
   });
+
+  it("throws an error if number of arguments for RENAMEX command is not valid", () => {
+    const command = '*2\r\n$8\r\nRENAMENX\r\n$1\r\nk\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for RENAMENX command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("returns array of tokens for valid RENAMENX command", () => {
+    const command = '*3\r\n$8\r\nRENAMENX\r\n$1\r\nk\r\n$1\r\na\r\n';
+    expect(Parser.processIncomingString(command)).toEqual(['RENAMENX', 'k', 'a']);
+  });
+
+  it("throws an error if number of arguments for TYPE command is not valid", () => {
+    const command = '*3\r\n$4\r\nTYPE\r\n$1\r\nk\r\n$1\r\na\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for TYPE command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("returns array of tokens for valid TYPE command", () => {
+    const command = '*2\r\n$4\r\nTYPE\r\n$1\r\nk\r\n';
+    expect(Parser.processIncomingString(command)).toEqual(['TYPE', 'k']);
+  });
 });

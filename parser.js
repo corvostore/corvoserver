@@ -63,6 +63,22 @@ class Parser {
     }
   }
 
+  static processRenameNXRequest(tokens) {
+    if (tokens.length === 3) {
+      return tokens;
+    } else {
+      throw new Error("ParseError: Wrong number of arguments for RENAMENX command");
+    }
+  }
+
+  static processTypeRequest(tokens) {
+    if (tokens.length === 2) {
+      return tokens;
+    } else {
+      throw new Error("ParseError: Wrong number of arguments for TYPE command");
+    }
+  }
+
   static chomp(s) {
     return s.slice().replace(/[\n|\r]*$/, '');
   }
@@ -139,6 +155,8 @@ const commandMap = {
   'TOUCH': Parser.processTouchRequest,
   'INCR': Parser.processIncrRequest,
   'DECR': Parser.processDecrRequest,
+  'RENAMENX': Parser.processRenameNXRequest,
+  'TYPE': Parser.processTypeRequest
 };
 
 export { commandMap, Parser };
