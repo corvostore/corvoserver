@@ -19,27 +19,28 @@ class Parser {
   }
 
   static convertRespStringToTokens(s) {
-    let idx = 0;
     let numElems = 0;
 
-    const isCRLFSuffixed = s.endsWith('\r\n');
+    if(!s.endsWith('\r\n')) {
+      throw new Error("ParserError: doesn't have CRLF suffix.");
+    }
+
     s = this.chomp(s);
     let stringArray = s.split('\r\n');
 
     if (stringArray[0][0] !== '*') {
-      // error: invalid incoming string, does not start with *
+      throw new Error("ParserError: doesn't start with *.");
     } else {
       const numElemsStr = stringArray[0].slice(1);
       if (numElemsStr.match(/[^0-9]/)) {
-        // error: invalid number following *
+        throw new Error("ParserError: * followed by non-number.");
       } else {
         numElems = parseInt(numElemsStr);
       }
     }
 
     if ((numElems * 2) !== (stringArray.length - 1)) {
-      // error: mismtach between number of elements specified and actual number
-      // of elements
+      throw new Error("ParserError: mismatch between specified number of elements and actual number of elements");
     } else {
       return this.processRespArrayElems(numElems, stringArray.slice(1));
     }
@@ -53,18 +54,17 @@ class Parser {
       let expectedStringLength;
 
       if (arrayLengthElem[0] !== '$') {
-        // error: $ sign expected when reading length of (idx+1)th array elem
+        throw new Error("$ sign expected when reading length of array elem " + (idx + 1));
       } else {
         const numElemsStr = stringArray[idx].slice(1);
         if (numElemsStr.match(/[^0-9]/)) {
-          // error: invalid number following $ for (idx+1)th array elem
+          throw new Error("non-number following $ for array elem " + (idx + 1));
         } else {
           expectedStringLength = parseInt(numElemsStr);
         }
 
         if (arrayStringElem.length !== expectedStringLength) {
-          // error: length of string at (idx+2)th location not matching the
-          // expected length specified with $.
+          throw new Error("mismatch between length of RespArray element and element itself at elem " + (idx + 2));
         } else {
           tokens.push(arrayStringElem);
         }
@@ -75,11 +75,10 @@ class Parser {
   }
 
   static processIncomingString(s) {
-    // const tokens = this.chomp(s).split(' ');
     const tokens = convertRespStringToTokens(s);
     const command = tokens[0].toUpperCase();
     let result;
-    
+
     switch(command) {
       case 'GET':
         result = this.processGetRequest(tokens);
@@ -87,8 +86,6 @@ class Parser {
     }
     return result;
   }
-
-
 }
 
 export default Parser;
