@@ -76,6 +76,20 @@ class Parser {
       return tokens;
     } else {
       throw new Error("ParseError: Wrong number of arguments for RENAME command");
+
+  static processRenameNXRequest(tokens) {
+    if (tokens.length === 3) {
+      return tokens;
+    } else {
+      throw new Error("ParseError: Wrong number of arguments for RENAMENX command");
+    }
+  }
+
+  static processTypeRequest(tokens) {
+    if (tokens.length === 2) {
+      return tokens;
+    } else {
+      throw new Error("ParseError: Wrong number of arguments for TYPE command");
     }
   }
 
@@ -157,6 +171,8 @@ const commandMap = {
   'DECR': Parser.processDecrRequest,
   'EXISTS': Parser.processExistsRequest,
   'RENAME': Parser.processRenameRequest,
+  'RENAMENX': Parser.processRenameNXRequest,
+  'TYPE': Parser.processTypeRequest
 };
 
 export { commandMap, Parser };
