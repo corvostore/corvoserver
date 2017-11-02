@@ -63,6 +63,22 @@ class Parser {
     }
   }
 
+  static processDelRequest(tokens) {
+    if (tokens.length >= 2) {
+      return tokens;
+    } else {
+      throw new Error("ParseError: Wrong number of arguments for DEL command");
+    }
+  }
+
+  static processDumpRequest(tokens) {
+    if (tokens.length === 2) {
+      return tokens;
+    } else {
+      throw new Error("ParseError: Wrong number of arguments for DUMP command");
+    }
+  }
+
   static chomp(s) {
     return s.slice().replace(/[\n|\r]*$/, '');
   }
@@ -139,6 +155,8 @@ const commandMap = {
   'TOUCH': Parser.processTouchRequest,
   'INCR': Parser.processIncrRequest,
   'DECR': Parser.processDecrRequest,
+  'DEL': Parser.processDelRequest,
+  'DUMP': Parser.processDumpRequest,
 };
 
 export { commandMap, Parser };
