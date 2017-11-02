@@ -394,4 +394,63 @@ describe("store", () => {
     expect(testStore.mainList.head.key).toBe("key1");
   });
 
+  it("uses exists to check for existence of a key", () => {
+    const testStore = new Store();
+    const key = "key";
+    const val = "value";
+    testStore.setString(key, val);
+    const keyExists = testStore.exists(key);
+    expect(keyExists).toBe(true);
+  });
+
+  it("uses exists to check for existence of a key", () => {
+    const testStore = new Store();
+    const key = "key";
+
+    const keyExists = testStore.exists(key);
+
+    expect(keyExists).toBe(false);
+  });
+
+  it("uses type to get the data type of a string key/value", () => {
+    const testStore = new Store();
+    const key = "key";
+    const val = "my string";
+
+    testStore.setString(key, val);
+    const type = testStore.type(key);
+
+    expect(type).toBe('string');
+  });
+
+  it("uses remove to delete a single key and value", () => {
+    const testStore = new Store();
+    const key = "key";
+    const val = "my string";
+
+    testStore.setString(key, val);
+    testStore.del(key);
+    const lookupResult = testStore.getString(key);
+
+    expect(lookupResult).toBe(null);
+    expect(testStore.memoryTracker.memoryUsed).toBe(0);
+  });
+
+  it("uses remove to delete multiple keys and values", () => {
+    const testStore = new Store();
+    const keyA = "key";
+    const valA = "my string";
+    const keyB = "keyB";
+    const valB = "my string";
+
+    testStore.setString(keyA, valA);
+    testStore.setString(keyB, valB);
+    testStore.del(keyA, keyB);
+    const lookupResultA = testStore.getString(keyA);
+    const lookupResultB = testStore.getString(keyB);
+
+    expect(lookupResultA).toBe(null);
+    expect(lookupResultB).toBe(null);
+    expect(testStore.memoryTracker.memoryUsed).toBe(0);
+  });
 });

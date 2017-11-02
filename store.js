@@ -143,6 +143,25 @@ class Store {
     this.lruCheckAndEvictToMaxMemory();
   }
 
+  exists(key) {
+    return !!this.mainHash[key];
+  }
+
+  type(key) {
+    // alter after dataType prop added to corvoNode
+    return 'string';
+  }
+
+  del(...keys) {
+    keys.forEach((key) => {
+      const node = this.mainHash[key];
+      const val = node.val;
+      this.memoryTracker.decrementMemoryUsed(key, val);
+      delete this.mainHash[key];
+      this.mainList.remove(node);
+    });
+  }
+
   lruEvict() {
     const head = this.mainList.head;
     const headKey = head.key;
