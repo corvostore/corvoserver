@@ -1,6 +1,11 @@
 class Parser {
+
   static processSetRequest() {
 
+  }
+
+  static commandProcessor() {
+    return commandProcessor;
   }
 
   static processGetRequest(tokens) {
@@ -75,7 +80,7 @@ class Parser {
   }
 
   static processIncomingString(s) {
-    const tokens = convertRespStringToTokens(s);
+    const tokens = this.convertRespStringToTokens(s);
     const command = tokens[0].toUpperCase();
     let result;
 
@@ -88,4 +93,9 @@ class Parser {
   }
 }
 
-export default Parser;
+const commandMap = {
+  'GET': Parser.processGetRequest,
+  'SET': Parser.processSetRequest
+};
+
+export { commandMap, Parser };

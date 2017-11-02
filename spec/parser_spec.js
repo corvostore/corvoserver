@@ -1,4 +1,4 @@
-import Parser from '../parser';
+import { commandMap, Parser } from '../parser';
 
 describe("Parser", () => {
   it("processes incoming GET command", () => {
@@ -117,5 +117,18 @@ describe("Parser", () => {
     const errorMessage = "mismatch between length of RespArray element and element itself at elem 4";
 
     expect(function() { Parser.convertRespStringToTokens(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("commandMap returns an object", () => {
+    expect(commandMap.constructor).toBe(Object);
+  });
+
+  it("processIncomingString returns an object", () => {
+    const command = '*2\r\n$3\r\nGET\r\n$1\r\nk\r\n';
+    expect(Parser.processIncomingString(command)).toEqual({
+      isValid: true,
+      error: "",
+      tokens: ['GET', 'k']
+    });
   });
 });
