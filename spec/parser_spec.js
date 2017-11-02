@@ -217,4 +217,26 @@ describe("Parser", () => {
     const command = '*2\r\n$4\r\nDECR\r\n$1\r\nk\r\n';
     expect(Parser.processIncomingString(command)).toEqual(['DECR', 'k']);
   });
+
+  it("throws an error if number of arguments for EXISTS command is not valid", () => {
+    const command = '*3\r\n$6\r\nEXISTS\r\n$1\r\nk\r\n$1\r\nv\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for EXISTS command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("returns array of tokens for valid EXISTS command", () => {
+    const command = '*2\r\n$6\r\nEXISTS\r\n$1\r\nk\r\n';
+    expect(Parser.processIncomingString(command)).toEqual(['EXISTS', 'k']);
+  });
+
+  it("throws an error if number of arguments for RENAME command is not valid", () => {
+    const command = '*4\r\n$6\r\nRENAME\r\n$1\r\nk\r\n$1\r\nv\r\n$4\r\nblah\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for RENAME command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("returns array of tokens for valid RENAME command", () => {
+    const command = '*3\r\n$6\r\nRENAME\r\n$2\r\nkA\r\n$2\r\nkB\r\n';
+    expect(Parser.processIncomingString(command)).toEqual(['RENAME', 'kA', 'kB']);
+  });
 });

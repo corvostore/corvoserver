@@ -63,6 +63,22 @@ class Parser {
     }
   }
 
+  static processExistsRequest(tokens) {
+    if (tokens.length ===  2) {
+      return tokens;
+    } else {
+      throw new Error("ParseError: Wrong number of arguments for EXISTS command");
+    }
+  }
+
+  static processRenameRequest(tokens) {
+    if (tokens.length === 3) {
+      return tokens;
+    } else {
+      throw new Error("ParseError: Wrong number of arguments for RENAME command");
+    }
+  }
+
   static chomp(s) {
     return s.slice().replace(/[\n|\r]*$/, '');
   }
@@ -139,6 +155,8 @@ const commandMap = {
   'TOUCH': Parser.processTouchRequest,
   'INCR': Parser.processIncrRequest,
   'DECR': Parser.processDecrRequest,
+  'EXISTS': Parser.processExistsRequest,
+  'RENAME': Parser.processRenameRequest,
 };
 
 export { commandMap, Parser };
