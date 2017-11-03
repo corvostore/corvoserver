@@ -1,5 +1,4 @@
 import Store from '../store.js';
-import TestClient from './test_client.js';
 import CorvoServer from '../corvo_server.js';
 import Net from 'net';
 
@@ -34,8 +33,16 @@ describe("CorvoServer", () => {
   });
 
   it("returns OK for SET command", () => {
-    const request = '*3\r\n$3\r\nSET\r\n$1\r\nk\r\n$1\r\nv\r\n';
+    const request = '*3\r\n$3\r\nSET\r\n$1\r\nz\r\n$1\r\nv\r\n';
     const expectedVal = 'OK';
     runClient(request, expectedVal);
+  });
+
+  it("returns (nil) for SET NX if key already exists", () => {
+    const setRequest = '*3\r\n$3\r\nSET\r\n$1\r\nx\r\n$1\r\nv\r\n';
+    const setNXRequest = '*4\r\n$3\r\nSET\r\n$1\r\ny\r\n$1\r\nz\r\n$2\r\nNX\r\n';
+    const expectedVal = '(nil)';
+    runClient(setRequest);
+    runClient(setNXRequest, expectedVal);
   });
 });
