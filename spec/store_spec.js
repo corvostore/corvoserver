@@ -453,4 +453,44 @@ describe("store", () => {
     expect(lookupResultB).toBe(null);
     expect(testStore.memoryTracker.memoryUsed).toBe(0);
   });
+
+  it("uses rename to rename an exising key", () => {
+    const testStore = new Store();
+    const keyA = "key";
+    const keyB = "newKey";
+    const val = "my string";
+
+    testStore.setString(keyA, val);
+    testStore.rename(keyA, keyB);
+
+    expect(testStore.getString(keyB)).toBe(val);
+  });
+
+  it("uses renameNX to rename an existing key", () => {
+    const testStore = new Store();
+    const keyA = "key";
+    const keyB = "newKey";
+    const val = "my string";
+
+    testStore.setString(keyA, val);
+    testStore.renameNX(keyA, keyB);
+
+    expect(testStore.getString(keyB)).toBe(val);
+  });
+
+  it("uses renameNX to raise error if key to be renamed doesn't exist", () => {
+    const testStore = new Store();
+    const keyA = "key";
+    const keyB = "keyB"
+
+    expect(() => { testStore.renameNX(keyA, keyB) }).toThrow(new Error("StoreError: key does not exist."));
+  });
+
+  it("uses renameNX to raise error if key to be renamed doesn't exist", () => {
+    const testStore = new Store();
+    const keyA = "key";
+    const keyB = "keyB"
+
+    expect(() => { testStore.renameNX(keyA, keyB) }).toThrow(new Error("StoreError: key does not exist."));
+  });
 });

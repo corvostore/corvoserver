@@ -152,6 +152,29 @@ class Store {
     return 'string';
   }
 
+  rename(keyA, keyB) {
+    // alter after dataType prop and multiple data types added
+    const val = this.getString(keyA);
+    this.del(keyA);
+    this.setString(keyB, val);
+  }
+
+  renameNX(keyA, keyB) {
+    const keyAExists = !!this.mainHash[keyA];
+    const keyBExists = !!this.mainHash[keyB];
+
+    if (keyAExists) {
+      if (keyBExists) {
+        return 0;
+      } else {
+        this.rename(keyA, keyB);
+        return 1;
+      }
+    } else {
+      throw new Error("StoreError: key does not exist.");
+    }
+  }
+
   del(...keys) {
     keys.forEach((key) => {
       const node = this.mainHash[key];
