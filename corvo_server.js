@@ -22,6 +22,7 @@ class CorvoServer {
       'DEL': this.store.del,
     };
   }
+
   startServer() {
     const server = Net.createServer();
     server.on('connection', this.handleConnection.bind(this));
@@ -39,12 +40,12 @@ class CorvoServer {
         const tokens = Parser.processIncomingString(data);
         const command = tokens[0];
         let result;
-  
+
         if (command === 'SET') {
           if (tokens.length > 3) {
             // add code to accommodate expiry later
             const flag = tokens[tokens.length - 1];
-  
+
             if (flag === 'NX') {
               result = this.store.setStringNX(...tokens.slice(1));
             } else if (flag === 'XX') {

@@ -1,7 +1,22 @@
 import Store from '../store.js';
+import TestClient from './test_client.js';
 import CorvoServer from '../corvo_server.js';
+import Net from 'net';
 
 describe("CorvoServer", () => {
+  function runClient(request, expectedVal) {
+    const client = new Net.Socket();
+    client.connect(6379, '127.0.0.1', function() {
+      client.setEncoding('utf8');
+      client.write(request);
+    });
+
+    client.on('data', function(data) {
+      expect(data).toBe(expectedVal);
+      client.destroy(); // kill client after server's response
+    });
+  }
+
   it("exists as a class", () => {
     const server = new CorvoServer();
     expect(server.constructor).toBe(CorvoServer);
@@ -12,24 +27,15 @@ describe("CorvoServer", () => {
     expect(server.store.constructor).toBe(Store);
   });
 
-});
+  it("returns (nil) for GET command with non-existant key", () => {
+    const request = '*2\r\n$3\r\nGET\r\n$1\r\nz\r\n';
+    const expectedVal = '(nil)';
+    runClient(request, expectedVal);
+  });
 
-// describe("Server test", () => {
-//   let server;
-//   beforeEach(function() {
-//     server = new CorvoServer();
-//   });
-//   afterEach(function() {
-//     server.tempServer.close();
-//   });
-//
-//   it("starts a server", () => {
-//     let started = false;
-//     server.tempServer.on('listening', function() {
-//       started = true;
-//     });
-//     server.startServer();
-//     expect(started).toBe(true);
-//   });
-//
-// });
+  it("returns OK for SET command", () => {
+    const request = '*3\r\n$3\r\nSET\r\n$1\r\nk\r\n$1\r\nv\r\n';
+    const expectedVal = 'OK';
+    runClient(request, expectedVal);
+  });
+});
