@@ -1,4 +1,5 @@
 import Store from './store';
+import Parser from './parser';
 import Net from 'net';
 
 const DEFAULT_PORT = 6379;
@@ -7,22 +8,61 @@ const DEFAULT_HOST = '127.0.0.1';
 class CorvoServer {
   constructor() {
     this.store = new Store();
+    this.storeCommandMap = {
+      'GET': this.store.getString,
+      'APPEND': this.store.appendString,
+      'STRLEN': this.store.getStrLen,
+      'TOUCH': this.store.touch,
+      'INCR': this.store.strIncr,
+      'DECR': this.store.strDecr,
+      'EXISTS': this.store.exists,
+      'RENAME': this.store.rename,
+      'RENAMENX': this.store.renameNX,
+      'TYPE': this.store.type,
+      'DEL': this.store.del,
+    };
   }
   startServer() {
     const server = Net.createServer();
-    server.on('connection', this.handleConnection.bind(this));
+    server.on('connection', this.handleConnection);
 
-    server.listen(DEFAULT_PORT, DEFAULT_HOST, function() {
-      console.log('server listening to %j', server.address());
-    });
-
+    server.listen(DEFAULT_PORT, DEFAULT_HOST);
+    //, function() {
+      // console.log('server listening to %j', // server.address());
+    //}
   }
 
   handleConnection(conn) {
-    return "handleConnection called";
+    conn.on('data', this.handleData);
+  };
+
+  handleData(data) {
+    try {
+      const tokens = Parser.processIncomingString(data);
+      const command = tokens[0];
+
+      if (command === 'SET') {
+        if (tokens.length > 3) {
+          // add code to accommodate expiry later
+          const flag = tokens[-1];
+
+          if (flag === 'NX') {
+            this.store.setStringNX(...tokens.slice(1));
+          } else if (flag === 'XX') {
+            this.store.setStringXX(...tokens.slice(1));
+          }
+        } else {
+          this.store.setString(...tokens.slice(1));
+        }
+      } else if (this.storeCommandMap[command]) {
+        this.storeCommandMap[command].apply(this.store, tokens.slice(1));
+      } else {
+        throw new Error("ParserError: Invalid Command.");
+      }
+    } catch(err) {
+      console.log(err.message, err.stack);
+    }
   }
-
-
 }
 
 export default CorvoServer;

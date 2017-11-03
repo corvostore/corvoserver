@@ -6,7 +6,6 @@
   "scripts": {
     "test": "babel-node node_modules/.bin/jasmine",
     "build": "rimraf dist/ && babel ./ --out-dir dist/ --ignore ./node_modules,./.babelrc,./package.json,./npm-debug.log --copy-files",
-    "start-xyz": "npm run build && node dist/index.js",
     "start": "babel-node index.js"
   },
   "author": "",
