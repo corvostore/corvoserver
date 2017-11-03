@@ -272,21 +272,4 @@ describe("Parser", () => {
     const command = '*2\r\n$3\r\nDEL\r\n$1\r\nk\r\n';
     expect(Parser.processIncomingString(command)).toEqual(['DEL', 'k']);
   });
-
-  it("returns an error if number of arguments for DUMP command is more than expected", () => {
-    const command = '*3\r\n$4\r\nDUMP\r\n$1\r\na\r\n$2\r\nbb\r\n';
-    const errorMessage = "ParseError: Wrong number of arguments for DUMP command";
-    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
-  });
-
-  it("throws an error if number of arguments for DUMP command is less than expected", () => {
-    const command = '*1\r\n$4\r\nDUMP\r\n';
-    const errorMessage = "ParseError: Wrong number of arguments for DUMP command";
-    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
-  });
-
-  it("returns array of tokens for valid DUMP command", () => {
-    const command = '*2\r\n$4\r\nDUMP\r\n$1\r\nk\r\n';
-    expect(Parser.processIncomingString(command)).toEqual(['DUMP', 'k']);
-  });
 });

@@ -1,5 +1,4 @@
 class Parser {
-
   static processSetRequest(tokens) {
     if (tokens.length === 4) {
       const flag = tokens[3].toUpperCase();
@@ -103,14 +102,6 @@ class Parser {
     }
   }
 
-  static processDumpRequest(tokens) {
-    if (tokens.length === 2) {
-      return tokens;
-    } else {
-      throw new Error("ParseError: Wrong number of arguments for DUMP command");
-    }
-  }
-
   static chomp(s) {
     return s.slice().replace(/[\n|\r]*$/, '');
   }
@@ -192,7 +183,6 @@ const commandMap = {
   'RENAMENX': Parser.processRenameNXRequest,
   'TYPE': Parser.processTypeRequest,
   'DEL': Parser.processDelRequest,
-  'DUMP': Parser.processDumpRequest,
 };
 
 export { commandMap, Parser };
