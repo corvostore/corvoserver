@@ -99,10 +99,12 @@ class Store {
   }
 
   getStrLen(key) {
+    // strlen should return an error if the value is not a string
     const accessedNode = this.mainHash[key];
     if (accessedNode !== undefined) {
       return accessedNode.val.length;
     }
+    return 0;
   }
 
   strIncr(key) {
@@ -126,6 +128,7 @@ class Store {
     this.touch(accessedNode);
 
     this.lruCheckAndEvictToMaxMemory();
+    return parseInt(accessedNode.val, 10);
   }
 
   strDecr(key) {
@@ -148,6 +151,7 @@ class Store {
     this.touch(accessedNode);
 
     this.lruCheckAndEvictToMaxMemory();
+    return parseInt(accessedNode.val, 10);
   }
 
   exists(key) {
@@ -162,8 +166,14 @@ class Store {
   rename(keyA, keyB) {
     // alter after dataType prop and multiple data types added
     const val = this.getString(keyA);
+
+    if (val === null) {
+      return null;
+    }
+
     this.del(keyA);
     this.setString(keyB, val);
+    return "OK";
   }
 
   renameNX(keyA, keyB) {
@@ -178,18 +188,25 @@ class Store {
         return 1;
       }
     } else {
-      throw new Error("StoreError: key does not exist.");
+      return null;
     }
   }
 
   del(...keys) {
+    let numDeleted = 0;
+
     keys.forEach((key) => {
       const node = this.mainHash[key];
-      const val = node.val;
-      this.memoryTracker.decrementMemoryUsed(key, val);
-      delete this.mainHash[key];
-      this.mainList.remove(node);
+      if (node !== undefined) {
+        const val = node.val;
+        this.memoryTracker.decrementMemoryUsed(key, val);
+        delete this.mainHash[key];
+        this.mainList.remove(node);
+        numDeleted += 1;
+      }
     });
+
+    return numDeleted;
   }
 
   lruEvict() {

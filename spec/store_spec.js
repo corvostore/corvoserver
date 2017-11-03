@@ -347,14 +347,25 @@ describe("store", () => {
     expect(len).toBe(value.length);
   });
 
-  it("uses strIncr to increment number stored as string", () => {
+  it("uses getStrLen to return 0 if key does not exist", () => {
+    const testStore = new Store();
+    const key = "key1";
+    const value = "123456789";
+
+    testStore.setString(key, value);
+    const len = testStore.getStrLen("key2");
+    expect(len).toBe(0);
+  });
+
+  it("uses strIncr to increment number stored as string and verify returns the incremented number", () => {
     const testStore = new Store();
     const key = 'key';
     const value = '1';
 
     testStore.setString(key, value);
-    testStore.strIncr(key);
+    const returnVal = testStore.strIncr(key);
     expect(testStore.getString(key)).toBe('2');
+    expect(returnVal).toBe(2);
   });
 
   it("uses strIncr to create a new key/value of 0 and then increment it", () => {
@@ -374,14 +385,15 @@ describe("store", () => {
     expect(testStore.strIncr(key)).toBe(null);
   });
 
-  it("uses strDecr to decrement number stored as string", () => {
+  it("uses strDecr to decrement number stored as string and verify return value is the decremented value", () => {
     const testStore = new Store();
     const key = 'key';
-    const value = '1';
+    const value = '9';
 
     testStore.setString(key, value);
-    testStore.strDecr(key);
-    expect(testStore.getString(key)).toBe('0');
+    const returnVal = testStore.strDecr(key);
+    expect(testStore.getString(key)).toBe('8');
+    expect(returnVal).toBe(8);
   });
 
   it("uses strDecr to create a new key/value of 0 and then decrement it", () => {
@@ -465,20 +477,21 @@ describe("store", () => {
     expect(type).toBe('string');
   });
 
-  it("uses remove to delete a single key and value", () => {
+  it("uses del to delete a single key and value and expect return value to be 1", () => {
     const testStore = new Store();
     const key = "key";
     const val = "my string";
 
     testStore.setString(key, val);
-    testStore.del(key);
+    const returnVal = testStore.del(key);
     const lookupResult = testStore.getString(key);
 
     expect(lookupResult).toBe(null);
+    expect(returnVal).toBe(1);
     expect(testStore.memoryTracker.memoryUsed).toBe(0);
   });
 
-  it("uses remove to delete multiple keys and values", () => {
+  it("uses del to delete multiple keys and values and expect return value to be equal to number of keys deleted", () => {
     const testStore = new Store();
     const keyA = "key";
     const valA = "my string";
@@ -487,52 +500,90 @@ describe("store", () => {
 
     testStore.setString(keyA, valA);
     testStore.setString(keyB, valB);
-    testStore.del(keyA, keyB);
+    const returnVal = testStore.del(keyA, keyB);
     const lookupResultA = testStore.getString(keyA);
     const lookupResultB = testStore.getString(keyB);
 
     expect(lookupResultA).toBe(null);
     expect(lookupResultB).toBe(null);
+    expect(returnVal).toBe(2);
     expect(testStore.memoryTracker.memoryUsed).toBe(0);
   });
 
-  it("uses rename to rename an exising key", () => {
+  it("uses del to delete multiple keys and non-existent keys and returns an integer equal to number of keys actually deleted", () => {
+    const testStore = new Store();
+    const keyA = "key";
+    const valA = "my string";
+    const keyB = "keyB";
+    const valB = "my string";
+
+    testStore.setString(keyA, valA);
+    testStore.setString(keyB, valB);
+    const returnVal = testStore.del(keyA, keyB, "keyC", "keyD");
+    const lookupResultA = testStore.getString(keyA);
+    const lookupResultB = testStore.getString(keyB);
+
+    expect(lookupResultA).toBe(null);
+    expect(lookupResultB).toBe(null);
+    expect(returnVal).toBe(2);
+    expect(testStore.memoryTracker.memoryUsed).toBe(0);
+  });
+
+  it("uses rename to rename an exising key and returns OK", () => {
     const testStore = new Store();
     const keyA = "key";
     const keyB = "newKey";
     const val = "my string";
 
     testStore.setString(keyA, val);
-    testStore.rename(keyA, keyB);
+    const returnVal = testStore.rename(keyA, keyB);
 
     expect(testStore.getString(keyB)).toBe(val);
+    expect(returnVal).toBe("OK");
   });
 
-  it("uses renameNX to rename an existing key", () => {
+  it("uses rename to rename an non-exising key and verify null returned", () => {
+    const testStore = new Store();
+    const returnVal = testStore.rename("keyA", "keyB");
+
+    expect(returnVal).toBe(null);
+  });
+
+  it("uses renameNX to rename an existing key and returns 1", () => {
     const testStore = new Store();
     const keyA = "key";
     const keyB = "newKey";
     const val = "my string";
 
     testStore.setString(keyA, val);
-    testStore.renameNX(keyA, keyB);
+    const returnVal = testStore.renameNX(keyA, keyB);
 
     expect(testStore.getString(keyB)).toBe(val);
+    expect(returnVal).toBe(1);
   });
 
-  it("uses renameNX to raise error if key to be renamed doesn't exist", () => {
+  it("uses renameNX to return null if key to be renamed doesn't exist", () => {
     const testStore = new Store();
     const keyA = "key";
     const keyB = "keyB"
 
-    expect(() => { testStore.renameNX(keyA, keyB) }).toThrow(new Error("StoreError: key does not exist."));
+    const returnVal = testStore.renameNX(keyA, keyB);
+
+    expect(returnVal).toBe(null);
   });
 
-  it("uses renameNX to raise error if key to be renamed doesn't exist", () => {
+  it("uses renameNX to return 0 if keyB already exists and verify keyB still exists", () => {
     const testStore = new Store();
-    const keyA = "key";
+    const keyA = "keyA";
+    const valA = "some-valueA";
     const keyB = "keyB"
+    const valB = "some-valueB";
 
-    expect(() => { testStore.renameNX(keyA, keyB) }).toThrow(new Error("StoreError: key does not exist."));
+    testStore.setString(keyA, valA);
+    testStore.setString(keyB, valB);
+    const returnVal = testStore.renameNX(keyA, keyB) 
+
+    expect(returnVal).toBe(0);
+    expect(testStore.getString(keyB)).toBe(valB);
   });
 });
