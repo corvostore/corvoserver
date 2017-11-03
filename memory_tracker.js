@@ -13,14 +13,15 @@ class MemoryTracker {
     return keyBytes + REFERENCE_SIZE_BYTES;
   }
 
-  calculateNodeSize(val) {
-    const total_refs = REFERENCE_SIZE_BYTES * 3;
+  calculateNodeSize(key, val) {
+    const total_refs = REFERENCE_SIZE_BYTES * 4;
     const valueBytes = STRING_ONE_CHAR_BYTES * val.length;
-    return total_refs + valueBytes;
+    const keyBytes = STRING_ONE_CHAR_BYTES * key.length;
+    return total_refs + valueBytes + keyBytes;
   }
 
   calculateStoreItemSize(key, val) {
-    return this.calculateHashItemSize(key) + this.calculateNodeSize(val);
+    return this.calculateHashItemSize(key) + this.calculateNodeSize(key, val);
   }
 
   incrementMemoryUsed(key, val) {

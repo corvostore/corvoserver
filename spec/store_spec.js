@@ -385,7 +385,7 @@ describe("store", () => {
   });
 
   it("uses lruCheckAndEvictToMaxMemory to bring total store memory below threshold", () => {
-    const testStore = new Store({maxMemory: 1001});
+    const testStore = new Store({maxMemory: 1161});
     for (var i = 0; i < 10; i++) {
       testStore.setString("key" + i, "abcdefghijklmnopqrstuvwxyzabc" + i);
     }
