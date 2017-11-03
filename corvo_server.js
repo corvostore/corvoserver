@@ -1,5 +1,5 @@
 import Store from './store';
-import Parser from './parser';
+import { Parser } from './parser';
 import Net from 'net';
 
 const DEFAULT_PORT = 6379;
@@ -24,19 +24,20 @@ class CorvoServer {
   }
   startServer() {
     const server = Net.createServer();
-    server.on('connection', this.handleConnection);
+    server.on('connection', this.handleConnection.bind(this));
 
-    server.listen(DEFAULT_PORT, DEFAULT_HOST);
-    //, function() {
-      // console.log('server listening to %j', // server.address());
-    //}
+    server.listen(DEFAULT_PORT, DEFAULT_HOST, function() {
+        console.log('server listening to %j', server.address());
+      });
   }
 
   handleConnection(conn) {
+    conn.setEncoding('utf8');
     conn.on('data', this.handleData);
   };
 
   handleData(data) {
+    console.log("data =", data);
     try {
       const tokens = Parser.processIncomingString(data);
       const command = tokens[0];
@@ -55,7 +56,9 @@ class CorvoServer {
           this.store.setString(...tokens.slice(1));
         }
       } else if (this.storeCommandMap[command]) {
-        this.storeCommandMap[command].apply(this.store, tokens.slice(1));
+        const result = this.storeCommandMap[command].apply(this.store, tokens.slice(1));
+        console.log("Writing result to client: " + result);
+        conn.write("OK");
       } else {
         throw new Error("ParserError: Invalid Command.");
       }
