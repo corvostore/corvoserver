@@ -166,6 +166,10 @@ class Parser {
     const tokens = this.convertRespStringToTokens(s);
     const command = tokens[0].toUpperCase();
 
+    if (!commandMap[command]) {
+      throw new Error("ParserError: Invalid command.");
+    }
+
     return commandMap[command](tokens);
   }
 }
