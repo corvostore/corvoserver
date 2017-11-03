@@ -26,36 +26,37 @@ class Store {
       this.touch(accessedNode);
     }
     this.lruCheckAndEvictToMaxMemory();
+    return "OK";
   }
 
   setStringX(key, value) {
     // only writes if already exists; otherwise, return null
     const accessedNode = this.mainHash[key];
 
-    if (accessedNode !== undefined) {
-      const oldValue = accessedNode.val;
-      accessedNode.val = value;
-      this.memoryTracker.updateMemoryUsed(key, oldValue, value);
-      this.touch(accessedNode);
-    } else {
+    if (accessedNode === undefined) {
       return null;
     }
+    const oldValue = accessedNode.val;
+    accessedNode.val = value;
+    this.memoryTracker.updateMemoryUsed(key, oldValue, value);
+    this.touch(accessedNode);
     this.lruCheckAndEvictToMaxMemory();
+    return "OK";
   }
 
   setStringNX(key, value) {
     // only writes if doesn't exist; otherwise return null
     const accessedNode = this.mainHash[key];
 
-    if (accessedNode === undefined) {
-      const newNode = new CorvoNode(key, value);
-      this.mainHash[key] = newNode;
-      this.mainList.append(newNode);
-      this.memoryTracker.incrementMemoryUsed(key, value);
-    } else {
+    if (accessedNode !== undefined) {
       return null;
     }
+    const newNode = new CorvoNode(key, value);
+    this.mainHash[key] = newNode;
+    this.mainList.append(newNode);
+    this.memoryTracker.incrementMemoryUsed(key, value);
     this.lruCheckAndEvictToMaxMemory();
+    return "OK";
   }
 
   getString(key) {
@@ -81,14 +82,20 @@ class Store {
     this.memoryTracker.updateMemoryUsed(key, oldValue, accessedNode.val);
 
     this.lruCheckAndEvictToMaxMemory();
+    return accessedNode.val.length;
   }
 
-  touch(key) {
-    const accessedNode = this.mainHash[key];
-    if (accessedNode !== undefined) {
-      this.mainList.remove(accessedNode);
-      this.mainList.append(accessedNode);
-    }
+  touch(...keys) {
+    let validKeys = 0;
+    keys.forEach((key) => {
+      const accessedNode = this.mainHash[key];
+      if (accessedNode !== undefined) {
+        validKeys += 1;
+        this.mainList.remove(accessedNode);
+        this.mainList.append(accessedNode);
+      }
+    });
+    return validKeys;
   }
 
   getStrLen(key) {

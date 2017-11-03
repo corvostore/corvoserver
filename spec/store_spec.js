@@ -146,14 +146,15 @@ describe("store", () => {
     expect(testStore.memoryTracker.maxMemory).toBe(104857600);
   });
 
-  it("uses setString method to set one key/value in store", () => {
+  it("uses setString method to set one key/value in store and return OK", () => {
     const testStore = new Store();
     const key = "key1";
     const value = "this-is-the-value";
-    testStore.setString(key, value);
+    const returnVal = testStore.setString(key, value);
     expect(testStore.mainHash[key].val).toBe(value);
     expect(testStore.mainList.head.val).toBe(value);
     expect(testStore.mainList.tail.val).toBe(value);
+    expect(returnVal).toBe("OK");
   });
 
   it("uses setString method to overwrite one value in store", () => {
@@ -184,7 +185,7 @@ describe("store", () => {
     expect(testStore.mainList.tail.val).toBe(value2);
   });
 
-  it("uses setStringX to overwrite a single key/value in store", () => {
+  it("uses setStringX to overwrite a single key/value in store and return OK", () => {
     const testStore = new Store();
     const key = "key";
     const value1 = "this-is-the-value1";
@@ -192,8 +193,9 @@ describe("store", () => {
 
     testStore.setString(key, value1);
     expect(testStore.getString(key)).toBe(value1);
-    testStore.setStringX(key, value2);
+    const returnVal = testStore.setStringX(key, value2);
     expect(testStore.getString(key)).toBe(value2);
+    expect(returnVal).toBe("OK");
   });
 
   it("can't use setStringX method to create new key/value in store", () => {
@@ -205,14 +207,15 @@ describe("store", () => {
     expect(testStore.getString(key)).toBe(null);
   });
 
-  it("uses setStringNX method to create new key/value in store", () => {
+  it("uses setStringNX method to create new key/value in store and return OK", () => {
     const testStore = new Store();
     const key = "key";
     const value = "this-is-the-value";
 
-    testStore.setStringNX(key, value);
+    const returnVal = testStore.setStringNX(key, value);
 
     expect(testStore.getString(key)).toBe(value);
+    expect(returnVal).toBe("OK");
   });
 
   it("can't use setStringNX method to overwrite key/value in store", () => {
@@ -282,7 +285,45 @@ describe("store", () => {
     expect(testStore.mainList.tail.val).toBe(value)
   });
 
-  it("appends string value to value in memory with appendString", () => {
+  it("moves multiple touched nodes to end of linked list and returns number of keys touched", () => {
+    const testStore = new Store();
+    const key = "key";
+    const value = "this-is-the-value";
+    const key2 ="key2";
+    const value2 = "value2";
+
+    for (var i = 0; i < 50; i++) {
+      testStore.setString("key" + i, "Some val");
+    }
+
+    testStore.setString(key, value);
+    testStore.setString(key2, value2);
+    const returnVal = testStore.touch(key, key2);
+    expect(testStore.mainList.tail.val).toBe(value2);
+    expect(testStore.mainList.tail.prevNode.val).toBe(value);
+    expect(returnVal).toBe(2);
+  });
+
+  it("moves multiple existing keys to end of linked list and returns number of existing keys touched", () => {
+    const testStore = new Store();
+    const key = "key";
+    const value = "this-is-the-value";
+    const key2 ="key2";
+    const value2 = "value2";
+
+    for (var i = 0; i < 50; i++) {
+      testStore.setString("key" + i, "Some val");
+    }
+
+    testStore.setString(key, value);
+    testStore.setString(key2, value2);
+    const returnVal = testStore.touch(key, key2, "randKey");
+    expect(testStore.mainList.tail.val).toBe(value2);
+    expect(testStore.mainList.tail.prevNode.val).toBe(value);
+    expect(returnVal).toBe(2);
+  });
+
+  it("appends string value to value in memory with appendString and returns length of newly updated value", () => {
     const testStore = new Store();
     const key = "key1";
     const valueA = "Hello, ";
@@ -290,9 +331,10 @@ describe("store", () => {
     const result = "Hello, World!";
 
     testStore.setString(key, valueA);
-    testStore.appendString(key, valueB);
+    const returnVal = testStore.appendString(key, valueB);
 
     expect(testStore.getString(key)).toBe(result);
+    expect(returnVal).toBe(result.length);
   });
 
   it("uses getStrLen to return number representation of string length", () => {
