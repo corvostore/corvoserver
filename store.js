@@ -224,6 +224,29 @@ class Store {
       this.lruEvict();
     }
   }
+
+  lpush(key, val) {
+    const valueAtKey = this.mainHash[key];
+    if (valueAtKey && valueAtKey.type === "list") {
+      valueAtKey.append(val);
+    } else if (valueAtKey && valueAtKey.type !== "list") {
+      return null;
+    } else {
+      // create new linked list at that key
+      const newListNode = this.createListNode(key);
+      newListNode.val.append(val);
+    }
+  }
+
+  createListNode(key) {
+    const newList = new CorvoLinkedList();
+    const newNode = new CorvoNode(newList, "list");
+
+    this.mainHash[key] = newNode;
+    console.log(newNode);
+    this.mainList.append(newNode);
+    return newNode;
+  }
 }
 
 export default Store;
