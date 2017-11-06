@@ -1,9 +1,10 @@
 class CorvoNode {
-  constructor(key, val, prevNode=null, nextNode=null) {
+  constructor(key, val, type="string", prevNode=null, nextNode=null) {
     this.val = val;
     this._prevNode = prevNode;
     this._nextNode = nextNode;
     this.key = key;
+    this.type = type;
   }
 
   get prevNode() {

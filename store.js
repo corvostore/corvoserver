@@ -1,5 +1,6 @@
 import CorvoLinkedList from './corvo_linked_list';
 import CorvoNode from './corvo_node';
+import CorvoListNode from './data_types/corvo_list_node';
 import MemoryTracker from './memory_tracker';
 const DEFAULT_MAX_MEMORY = 104857600; // equals 100MB
 
@@ -160,19 +161,27 @@ class Store {
 
   type(key) {
     // alter after dataType prop added to corvoNode
-    return 'string';
+    return this.mainHash[key].type;
   }
 
   rename(keyA, keyB) {
     // alter after dataType prop and multiple data types added
-    const val = this.getString(keyA);
-
-    if (val === null) {
+    if (!this.exists(keyA)) {
       return null;
     }
 
+    const val = this.mainHash[keyA].val;
+    const keyADataType = this.mainHash[keyA].type;
+
+    if (keyADataType === 'string') {
+      this.setString(keyB, val);
+    } else if (keyADataType === 'list') {
+      const newMainListNode = new CorvoNode(keyA, val, "list");
+      this.mainList.append(newMainListNode);
+      this.mainList[keyB] = newMainListNode;
+    }
+
     this.del(keyA);
-    this.setString(keyB, val);
     return "OK";
   }
 
@@ -226,25 +235,26 @@ class Store {
   }
 
   lpush(key, val) {
-    const valueAtKey = this.mainHash[key];
-    if (valueAtKey && valueAtKey.type === "list") {
-      valueAtKey.append(val);
-    } else if (valueAtKey && valueAtKey.type !== "list") {
+    const nodeAtKey = this.mainHash[key];
+    if (nodeAtKey && nodeAtKey.type === "list") {
+      nodeAtKey.val.append(new CorvoListNode(val));
+    } else if (nodeAtKey && nodeAtKey.type !== "list") {
       return null;
     } else {
       // create new linked list at that key
+      // add node to mainList
+      // add key to mainHash
+      // add value to "list" linked list
       const newListNode = this.createListNode(key);
-      newListNode.val.append(val);
+      newListNode.val.append(new CorvoListNode(val));
+      this.mainHash[key] = newListNode;
+      this.mainList.append(newListNode);
     }
   }
 
   createListNode(key) {
     const newList = new CorvoLinkedList();
-    const newNode = new CorvoNode(newList, "list");
-
-    this.mainHash[key] = newNode;
-    console.log(newNode);
-    this.mainList.append(newNode);
+    const newNode = new CorvoNode(key, newList, "list", null, null);
     return newNode;
   }
 }

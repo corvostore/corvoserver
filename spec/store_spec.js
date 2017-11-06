@@ -21,7 +21,7 @@ describe("corvo node", () => {
     const key = "key";
     const preceedingNode = new CorvoNode(null, null);
     const succeedingNode = new CorvoNode(null, null);
-    const testNode = new CorvoNode(key, val, preceedingNode, succeedingNode);
+    const testNode = new CorvoNode(key, val, "string", preceedingNode, succeedingNode);
     expect(testNode.val).toBe(val);
     expect(testNode.nextNode).toBe(succeedingNode);
     expect(testNode.prevNode).toBe(preceedingNode);

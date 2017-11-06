@@ -52,11 +52,35 @@ describe("Store list", () => {
   it("uses lpush to add item to end of list", () => {
     const testStore = new Store();
     const key = "mykey";
-    const val = "val";
+    const val = "value";
     testStore.lpush(key, val);
 
     expect(testStore.mainHash[key].type).toBe("list");
-
     expect(testStore.mainHash[key].val.tail.val).toBe(val);
+    expect(testStore.mainList.head.val.head.val).toBe(val);
   });
+
+  it("uses lpush to add item to end of list", () => {
+    const testStore = new Store();
+    const key = "mykey";
+    const val = "value";
+    testStore.setString(key, val);
+    const returnVal = testStore.lpush(key, val);
+
+    expect(returnVal).toBe(null);
+  });
+
+  it("uses lpush to add two items to the list", () => {
+    const testStore = new Store();
+    const key = "mykey";
+    const val1 = "value1";
+    const val2 = "value2";
+    testStore.lpush(key, val1);
+    testStore.lpush(key, val2);
+
+    expect(testStore.mainHash[key].type).toBe("list");
+    expect(testStore.mainHash[key].val.head.val).toBe(val1);
+    expect(testStore.mainList.head.val.tail.val).toBe(val2);
+  });
+
 });
