@@ -13,27 +13,34 @@ class MemoryTracker {
     return keyBytes + REFERENCE_SIZE_BYTES;
   }
 
-  calculateNodeSize(key, val) {
-    const total_refs = REFERENCE_SIZE_BYTES * 4;
+  calculateNodeSize(key, val, type) {
+    const total_refs = REFERENCE_SIZE_BYTES * 5;
     const valueBytes = STRING_ONE_CHAR_BYTES * val.length;
     const keyBytes = STRING_ONE_CHAR_BYTES * key.length;
-    return total_refs + valueBytes + keyBytes;
+    const typeStringBytes = STRING_ONE_CHAR_BYTES * type.length;
+    return total_refs + valueBytes + keyBytes + typeStringBytes;
   }
 
-  calculateStoreItemSize(key, val) {
-    return this.calculateHashItemSize(key) + this.calculateNodeSize(key, val);
+  calculateListNodeSize(val) {
+    const total_refs = REFERENCE_SIZE_BYTES * 3;
+    const valueBytes = STRING_ONE_CHAR_BYTES * val.length;
+    return total_refs + valueBytes;
   }
 
-  incrementMemoryUsed(key, val) {
-    this.memoryUsed += this.calculateStoreItemSize(key, val);
+  calculateStoreItemSize(key, val, type) {
+    return this.calculateHashItemSize(key) + this.calculateNodeSize(key, val, type);
+  }
+
+  incrementMemoryUsed(key, val, type) {
+    this.memoryUsed += this.calculateStoreItemSize(key, val, type);
   }
 
   updateMemoryUsed(key, oldVal, newVal) {
     this.memoryUsed += (newVal.length - oldVal.length) * STRING_ONE_CHAR_BYTES;
   }
 
-  decrementMemoryUsed(key, val) {
-    this.memoryUsed -= this.calculateStoreItemSize(key, val);
+  decrementMemoryUsed(key, val, type) {
+    this.memoryUsed -= this.calculateStoreItemSize(key, val, type);
   }
 
   maxMemoryExceeded() {

@@ -19,7 +19,7 @@ class Store {
       const newNode = new CorvoNode(key, value);
       this.mainHash[key] = newNode;
       this.mainList.append(newNode);
-      this.memoryTracker.incrementMemoryUsed(key, value);
+      this.memoryTracker.incrementMemoryUsed(key, value, newNode.type);
     } else {
       const oldValue = accessedNode.val;
       accessedNode.val = value;
@@ -55,7 +55,7 @@ class Store {
     const newNode = new CorvoNode(key, value);
     this.mainHash[key] = newNode;
     this.mainList.append(newNode);
-    this.memoryTracker.incrementMemoryUsed(key, value);
+    this.memoryTracker.incrementMemoryUsed(key, value, newNode.type);
     this.lruCheckAndEvictToMaxMemory();
     return "OK";
   }
@@ -166,6 +166,7 @@ class Store {
 
   rename(keyA, keyB) {
     // alter after dataType prop and multiple data types added
+    // alter to reflect memory changes list data type
     if (!this.exists(keyA)) {
       return null;
     }
@@ -186,6 +187,7 @@ class Store {
   }
 
   renameNX(keyA, keyB) {
+    // alter to accommodate memory mgmt for complex data types
     const keyAExists = !!this.mainHash[keyA];
     const keyBExists = !!this.mainHash[keyB];
 
@@ -202,13 +204,15 @@ class Store {
   }
 
   del(...keys) {
+    // alter to accommodate memory mgmt for complex data types
     let numDeleted = 0;
 
     keys.forEach((key) => {
       const node = this.mainHash[key];
       if (node !== undefined) {
         const val = node.val;
-        this.memoryTracker.decrementMemoryUsed(key, val);
+        const type = node.type;
+        this.memoryTracker.decrementMemoryUsed(key, val, type);
         delete this.mainHash[key];
         this.mainList.remove(node);
         numDeleted += 1;
@@ -219,13 +223,14 @@ class Store {
   }
 
   lruEvict() {
+    // alter to accommodate memory mgmt for complex data types
     const head = this.mainList.head;
     const headKey = head.key;
 
     this.mainList.remove(head);
     const currentVal = this.mainHash[headKey];
     delete this.mainHash[headKey];
-    this.memoryTracker.decrementMemoryUsed(headKey, currentVal);
+    this.memoryTracker.decrementMemoryUsed(headKey, currentVal, currentVal.type);
   }
 
   lruCheckAndEvictToMaxMemory() {
@@ -237,7 +242,10 @@ class Store {
   lpush(key, val) {
     const nodeAtKey = this.mainHash[key];
     if (nodeAtKey && nodeAtKey.type === "list") {
-      nodeAtKey.val.append(new CorvoListNode(val));
+      const newListNode = new CorvoListNode(val);
+      const newListNodeMemory = this.memoryTracker.calculateListNodeSize(val);
+      nodeAtKey.val.append(newListNode);
+      // increment memory tracker memoryUsed by size of node holding val
     } else if (nodeAtKey && nodeAtKey.type !== "list") {
       return null;
     } else {
