@@ -86,7 +86,7 @@ class Store {
       this.mainList.append(newNode);
       this.memoryTracker.incrementMemoryUsed(key, valueToAppend, newNode.type);
       lengthAppendedValue = valueToAppend.length;
-    } else {
+    } else if (accessedNode.type === 'string') {
       this.touch(key);
       const oldValue = accessedNode.val;
       accessedNode.val += valueToAppend;
@@ -96,6 +96,8 @@ class Store {
       this.memoryTracker.updateMemoryUsed(oldValueMemory, newValueMemory);
 
       lengthAppendedValue = accessedNode.val.length;
+    } else {
+      throw new Error("StoreError: value at key not string type.");
     }
 
     this.lruCheckAndEvictToMaxMemory();
@@ -116,16 +118,17 @@ class Store {
   }
 
   getStrLen(key) {
-    // strlen should return an error if the value is not a string
     const accessedNode = this.mainHash[key];
-    if (accessedNode !== undefined) {
+    if (accessedNode !== undefined && accessedNode.type === 'string') {
       return accessedNode.val.length;
+    } else if (accessedNode) {
+      throw new Error("StoreError: value at key is not string type.")
+    } else {
+      return 0;
     }
-    return 0;
   }
 
   strIncr(key) {
-    // should we touch if val not number as string?
     function isNumberString(strInput) {
       return ((parseInt(strInput)).toString() === strInput);
     }
@@ -136,7 +139,7 @@ class Store {
       this.setString(key, '0');
       accessedNode = this.mainHash[key];
     } else if (!isNumberString(accessedNode.val)) {
-      return null;
+      throw new Error("StoreError: value at key is not a number string.");
     }
 
     const oldValue = accessedNode.val;
@@ -164,7 +167,7 @@ class Store {
       this.setString(key, '0');
       accessedNode = this.mainHash[key];
     } else if (!isNumberString(accessedNode.val)) {
-      return null;
+      throw new Error("StoreError: value at key is not a number string.");
     }
 
     const oldValue = accessedNode.val;
@@ -182,11 +185,12 @@ class Store {
   }
 
   exists(key) {
+    // alter to accommodate multiple keys
     return !!this.mainHash[key];
   }
 
   type(key) {
-    // alter after dataType prop added to corvoNode
+    // alter to return null or none or type
     return this.mainHash[key].type;
   }
 
@@ -194,7 +198,7 @@ class Store {
     // alter after dataType prop and multiple data types added
     // alter to reflect memory changes list data type
     if (!this.exists(keyA)) {
-      return null;
+      throw new Error("StoreError: No such key.");
     }
 
     const val = this.mainHash[keyA].val;
@@ -225,7 +229,7 @@ class Store {
         return 1;
       }
     } else {
-      return null;
+      throw new Error("StoreError: No such key");
     }
   }
 
@@ -278,7 +282,7 @@ class Store {
 
       // increment memory tracker memoryUsed by size of node holding val
     } else if (nodeAtKey && nodeAtKey.type !== "list") {
-      return null;
+      throw new Error("StoreError: value at key not a list.");
     } else {
       // create new linked list at that key
       // add node to mainList
@@ -306,7 +310,7 @@ class Store {
 
       // increment memory tracker memoryUsed by size of node holding val
     } else if (nodeAtKey && nodeAtKey.type !== "list") {
-      return null;
+      throw new Error("StoreError: value at key not a list.");
     } else {
       // create new linked list at that key
       // add node to mainList
@@ -353,7 +357,7 @@ class Store {
     }
 
     if (this.mainHash[key].type !== "list") {
-      return null;
+      throw new Error("StoreError: value at key not a list.");
     }
 
     const list = this.mainHash[key].val;
@@ -394,7 +398,7 @@ class Store {
     }
 
     if (this.mainHash[key].type !== "list") {
-      return null;
+      throw new Error("StoreError: value at key not a list.");
     }
 
     const list = this.mainHash[key].val;
@@ -462,7 +466,7 @@ class Store {
     }
 
     if (this.mainHash[key].type !== "list") {
-      return null;
+      throw new Error("StoreError: value at key not a list.");
     }
 
     return this.mainHash[key].val.length;
@@ -474,7 +478,7 @@ class Store {
     }
 
     if (this.mainHash[key].type !== "list") {
-      return null;
+      throw new Error("StoreError: value at key not a list.");
     }
 
     return this.mainHash[key].val.insertBefore(pivotVal, newVal);
@@ -486,7 +490,7 @@ class Store {
     }
 
     if (this.mainHash[key].type !== "list") {
-      return null;
+      throw new Error("StoreError: value at key not a list.");
     }
 
     return this.mainHash[key].val.insertAfter(pivotVal, newVal);

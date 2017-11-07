@@ -420,13 +420,13 @@ describe("store", () => {
     expect(testStore.getString(key)).toBe('1');
   });
 
-  it("it returns null if strIncr used on non-number string", () => {
+  it("it throws error if strIncr used on non-number string", () => {
     const testStore = new Store();
     const key = 'key';
     const value = 'Aw heck';
 
     testStore.setString(key, value);
-    expect(testStore.strIncr(key)).toBe(null);
+    expect(() => { testStore.strIncr(key) }).toThrow(new Error("StoreError: value at key is not a number string."));
   });
 
   it("uses strDecr to decrement number stored as string and verify return value is the decremented value", () => {
@@ -448,13 +448,13 @@ describe("store", () => {
     expect(testStore.getString(key)).toBe('-1');
   });
 
-  it("returns null if strDecr used on non-number string", () => {
+  it("throws error if strDecr used on non-number string", () => {
     const testStore = new Store();
     const key = 'key';
     const value = 'Aw heck';
 
     testStore.setString(key, value);
-    expect(testStore.strDecr(key)).toBe(null);
+    expect(() => { testStore.strDecr(key) }).toThrow(new Error("StoreError: value at key is not a number string."));
   });
 
   it("evicts least-recently touched key/value from store when lruEvict is invoked", () => {
@@ -586,11 +586,10 @@ describe("store", () => {
     expect(returnVal).toBe("OK");
   });
 
-  it("uses rename to rename an non-exising key and verify null returned", () => {
+  it("uses rename to throw error if key doesn't exist", () => {
     const testStore = new Store();
-    const returnVal = testStore.rename("keyA", "keyB");
 
-    expect(returnVal).toBe(null);
+    expect(() => { testStore.rename("keyA", "keyB") }).toThrow(new Error("StoreError: No such key."));
   });
 
   it("uses renameNX to rename an existing key and returns 1", () => {
@@ -606,14 +605,12 @@ describe("store", () => {
     expect(returnVal).toBe(1);
   });
 
-  it("uses renameNX to return null if key to be renamed doesn't exist", () => {
+  it("uses renameNX to throw error if key to be renamed doesn't exist", () => {
     const testStore = new Store();
     const keyA = "key";
     const keyB = "keyB"
 
-    const returnVal = testStore.renameNX(keyA, keyB);
-
-    expect(returnVal).toBe(null);
+    expect(() => { testStore.renameNX(keyA, keyB) }).toThrow(new Error("StoreError: No such key"));
   });
 
   it("uses renameNX to return 0 if keyB already exists and verify keyB still exists", () => {

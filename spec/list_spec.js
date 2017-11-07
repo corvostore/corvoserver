@@ -61,14 +61,14 @@ describe("Store list", () => {
     expect(testStore.memoryTracker.memoryUsed).toBe(142);
   });
 
-  it("uses lpush to add item to end of list", () => {
+  it("uses lpush throw error when adding item to non list", () => {
     const testStore = new Store();
     const key = "mykey";
     const val = "value";
     testStore.setString(key, val);
-    const returnVal = testStore.lpush(key, val);
+    // const returnVal = testStore.lpush(key, val);
 
-    expect(returnVal).toBe(null);
+    expect(() => { testStore.lpush(key, val) }).toThrow(new Error("StoreError: value at key not a list."));
   });
 
   it("uses lpush to add two items to the list", () => {
@@ -86,14 +86,12 @@ describe("Store list", () => {
     expect(testStore.mainList.head.val.tail.val).toBe(val1);
   });
 
-  it("uses rpush to add item to end of list", () => {
+  it("uses rpush to throw error when adding item to end of non list", () => {
     const testStore = new Store();
     const key = "mykey";
     const val = "value";
     testStore.setString(key, val);
-    const returnVal = testStore.rpush(key, val);
-
-    expect(returnVal).toBe(null);
+    expect(() => { testStore.rpush(key, val) }).toThrow(new Error("StoreError: value at key not a list."));
   });
 
   it("uses rpush to add two items to the list", () => {
@@ -176,14 +174,13 @@ describe("Store list", () => {
     expect(result).toBe(null);
   });
 
-  it("lindex returns null when operation performed on a key that is not of list type", () => {
+  it("lindex throws error when operation performed on a key that is not of list type", () => {
     const testStore = new Store();
     const key1 = "key-1";
     const val1 = "value-1";
     testStore.setString(key1, val1);
 
-    const result = testStore.lindex(key1, 0);
-    expect(result).toBe(null);
+    expect(() => { testStore.lindex(key1, 0) }).toThrow(new Error("StoreError: value at key not a list."));
   });
 
   it("uses lindex to retrieve a value from list using negative index", () => {
@@ -212,14 +209,13 @@ describe("Store list", () => {
     expect(result).toBe(0);
   });
 
-  it("uses lrem on a key with non-list value, returns null", () => {
+  it("uses lrem on a key with non-list value, throws error", () => {
     const testStore = new Store();
     const key1 = "key-1";
     const val1 = "value-1";
     testStore.setString(key1, val1);
 
-    const result = testStore.lrem(key1, 2, val1);
-    expect(result).toBe(null);
+    expect(() => { testStore.lrem(key1, 2, val1) }).toThrow(new Error("StoreError: value at key not a list."));
   });
 
   it("uses lrem to remove one element from a list", () => {
@@ -378,7 +374,7 @@ describe("Store list", () => {
     expect(testStore.llen(key2)).toBe(0);
   });
 
-  it("uses llen to return an error if the value stored at key is not a list", () => {
+  it("uses llen to throw an error if the value stored at key is not a list", () => {
 
     const testStore = new Store();
     const key1 = "key-1";
@@ -395,7 +391,7 @@ describe("Store list", () => {
 
     testStore.setString(key2, "val");
 
-    expect(testStore.llen(key2)).toBe(null);
+    expect(() => { testStore.llen(key2) }).toThrow(new Error("StoreError: value at key not a list."));
   });
 
   it ("uses linsertBefore to insert a value before the reference value pivot and return new length of list", () => {
@@ -430,7 +426,7 @@ describe("Store list", () => {
     expect(testStore.linsertBefore(key2, "value-1", "new-val")).toBe(0);
   });
 
-  it("linsertBefore returns null when the value stored at key is not a list", () => {
+  it("linsertBefore throws error when the value stored at key is not a list", () => {
     const testStore = new Store();
 
     const key1 = "key-1";
@@ -442,7 +438,7 @@ describe("Store list", () => {
     testStore.rpush(key1, val2);
     testStore.setString(key2, "val");
 
-    expect(testStore.linsertBefore(key2, "val", "new-val")).toBe(null);
+    expect(() => { testStore.linsertBefore(key2, "val", "new-val") }).toThrow(new Error("StoreError: value at key not a list."));
   });
 
   it("linsertBefore maintains existing state of the list", () => {
@@ -517,7 +513,7 @@ it("linsertAfter returns 0 when key does not exist", () => {
   expect(testStore.linsertAfter(key2, "value-1", "new-val")).toBe(0);
 });
 
-it("linsertAfter returns null when the value stored at key is not a list", () => {
+it("linsertAfter throws error when the value stored at key is not a list", () => {
   const testStore = new Store();
 
   const key1 = "key-1";
@@ -529,7 +525,7 @@ it("linsertAfter returns null when the value stored at key is not a list", () =>
   testStore.rpush(key1, val2);
   testStore.setString(key2, "val");
 
-  expect(testStore.linsertAfter(key2, "val", "new-val")).toBe(null);
+  expect(() => { testStore.linsertAfter(key2, "val", "new-val") }).toThrow(new Error("StoreError: value at key not a list."));
 });
 
 it("linsertAfter maintains existing state of the list", () => {
