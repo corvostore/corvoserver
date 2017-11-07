@@ -3,6 +3,7 @@ import CorvoNode from './corvo_node';
 import CorvoListNode from './data_types/corvo_list_node';
 import MemoryTracker from './memory_tracker';
 const DEFAULT_MAX_MEMORY = 104857600; // equals 100MB
+const STRING_ONE_CHAR_BYTES = 2;
 
 class Store {
   constructor(options={maxMemory: DEFAULT_MAX_MEMORY}) {
@@ -22,8 +23,10 @@ class Store {
       this.memoryTracker.incrementMemoryUsed(key, value, newNode.type);
     } else {
       const oldValue = accessedNode.val;
+      const oldValueMemory = oldValue.length * STRING_ONE_CHAR_BYTES;
+      const newValueMemory = value.length * STRING_ONE_CHAR_BYTES;
       accessedNode.val = value;
-      this.memoryTracker.updateMemoryUsed(key, oldValue, value);
+      this.memoryTracker.updateMemoryUsed(oldValueMemory, newValueMemory);
       this.touch(accessedNode);
     }
     this.lruCheckAndEvictToMaxMemory();
@@ -38,8 +41,10 @@ class Store {
       return null;
     }
     const oldValue = accessedNode.val;
+    const oldValueMemory = oldValue.length * STRING_ONE_CHAR_BYTES;
+    const newValueMemory = value.length * STRING_ONE_CHAR_BYTES;
     accessedNode.val = value;
-    this.memoryTracker.updateMemoryUsed(key, oldValue, value);
+    this.memoryTracker.updateMemoryUsed(oldValueMemory, newValueMemory);
     this.touch(accessedNode);
     this.lruCheckAndEvictToMaxMemory();
     return "OK";
@@ -80,7 +85,11 @@ class Store {
     this.touch(key);
     const oldValue = accessedNode.val;
     accessedNode.val += valueToAppend;
-    this.memoryTracker.updateMemoryUsed(key, oldValue, accessedNode.val);
+
+    const oldValueMemory = oldValue.length * STRING_ONE_CHAR_BYTES;
+    const newValueMemory = accessedNode.val.length * STRING_ONE_CHAR_BYTES;
+
+    this.memoryTracker.updateMemoryUsed(oldValueMemory, newValueMemory);
 
     this.lruCheckAndEvictToMaxMemory();
     return accessedNode.val.length;
@@ -124,8 +133,13 @@ class Store {
     }
 
     const oldValue = accessedNode.val;
+
     accessedNode.val = (parseInt(accessedNode.val, 10) + 1).toString();
-    this.memoryTracker.updateMemoryUsed(key, oldValue, accessedNode.val);
+
+    const oldValueMemory = oldValue.length * STRING_ONE_CHAR_BYTES;
+    const newValueMemory = accessedNode.val.length * STRING_ONE_CHAR_BYTES;
+
+    this.memoryTracker.updateMemoryUsed(oldValueMemory, newValueMemory);
     this.touch(accessedNode);
 
     this.lruCheckAndEvictToMaxMemory();
@@ -148,7 +162,12 @@ class Store {
 
     const oldValue = accessedNode.val;
     accessedNode.val = (parseInt(accessedNode.val, 10) - 1).toString();
-    this.memoryTracker.updateMemoryUsed(key, oldValue, accessedNode.val);
+
+    const oldValueMemory = oldValue.length * STRING_ONE_CHAR_BYTES;
+    const newValueMemory = accessedNode.val.length * STRING_ONE_CHAR_BYTES;
+
+    this.memoryTracker.updateMemoryUsed(oldValueMemory, newValueMemory);
+
     this.touch(accessedNode);
 
     this.lruCheckAndEvictToMaxMemory();
@@ -244,7 +263,12 @@ class Store {
     if (nodeAtKey && nodeAtKey.type === "list") {
       const newListNode = new CorvoListNode(val);
       const newListNodeMemory = this.memoryTracker.calculateListNodeSize(val);
+      const oldListMemory = this.memoryTracker.calculateListSize(nodeAtKey.val);
+      const newListMemory = oldListMemory + newListNodeMemory;
+
       nodeAtKey.val.append(newListNode);
+      this.memoryTracker.updateMemoryUsed(oldListMemory, newListMemory);
+
       // increment memory tracker memoryUsed by size of node holding val
     } else if (nodeAtKey && nodeAtKey.type !== "list") {
       return null;
@@ -257,6 +281,10 @@ class Store {
       newListNode.val.append(new CorvoListNode(val));
       this.mainHash[key] = newListNode;
       this.mainList.append(newListNode);
+
+      this.memoryTracker.incrementMemoryUsed(key, newListNode.val, "list");
+      
+
     }
   }
 
