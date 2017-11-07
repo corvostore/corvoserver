@@ -343,4 +343,232 @@ describe("Store list", () => {
     expect(list.nextNode.nextNode.val).toBe("value-4");
     expect(list.nextNode.nextNode.nextNode).toBe(null);
   });
+
+  it("uses llen to return the length of the list stored at key", () => {
+    const testStore = new Store();
+    const key1 = "key-1";
+    const val1 = "value-1";
+    const val2 = "value-2";
+    const val3 = "value-3";
+    const val4 = "value-4";
+
+    testStore.rpush(key1, val1);
+    testStore.rpush(key1, val2);
+    testStore.rpush(key1, val3);
+    testStore.rpush(key1, val4);
+
+    expect(testStore.llen(key1)).toBe(4);
+
+  });
+
+  it("uses llen to return 0 if the key does not exist", () => {
+    const testStore = new Store();
+    const key1 = "key-1";
+    const key2 = "key-2";
+    const val1 = "value-1";
+    const val2 = "value-2";
+    const val3 = "value-3";
+    const val4 = "value-4";
+
+    testStore.rpush(key1, val1);
+    testStore.rpush(key1, val2);
+    testStore.rpush(key1, val3);
+    testStore.rpush(key1, val4);
+
+    expect(testStore.llen(key2)).toBe(0);
+  });
+
+  it("uses llen to return an error if the value stored at key is not a list", () => {
+
+    const testStore = new Store();
+    const key1 = "key-1";
+    const key2 = "key-2";
+    const val1 = "value-1";
+    const val2 = "value-2";
+    const val3 = "value-3";
+    const val4 = "value-4";
+
+    testStore.rpush(key1, val1);
+    testStore.rpush(key1, val2);
+    testStore.rpush(key1, val3);
+    testStore.rpush(key1, val4);
+
+    testStore.setString(key2, "val");
+
+    expect(testStore.llen(key2)).toBe(null);
+  });
+
+  it ("uses linsertBefore to insert a value before the reference value pivot and return new length of list", () => {
+    const testStore = new Store();
+
+    const key1 = "key-1";
+    const val1 = "value-1";
+    const val2 = "value-2";
+    const val3 = "value-3";
+    const val4 = "value-4";
+
+    testStore.rpush(key1, val1);
+    testStore.rpush(key1, val2);
+    testStore.rpush(key1, val3);
+    testStore.rpush(key1, val4);
+
+    expect(testStore.linsertBefore(key1, "value-3", "new-val")).toBe(5);
+  });
+
+  it("linsertBefore returns 0 when key does not exist", () => {
+
+    const testStore = new Store();
+
+    const key1 = "key-1";
+    const key2 = "key-2";
+    const val1 = "value-1";
+    const val2 = "value-2";
+
+    testStore.rpush(key1, val1);
+    testStore.rpush(key1, val2);
+
+    expect(testStore.linsertBefore(key2, "value-1", "new-val")).toBe(0);
+  });
+
+  it("linsertBefore returns null when the value stored at key is not a list", () => {
+    const testStore = new Store();
+
+    const key1 = "key-1";
+    const key2 = "key-2";
+    const val1 = "value-1";
+    const val2 = "value-2";
+
+    testStore.rpush(key1, val1);
+    testStore.rpush(key1, val2);
+    testStore.setString(key2, "val");
+
+    expect(testStore.linsertBefore(key2, "val", "new-val")).toBe(null);
+  });
+
+  it("linsertBefore maintains existing state of the list", () => {
+    const testStore = new Store();
+    const key1 = "key-1";
+    const val1 = "value-1";
+    const val2 = "value-2";
+    const val3 = "value-3";
+
+    testStore.rpush(key1, val1);
+    testStore.rpush(key1, val2);
+    testStore.rpush(key1, val3);
+
+    const result = testStore.linsertBefore(key1, val3, "new-val");
+    expect(result).toBe(4);
+    const list = testStore.mainHash[key1].val.head;
+    expect(list.val).toBe("value-1");
+    expect(list.nextNode.val).toBe("value-2");
+    expect(list.nextNode.nextNode.val).toBe("new-val");
+    expect(list.nextNode.nextNode.nextNode.val).toBe("value-3");
+    expect(list.nextNode.nextNode.nextNode.nextNode).toBe(null);
+  });
+
+  it("linsertBefore maintains existing state of the list when inserting before head of list", () => {
+    const testStore = new Store();
+    const key1 = "key-1";
+    const val1 = "value-1";
+    const val2 = "value-2";
+
+    testStore.rpush(key1, val1);
+    testStore.rpush(key1, val2);
+
+    const result = testStore.linsertBefore(key1, val1, "new-val");
+    expect(result).toBe(3);
+    const list = testStore.mainHash[key1].val.head;
+    expect(list.val).toBe("new-val");
+    expect(list.nextNode.val).toBe("value-1");
+    expect(list.nextNode.nextNode.val).toBe("value-2");
+    expect(list.nextNode.nextNode.nextNode).toBe(null);
+  });
+
+////// insertAfter tests
+it ("uses linsertAfter to insert a value after the reference value pivot and return new length of list", () => {
+  const testStore = new Store();
+
+  const key1 = "key-1";
+  const val1 = "value-1";
+  const val2 = "value-2";
+  const val3 = "value-3";
+  const val4 = "value-4";
+
+  testStore.rpush(key1, val1);
+  testStore.rpush(key1, val2);
+  testStore.rpush(key1, val3);
+  testStore.rpush(key1, val4);
+
+  expect(testStore.linsertAfter(key1, "value-3", "new-val")).toBe(5);
+});
+
+it("linsertAfter returns 0 when key does not exist", () => {
+
+  const testStore = new Store();
+
+  const key1 = "key-1";
+  const key2 = "key-2";
+  const val1 = "value-1";
+  const val2 = "value-2";
+
+  testStore.rpush(key1, val1);
+  testStore.rpush(key1, val2);
+
+  expect(testStore.linsertAfter(key2, "value-1", "new-val")).toBe(0);
+});
+
+it("linsertAfter returns null when the value stored at key is not a list", () => {
+  const testStore = new Store();
+
+  const key1 = "key-1";
+  const key2 = "key-2";
+  const val1 = "value-1";
+  const val2 = "value-2";
+
+  testStore.rpush(key1, val1);
+  testStore.rpush(key1, val2);
+  testStore.setString(key2, "val");
+
+  expect(testStore.linsertAfter(key2, "val", "new-val")).toBe(null);
+});
+
+it("linsertAfter maintains existing state of the list", () => {
+  const testStore = new Store();
+  const key1 = "key-1";
+  const val1 = "value-1";
+  const val2 = "value-2";
+  const val3 = "value-3";
+
+  testStore.rpush(key1, val1);
+  testStore.rpush(key1, val2);
+  testStore.rpush(key1, val3);
+
+  const result = testStore.linsertAfter(key1, val2, "new-val");
+  expect(result).toBe(4);
+  const list = testStore.mainHash[key1].val.head;
+  expect(list.val).toBe("value-1");
+  expect(list.nextNode.val).toBe("value-2");
+  expect(list.nextNode.nextNode.val).toBe("new-val");
+  expect(list.nextNode.nextNode.nextNode.val).toBe("value-3");
+  expect(list.nextNode.nextNode.nextNode.nextNode).toBe(null);
+});
+
+it("linsertAfter maintains existing state of the list when inserting after tail of list", () => {
+  const testStore = new Store();
+  const key1 = "key-1";
+  const val1 = "value-1";
+  const val2 = "value-2";
+
+  testStore.rpush(key1, val1);
+  testStore.rpush(key1, val2);
+
+  const result = testStore.linsertAfter(key1, val2, "new-val");
+  expect(result).toBe(3);
+  const list = testStore.mainHash[key1].val.head;
+  expect(list.val).toBe("value-1");
+  expect(list.nextNode.val).toBe("value-2");
+  expect(list.nextNode.nextNode.val).toBe("new-val");
+  expect(list.nextNode.nextNode.nextNode).toBe(null);
+});
+
 });

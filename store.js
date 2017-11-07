@@ -448,6 +448,42 @@ class Store {
 
     return countRemoved;
   }
+
+  llen(key) {
+    if(!this.mainHash[key]) {
+      return 0;
+    }
+
+    if (this.mainHash[key].type !== "list") {
+      return null;
+    }
+
+    return this.mainHash[key].val.length;
+  }
+
+  linsertBefore(key, pivotVal, newVal) {
+    if (!this.mainHash[key]) {
+      return 0;
+    }
+
+    if (this.mainHash[key].type !== "list") {
+      return null;
+    }
+
+    return this.mainHash[key].val.insertBefore(pivotVal, newVal);
+  }
+
+  linsertAfter(key, pivotVal, newVal) {
+    if (!this.mainHash[key]) {
+      return 0;
+    }
+
+    if (this.mainHash[key].type !== "list") {
+      return null;
+    }
+
+    return this.mainHash[key].val.insertAfter(pivotVal, newVal);
+  }
 }
 
 export default Store;
