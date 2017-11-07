@@ -138,4 +138,68 @@ describe("Store list", () => {
 
     expect(result).toBe(valA);
   });
+
+  it("uses lindex to retrieve a value from list", () => {
+    const testStore = new Store();
+    const key1 = "key-1";
+    const val1 = "value-1";
+    const val2 = "value-2";
+    const val3 = "value-3";
+    const val4 = "value-4";
+
+    testStore.rpush(key1, val1);
+    testStore.rpush(key1, val2);
+    testStore.rpush(key1, val3);
+    testStore.rpush(key1, val4);
+    const result = testStore.lindex(key1, 1);
+    expect(result).toBe(val2);
+  });
+
+  it("lindex returns null for a non-existent key", () => {
+    const testStore = new Store();
+    const key1 = "key-1";
+
+    const result = testStore.lindex(key1, 10);
+    expect(result).toBe(null);
+  });
+
+  it("lindex returns null for a list that exists but index is out of range", () => {
+    const testStore = new Store();
+    const key1 = "key-1";
+    const val1 = "value-1";
+    const val2 = "value-2";
+
+    testStore.rpush(key1, val1);
+    testStore.rpush(key1, val2);
+
+    const result = testStore.lindex(key1, 10);
+    expect(result).toBe(null);
+  });
+
+  it("lindex returns null when operation performed on a key that is not of list type", () => {
+    const testStore = new Store();
+    const key1 = "key-1";
+    const val1 = "value-1";
+    testStore.setString(key1, val1);
+
+    const result = testStore.lindex(key1, 0);
+    expect(result).toBe(null);
+  });
+
+  it("uses lindex to retrieve a value from list using negative index", () => {
+    const testStore = new Store();
+    const key1 = "key-1";
+    const val1 = "value-1";
+    const val2 = "value-2";
+    const val3 = "value-3";
+    const val4 = "value-4";
+
+    testStore.rpush(key1, val1);
+    testStore.rpush(key1, val2);
+    testStore.rpush(key1, val3);
+    testStore.rpush(key1, val4);
+
+    const result = testStore.lindex(key1, -2);
+    expect(result).toBe(val3);
+  });
 });

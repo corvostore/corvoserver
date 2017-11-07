@@ -339,6 +339,47 @@ class Store {
       return null;
     }
   }
+
+  lindex(key, idx) {
+    if (!this.mainHash[key]) {
+      return null;
+    }
+
+    if (this.mainHash[key].type !== "list") {
+      return null;
+    }
+
+    const list = this.mainHash[key].val;
+    let currIdx;
+    let currListNode;
+    if (idx >= 0) {
+      currIdx = 0;
+      currListNode = list.head;
+
+      while (currListNode) {
+        if (idx === currIdx) {
+          return currListNode.val;
+        }
+
+        currIdx += 1;
+        currListNode = currListNode.nextNode;   
+      }
+    } else {
+      currIdx = -1;
+      currListNode = list.tail;
+
+      while (currListNode) {
+        if (idx === currIdx) {
+          return currListNode.val;
+        }
+
+        currIdx -= 1;
+        currListNode = currListNode.prevNode;   
+      }
+    }
+
+    return null;
+  } 
 }
 
 export default Store;
