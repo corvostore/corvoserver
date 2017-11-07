@@ -78,21 +78,28 @@ class Store {
 
   appendString(key, valueToAppend) {
     const accessedNode = this.mainHash[key];
+    let lengthAppendedValue;
+
     if (accessedNode === undefined) {
-      return null;
+      const newNode = new CorvoNode(key, valueToAppend);
+      this.mainHash[key] = newNode;
+      this.mainList.append(newNode);
+      this.memoryTracker.incrementMemoryUsed(key, valueToAppend, newNode.type);
+      lengthAppendedValue = valueToAppend.length;
+    } else {
+      this.touch(key);
+      const oldValue = accessedNode.val;
+      accessedNode.val += valueToAppend;
+
+      const oldValueMemory = oldValue.length * STRING_ONE_CHAR_BYTES;
+      const newValueMemory = accessedNode.val.length * STRING_ONE_CHAR_BYTES;
+      this.memoryTracker.updateMemoryUsed(oldValueMemory, newValueMemory);
+
+      lengthAppendedValue = accessedNode.val.length;
     }
 
-    this.touch(key);
-    const oldValue = accessedNode.val;
-    accessedNode.val += valueToAppend;
-
-    const oldValueMemory = oldValue.length * STRING_ONE_CHAR_BYTES;
-    const newValueMemory = accessedNode.val.length * STRING_ONE_CHAR_BYTES;
-
-    this.memoryTracker.updateMemoryUsed(oldValueMemory, newValueMemory);
-
     this.lruCheckAndEvictToMaxMemory();
-    return accessedNode.val.length;
+    return lengthAppendedValue;
   }
 
   touch(...keys) {

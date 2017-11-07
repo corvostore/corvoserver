@@ -370,6 +370,17 @@ describe("store", () => {
     expect(returnVal).toBe(result.length);
   });
 
+  it("appends string value to a non-existent key with appendString and returns length of newly updated value", () => {
+    const testStore = new Store();
+    const key = "key1";
+    const valueA = "Hello";
+    const result = 5;
+
+    const returnVal = testStore.appendString(key, valueA);
+    expect(returnVal).toBe(result);
+    expect(testStore.getString(key)).toBe(valueA);
+  });
+
   it("uses getStrLen to return number representation of string length", () => {
     const testStore = new Store();
     const key = "key1";

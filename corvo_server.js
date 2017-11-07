@@ -23,11 +23,31 @@ class CorvoServer {
     };
   }
 
-  startServer() {
+  prepareReturnString(result) {
+    let newResult;
+
+    if (result === null) {
+      return "+(nil)\r\n";
+    }
+
+    switch(typeof result) {
+      case 'string':
+        const stringToReturn = !!result ? "" + result : "(nil)";
+        newResult = "+" + stringToReturn + "\r\n";
+        break
+      case 'number':
+        newResult = ":" + result + "\r\n";
+        break;
+    }
+
+    return newResult;
+  }
+
+  startServer(port=DEFAULT_PORT, host=DEFAULT_HOST) {
     const server = Net.createServer();
     server.on('connection', this.handleConnection.bind(this));
 
-    server.listen(DEFAULT_PORT, DEFAULT_HOST, function() {
+    server.listen(port, host, function() {
         console.log('server listening to %j', server.address());
       });
   }
@@ -57,10 +77,10 @@ class CorvoServer {
         } else if (this.storeCommandMap[command]) {
           result = this.storeCommandMap[command].apply(this.store, tokens.slice(1));
         } else {
-          result = "ParserError: Invalid Command.";
+          result = "StoreError: Command not found in storeCommandMap.";
         }
-        const newResult = !!result ? "" + result : "(nil)";
-        conn.write(newResult);
+        const stringToReturn = this.prepareReturnString(result);
+        conn.write(stringToReturn);
       } catch(err) {
         const result = err.message;
         conn.write(result);
