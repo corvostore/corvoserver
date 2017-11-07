@@ -82,8 +82,35 @@ describe("Store list", () => {
     expect(testStore.memoryTracker.memoryUsed).toBe(148);
 
     expect(testStore.mainHash[key].type).toBe("list");
-    expect(testStore.mainHash[key].val.head.val).toBe(val1);
-    expect(testStore.mainList.head.val.tail.val).toBe(val2);
+    expect(testStore.mainHash[key].val.head.val).toBe(val2);
+    expect(testStore.mainList.head.val.tail.val).toBe(val1);
   });
 
+  it("uses lpop to pop the leftmost node and return the value", () => {
+    const testStore = new Store();
+    const keyA = "keyA";
+    const valA = "some-valueA";
+    const valB = "some-valueB";
+
+    testStore.lpush(keyA, valA);
+    testStore.lpush(keyA, valB);
+
+    const result = testStore.lpop(keyA);
+
+    expect(result).toBe(valB);
+  });
+
+  it("uses rpop to pop the rightmost node and return the value", () => {
+    const testStore = new Store();
+    const keyA = "keyA";
+    const valA = "some-valueA";
+    const valB = "some-valueB";
+
+    testStore.lpush(keyA, valA);
+    testStore.lpush(keyA, valB);
+
+    const result = testStore.rpop(keyA);
+
+    expect(result).toBe(valA);
+  });
 });

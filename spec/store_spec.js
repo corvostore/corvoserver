@@ -619,32 +619,4 @@ describe("store", () => {
     expect(returnVal).toBe(0);
     expect(testStore.getString(keyB)).toBe(valB);
   });
-
-  it("uses lpop to pop the leftmost node and return the value", () => {
-    const testStore = new Store();
-    const keyA = "keyA";
-    const valA = "some-valueA";
-    const valB = "some-valueB";
-
-    testStore.lpush(keyA, valA);
-    testStore.lpush(keyA, valB);
-
-    const result = testStore.lpop(keyA);
-
-    expect(result).toBe(valA);
-  });
-
-  it("uses rpop to pop the rightmost node and return the value", () => {
-    const testStore = new Store();
-    const keyA = "keyA";
-    const valA = "some-valueA";
-    const valB = "some-valueB";
-
-    testStore.lpush(keyA, valA);
-    testStore.lpush(keyA, valB);
-
-    const result = testStore.rpop(keyA);
-
-    expect(result).toBe(valB);
-  });
 });

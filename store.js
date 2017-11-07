@@ -266,6 +266,34 @@ class Store {
       const oldListMemory = this.memoryTracker.calculateListSize(nodeAtKey.val);
       const newListMemory = oldListMemory + newListNodeMemory;
 
+      nodeAtKey.val.prepend(newListNode);
+      this.memoryTracker.updateMemoryUsed(oldListMemory, newListMemory);
+
+      // increment memory tracker memoryUsed by size of node holding val
+    } else if (nodeAtKey && nodeAtKey.type !== "list") {
+      return null;
+    } else {
+      // create new linked list at that key
+      // add node to mainList
+      // add key to mainHash
+      // add value to "list" linked list
+      const newListNode = this.createListNode(key);
+      newListNode.val.append(new CorvoListNode(val));
+      this.mainHash[key] = newListNode;
+      this.mainList.append(newListNode);
+
+      this.memoryTracker.incrementMemoryUsed(key, newListNode.val, "list");
+    }
+  }
+
+  rpush(key, val) {
+    const nodeAtKey = this.mainHash[key];
+    if (nodeAtKey && nodeAtKey.type === "list") {
+      const newListNode = new CorvoListNode(val);
+      const newListNodeMemory = this.memoryTracker.calculateListNodeSize(val);
+      const oldListMemory = this.memoryTracker.calculateListSize(nodeAtKey.val);
+      const newListMemory = oldListMemory + newListNodeMemory;
+
       nodeAtKey.val.append(newListNode);
       this.memoryTracker.updateMemoryUsed(oldListMemory, newListMemory);
 
@@ -283,8 +311,6 @@ class Store {
       this.mainList.append(newListNode);
 
       this.memoryTracker.incrementMemoryUsed(key, newListNode.val, "list");
-
-
     }
   }
 
