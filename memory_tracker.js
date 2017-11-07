@@ -4,8 +4,8 @@ const NODE_NUM_REFS = 3;
 
 class MemoryTracker {
   constructor(maxMemory) {
-    this.maxMemory = maxMemory,
-    this.memoryUsed = 0
+    this.maxMemory = maxMemory;
+    this.memoryUsed = 0;
   }
 
   calculateHashItemSize(key) {
@@ -31,6 +31,8 @@ class MemoryTracker {
 
   calculateListSize(list) {
     let total = 0;
+    total += REFERENCE_SIZE_BYTES * 3;
+    total += 8;
     let currentNode = list.head;
     while(currentNode) {
       total = total + this.calculateListNodeSize(currentNode.val);
