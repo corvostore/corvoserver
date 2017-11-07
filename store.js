@@ -362,7 +362,7 @@ class Store {
         }
 
         currIdx += 1;
-        currListNode = currListNode.nextNode;   
+        currListNode = currListNode.nextNode;
       }
     } else {
       currIdx = -1;
@@ -374,12 +374,80 @@ class Store {
         }
 
         currIdx -= 1;
-        currListNode = currListNode.prevNode;   
+        currListNode = currListNode.prevNode;
       }
     }
 
     return null;
-  } 
+  }
+
+  lrem(key, count, val) {
+    if (!this.mainHash[key]) {
+      return 0;
+    }
+
+    if (this.mainHash[key].type !== "list") {
+      return null;
+    }
+
+    const list = this.mainHash[key].val;
+    let countRemoved = 0;;
+    let currListNode;
+
+    if (count > 0) {
+      currListNode = list.head;
+      while (currListNode) {
+        if (currListNode.val === val) {
+          const nextListNode = currListNode.nextNode;
+          list.remove(currListNode);
+          countRemoved += 1;
+
+          if (countRemoved === count) {
+            return countRemoved;
+          }
+
+          currListNode = nextListNode;
+          continue;
+        }
+
+        currListNode = currListNode.nextNode;
+      }
+    } else if (count < 0) {
+      currListNode = list.tail;
+      while (currListNode) {
+        if (currListNode.val === val) {
+          const prevListNode = currListNode.prevNode;
+          list.remove(currListNode);
+          countRemoved += 1;
+
+          if (countRemoved === Math.abs(count)) {
+            return countRemoved;
+          }
+
+          currListNode = prevListNode;
+          continue;
+        }
+
+        currListNode = currListNode.prevNode;
+      }
+    } else {
+      // count is 0, remove all elements matching val
+      currListNode = list.head;
+      while (currListNode) {
+        if (currListNode.val === val) {
+          const nextListNode = currListNode.nextNode;
+          list.remove(currListNode);
+          countRemoved += 1;
+          currListNode = nextListNode;
+          continue;
+        }
+
+        currListNode = currListNode.nextNode;
+      }
+    }
+
+    return countRemoved;
+  }
 }
 
 export default Store;

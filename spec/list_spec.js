@@ -202,4 +202,145 @@ describe("Store list", () => {
     const result = testStore.lindex(key1, -2);
     expect(result).toBe(val3);
   });
+
+  it("lrem returns 0 for a non-existent key", () => {
+    const testStore = new Store();
+    const key1 = "key-1";
+    const val1 = "value-1";
+
+    const result = testStore.lrem(key1, 2, val1);
+    expect(result).toBe(0);
+  });
+
+  it("uses lrem on a key with non-list value, returns null", () => {
+    const testStore = new Store();
+    const key1 = "key-1";
+    const val1 = "value-1";
+    testStore.setString(key1, val1);
+
+    const result = testStore.lrem(key1, 2, val1);
+    expect(result).toBe(null);
+  });
+
+  it("uses lrem to remove one element from a list", () => {
+    const testStore = new Store();
+    const key1 = "key-1";
+    const val1 = "value-1";
+    const val2 = "value-2";
+    const val3 = "value-3";
+    const val4 = "value-4";
+
+    testStore.rpush(key1, val1);
+    testStore.rpush(key1, val2);
+    testStore.rpush(key1, val3);
+    testStore.rpush(key1, val2);
+    testStore.rpush(key1, val4);
+
+    const result = testStore.lrem(key1, 1, val2);
+    expect(result).toBe(1);
+    const list = testStore.mainHash[key1].val.head;
+    expect(list.val).toBe("value-1");
+    expect(list.nextNode.val).toBe("value-3");
+    expect(list.nextNode.nextNode.val).toBe("value-2");
+    expect(list.nextNode.nextNode.nextNode.val).toBe("value-4");
+    expect(list.nextNode.nextNode.nextNode.nextNode).toBe(null);
+  });
+
+  it("uses lrem to remove multiple elements from a list", () => {
+    const testStore = new Store();
+    const key1 = "key-1";
+    const val1 = "value-1";
+    const val2 = "value-2";
+    const val3 = "value-3";
+    const val4 = "value-4";
+
+    testStore.rpush(key1, val1);
+    testStore.rpush(key1, val2);
+    testStore.rpush(key1, val3);
+    testStore.rpush(key1, val2);
+    testStore.rpush(key1, val4);
+    testStore.rpush(key1, val2);
+
+    const result = testStore.lrem(key1, 2, val2);
+    expect(result).toBe(2);
+    const list = testStore.mainHash[key1].val.head;
+    expect(list.val).toBe("value-1");
+    expect(list.nextNode.val).toBe("value-3");
+    expect(list.nextNode.nextNode.val).toBe("value-4");
+    expect(list.nextNode.nextNode.nextNode.val).toBe("value-2");
+    expect(list.nextNode.nextNode.nextNode.nextNode).toBe(null);
+  });
+
+  it("uses lrem to remove one element from end of list", () => {
+    const testStore = new Store();
+    const key1 = "key-1";
+    const val1 = "value-1";
+    const val2 = "value-2";
+    const val3 = "value-3";
+    const val4 = "value-4";
+
+    testStore.rpush(key1, val1);
+    testStore.rpush(key1, val2);
+    testStore.rpush(key1, val3);
+    testStore.rpush(key1, val2);
+    testStore.rpush(key1, val4);
+
+    const result = testStore.lrem(key1, -1, val2);
+    expect(result).toBe(1);
+    const list = testStore.mainHash[key1].val.head;
+    expect(list.val).toBe("value-1");
+    expect(list.nextNode.val).toBe("value-2");
+    expect(list.nextNode.nextNode.val).toBe("value-3");
+    expect(list.nextNode.nextNode.nextNode.val).toBe("value-4");
+    expect(list.nextNode.nextNode.nextNode.nextNode).toBe(null);
+  });
+
+  it("uses lrem to remove multiple elements from end of list", () => {
+    const testStore = new Store();
+    const key1 = "key-1";
+    const val1 = "value-1";
+    const val2 = "value-2";
+    const val3 = "value-3";
+    const val4 = "value-4";
+
+    testStore.rpush(key1, val1);
+    testStore.rpush(key1, val2);
+    testStore.rpush(key1, val3);
+    testStore.rpush(key1, val2);
+    testStore.rpush(key1, val4);
+    testStore.rpush(key1, val2);
+
+    const result = testStore.lrem(key1, -2, val2);
+    expect(result).toBe(2);
+    const list = testStore.mainHash[key1].val.head;
+    expect(list.val).toBe("value-1");
+    expect(list.nextNode.val).toBe("value-2");
+    expect(list.nextNode.nextNode.val).toBe("value-3");
+    expect(list.nextNode.nextNode.nextNode.val).toBe("value-4");
+    expect(list.nextNode.nextNode.nextNode.nextNode).toBe(null);
+  });
+
+  it("uses lrem to remove all elements matching a value from the list", () => {
+    const testStore = new Store();
+    const key1 = "key-1";
+    const val1 = "value-1";
+    const val2 = "value-2";
+    const val3 = "value-3";
+    const val4 = "value-4";
+
+    testStore.rpush(key1, val1);
+    testStore.rpush(key1, val2);
+    testStore.rpush(key1, val3);
+    testStore.rpush(key1, val2);
+    testStore.rpush(key1, val4);
+    testStore.rpush(key1, val2);
+
+    const result = testStore.lrem(key1, 0, val2);
+    expect(result).toBe(3);
+    const list = testStore.mainHash[key1].val.head;
+    expect(list.val).toBe("value-1");
+    expect(list.nextNode.val).toBe("value-3");
+    expect(list.nextNode.nextNode.val).toBe("value-4");
+    expect(list.nextNode.nextNode.nextNode).toBe(null);
+  });
 });
