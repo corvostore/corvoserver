@@ -498,7 +498,7 @@ describe("store", () => {
     const val = "value";
     testStore.setString(key, val);
     const keyExists = testStore.exists(key);
-    expect(keyExists).toBe(true);
+    expect(keyExists).toBe(1);
   });
 
   it("uses exists to check for existence of a key", () => {
@@ -507,7 +507,7 @@ describe("store", () => {
 
     const keyExists = testStore.exists(key);
 
-    expect(keyExists).toBe(false);
+    expect(keyExists).toBe(0);
   });
 
   it("uses type to get the data type of a string key/value", () => {

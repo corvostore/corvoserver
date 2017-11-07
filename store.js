@@ -184,13 +184,21 @@ class Store {
     return parseInt(accessedNode.val, 10);
   }
 
-  exists(key) {
-    // alter to accommodate multiple keys
-    return !!this.mainHash[key];
+  exists(...keys) {
+    let existingKeysCount = 0;
+    keys.forEach((key) => {
+      if(this.mainHash[key]) {
+        existingKeysCount += 1;
+      }
+    });
+    return existingKeysCount;
   }
 
   type(key) {
     // alter to return null or none or type
+    if (!this.mainHash[key]) {
+      return "none";
+    }
     return this.mainHash[key].type;
   }
 
