@@ -48,7 +48,7 @@ describe("corvo linked list", () => {
     expect(testList.tail).toBe(null);
   });
 
-  it("is added to list on append for single node", () => {
+  it("adds new single node to existing list", () => {
     const key1 = "key1";
     const key2 = "key2";
     const value1 = 100;
@@ -63,7 +63,7 @@ describe("corvo linked list", () => {
     expect(testList.tail).toBe(newNode2);
   });
 
-  it("is prepended to list on prepend for single node", () => {
+  it("prepends single node to existing list", () => {
     const key1 = "key1";
     const key2 = "key2";
     const value1 = 100;
@@ -78,7 +78,7 @@ describe("corvo linked list", () => {
     expect(head.nextNode).toBe(newNode);
   });
 
-  it("is added to list on append for multiple nodes", () => {
+  it("adds multiple nodes to the list with append", () => {
     const key1 = "key1";
     const key2 = "key2";
     const value1 = 100;
@@ -99,7 +99,7 @@ describe("corvo linked list", () => {
     expect(testList.tail).toBe(endNode);
   });
 
-  it("is prepended to list on prepend for multiple nodes", () => {
+  it("prepends multiple nodes to list with prepend", () => {
     const key1 = "key1";
     const key2 = "key2";
     const value1 = 100;
@@ -120,6 +120,39 @@ describe("corvo linked list", () => {
     expect(testList.tail).toBe(startNode);
   });
 
+  it("pops leftmost node with lpop", () => {
+    const key1 = "key1";
+    const key2 = "key2";
+    const value1 = 100;
+    const value2 = 200;
+
+    const startNode = new CorvoNode(key1, value1);
+    const testList = new CorvoLinkedList(startNode);
+    const endNode = new CorvoNode(key2, value2);
+    testList.append(endNode);
+
+    const result = testList.lpop();
+
+    expect(result).toBe(startNode);
+    expect(testList.head).toBe(endNode);
+  });
+
+  it("pops rightmost node with rpop", () => {
+    const key1 = "key1";
+    const key2 = "key2";
+    const value1 = 100;
+    const value2 = 200;
+
+    const startNode = new CorvoNode(key1, value1);
+    const testList = new CorvoLinkedList(startNode);
+    const endNode = new CorvoNode(key2, value2);
+    testList.append(endNode);
+
+    const result = testList.rpop();
+
+    expect(result).toBe(endNode);
+    expect(testList.head).toBe(startNode);
+  });
 });
 
 describe("store", () => {
@@ -585,5 +618,33 @@ describe("store", () => {
 
     expect(returnVal).toBe(0);
     expect(testStore.getString(keyB)).toBe(valB);
+  });
+
+  it("uses lpop to pop the leftmost node and return the value", () => {
+    const testStore = new Store();
+    const keyA = "keyA";
+    const valA = "some-valueA";
+    const valB = "some-valueB";
+
+    testStore.lpush(keyA, valA);
+    testStore.lpush(keyA, valB);
+
+    const result = testStore.lpop(keyA);
+
+    expect(result).toBe(valA);
+  });
+
+  it("uses rpop to pop the rightmost node and return the value", () => {
+    const testStore = new Store();
+    const keyA = "keyA";
+    const valA = "some-valueA";
+    const valB = "some-valueB";
+
+    testStore.lpush(keyA, valA);
+    testStore.lpush(keyA, valB);
+
+    const result = testStore.rpop(keyA);
+
+    expect(result).toBe(valB);
   });
 });

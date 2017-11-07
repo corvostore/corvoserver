@@ -283,7 +283,7 @@ class Store {
       this.mainList.append(newListNode);
 
       this.memoryTracker.incrementMemoryUsed(key, newListNode.val, "list");
-      
+
 
     }
   }
@@ -292,6 +292,26 @@ class Store {
     const newList = new CorvoLinkedList();
     const newNode = new CorvoNode(key, newList, "list", null, null);
     return newNode;
+  }
+
+  lpop(key) {
+    if (this.mainHash[key]) {
+      const list = this.mainHash[key].val;
+
+      return list.lpop().val;
+    } else {
+      return null;
+    }
+  }
+
+  rpop(key) {
+    if (this.mainHash[key]) {
+      const list = this.mainHash[key].val;
+
+      return list.rpop().val;
+    } else {
+      return null;
+    }
   }
 }
 

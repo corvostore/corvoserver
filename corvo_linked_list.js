@@ -40,6 +40,18 @@ class CorvoLinkedList {
     this.head = inputNode;
     dummy.prevNode = this.head;
   }
+
+  lpop() {
+    const head = this.head;
+    this.remove(head);
+    return head;
+  }
+
+  rpop() {
+    const tail = this.tail;
+    this.remove(tail);
+    return tail;
+  }
 }
 
 export default CorvoLinkedList;

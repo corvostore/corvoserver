@@ -80,7 +80,7 @@ describe("Store list", () => {
     expect(testStore.memoryTracker.memoryUsed).toBe(112);
     testStore.lpush(key, val2);
     expect(testStore.memoryTracker.memoryUsed).toBe(148);
-    
+
     expect(testStore.mainHash[key].type).toBe("list");
     expect(testStore.mainHash[key].val.head.val).toBe(val1);
     expect(testStore.mainList.head.val.tail.val).toBe(val2);
