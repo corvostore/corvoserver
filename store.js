@@ -511,6 +511,19 @@ class Store {
 
     return this.mainHash[key].val.insertAfter(pivotVal, newVal);
   }
+
+  hget(key, field) {
+    // return (nil) if key or field undefined
+    // else return value
+    const nodeAtKey = this.mainHash[key];
+    console.log(nodeAtKey);
+    if (nodeAtKey === undefined) {
+      return null;
+    } else {
+      const value = nodeAtKey.val[field];
+      return value ? value : null;
+    }
+  }
 }
 
 export default Store;
