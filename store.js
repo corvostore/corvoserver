@@ -529,6 +529,7 @@ class Store {
   }
 
   hsetnx(key, field, val) {
+    let returnValue;
     const nodeAtKey = this.mainHash[key];
     if (nodeAtKey) {
       this.touch(nodeAtKey);
@@ -537,10 +538,10 @@ class Store {
       } else {
         const hash = nodeAtKey.val;
         if (hash[field]) {
-          return 0;
+          returnValue = 0;
         } else {
           hash[field] = val;
-          return 1;
+          returnValue = 1;
         }
       }
     } else {
@@ -548,8 +549,11 @@ class Store {
       this.mainHash[key] = newMainHashNode;
       this.mainList.append(newMainHashNode);
       newMainHashNode.val[field] = val;
-      return 1;
+      returnValue = 1;
     }
+
+    this.lruCheckAndEvictToMaxMemory();
+    return returnValue;
   }
 
   hset(key, field, value) {
@@ -574,6 +578,51 @@ class Store {
     // update memory
     this.lruCheckAndEvictToMaxMemory();
     return 1;
+  }
+
+  hkeys(key) {
+    const nodeAtKey = this.mainHash[key];
+    const returnArray = [];
+
+    if (nodeAtKey) {
+      this.touch(nodeAtKey);
+      if (nodeAtKey.type !== "hash") {
+        throw new StoreError("StoreError: value at key not a hash.");
+      } else {
+        const hash = nodeAtKey.val;
+        Object.keys(hash).forEach((field) => {
+          returnArray.push(field);
+        });
+      }
+    }
+
+    this.lruCheckAndEvictToMaxMemory();
+    return returnArray;
+  }
+
+  hmget(key, ...fields) {
+    const nodeAtKey = this.mainHash[key];
+    const returnArray = [];
+
+    if (nodeAtKey) {
+      this.touch(nodeAtKey);
+      if (nodeAtKey.type !== "hash") {
+        throw new StoreError("StoreError: value at key not a hash.");
+      } else {
+        const hash = nodeAtKey.val;
+        fields.forEach((field) => {
+          const fieldValue = hash[field] ? hash[field] : null;
+          returnArray.push(fieldValue);
+        });
+      }
+    } else {
+      fields.forEach(() => {
+        returnArray.push(null);
+      });
+    }
+
+    this.lruCheckAndEvictToMaxMemory();
+    return returnArray;
   }
 }
 

@@ -104,4 +104,82 @@ describe("Hash",  () => {
     testStore.setString(key, value);
     expect(() => { testStore.hset(key, field, value) }).toThrow(new Error("StoreError: value at key not a hash."));
   });
+
+  it("uses hkeys on a key that holds a non-hash value, throws error", () => {
+    const key = "key1"
+    const value = "value1";
+    const testStore = new Store();
+    testStore.setString(key, value);
+    expect(() => { testStore.hkeys(key) }).toThrow(new Error("StoreError: value at key not a hash."));
+  });
+
+  it("uses hkeys return empty array for a key that holds a hash with no fields", () => {
+    const key = "key1";
+    const field = "field1";
+    const value = "value1";
+    const testStore = new Store();
+
+    testStore.hset(key, field, value);
+    // testStore.hdel(key, field);
+    delete testStore.mainHash[key].val[field]; // delete field until hdel is implemented
+    const returnVal = testStore.hkeys(key);
+    expect(returnVal).toEqual([]);
+  });
+
+  it("uses hkeys return empty array for a non-existent key", () => {
+    const key = "key1";
+    const testStore = new Store();
+    const returnVal = testStore.hkeys(key);
+    expect(returnVal).toEqual([]);
+  });
+
+  it("uses hkeys return an array of field names", () => {
+    const key = "key1"
+    const field1 = "field1";
+    const value1 = "value1";
+    const field2 = "field2";
+    const value2 = "value2";
+    const field3 = "field3"; const value3 = "value3";
+    const testStore = new Store();
+
+    testStore.hset(key, field1, value1);
+    testStore.hset(key, field2, value2);
+    testStore.hset(key, field3, value3);
+    const returnVal = testStore.hkeys(key);
+    expect(returnVal).toEqual(["field1", "field2", "field3"]);
+  });
+
+  // ----- hmget tests
+
+  it("uses hmget on a key that is non-hash type, throws error", () => {
+    const key = "key1"
+    const value = "value1";
+    const testStore = new Store();
+    testStore.setString(key, value);
+    expect(() => { testStore.hmget(key, "foo") }).toThrow(new Error("StoreError: value at key not a hash."));
+  });
+
+  it("uses hmget returns array with one null for each value requested for a non-existent key", () => {
+    const key = "key1";
+    const testStore = new Store();
+    const returnVal = testStore.hmget(key, "f1", "f2", "f3");
+    expect(returnVal).toEqual([null, null, null]);
+  });
+
+  it("uses hmget to request a mix of existing and non-existing field values, returns an array with field value or null", () => {
+    const key = "key1"
+    const field1 = "field1";
+    const value1 = "value1";
+    const field2 = "field2";
+    const value2 = "value2";
+    const field3 = "field3";
+    const value3 = "value3";
+    const testStore = new Store();
+
+    testStore.hset(key, field1, value1);
+    testStore.hset(key, field2, value2);
+    testStore.hset(key, field3, value3);
+    const returnVal = testStore.hmget(key, field1, field2, "foo", "bar", field3);
+    expect(returnVal).toEqual(["value1", "value2", null, null, "value3"]);
+  });
 });
