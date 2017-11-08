@@ -627,4 +627,15 @@ describe("store", () => {
     expect(returnVal).toBe(0);
     expect(testStore.getString(keyB)).toBe(valB);
   });
+
+  it("accepts multiple values for lpush", () => {
+    const key = 'k';
+    const testStore = new Store();
+    const val1 = '1';
+    const val2 = '2';
+
+    testStore.lpush(key, val1, val2);
+
+    expect(testStore.mainHash[key].val.length).toBe(2);
+  });
 });

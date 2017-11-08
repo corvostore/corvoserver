@@ -4,7 +4,7 @@ class CorvoLinkedList {
   constructor(inputNode=null) {
     this.head = inputNode;
     this.tail = inputNode;
-    this.length = 0;
+    this.length = inputNode ? 1 : 0;
   }
 
   append(inputNode) {
@@ -40,11 +40,16 @@ class CorvoLinkedList {
   }
 
   prepend(inputNode) {
-    let dummy = this.head;
-    inputNode.nextNode = dummy;
-    this.head = inputNode;
-    dummy.prevNode = this.head;
-
+    if (this.length === 0) {
+      this.head = inputNode;
+      this.tail = inputNode;
+    } else {
+      let dummy = this.head;
+      inputNode.nextNode = dummy;
+      this.head = inputNode;
+      // dummy.prevNode = this.head;
+      dummy.prevNode = inputNode;
+    }
     this.length += 1;
   }
 
