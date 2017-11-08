@@ -529,6 +529,7 @@ class Store {
   }
 
   hsetnx(key, field, val) {
+    let returnValue;
     const nodeAtKey = this.mainHash[key];
     if (nodeAtKey) {
       this.touch(nodeAtKey);
@@ -537,10 +538,10 @@ class Store {
       } else {
         const hash = nodeAtKey.val;
         if (hash[field]) {
-          return 0;
+          returnValue = 0;
         } else {
           hash[field] = val;
-          return 1;
+          returnValue = 1;
         }
       }
     } else {
@@ -548,8 +549,11 @@ class Store {
       this.mainHash[key] = newMainHashNode;
       this.mainList.append(newMainHashNode);
       newMainHashNode.val[field] = val;
-      return 1;
+      returnValue = 1;
     }
+
+    this.lruCheckAndEvictToMaxMemory();
+    return returnValue;
   }
 
   hset(key, field, value) {
@@ -692,6 +696,85 @@ class Store {
     }
   }
 
+  hkeys(key) {
+    const nodeAtKey = this.mainHash[key];
+    const returnArray = [];
+
+    if (nodeAtKey) {
+      this.touch(nodeAtKey);
+      if (nodeAtKey.type !== "hash") {
+        throw new StoreError("StoreError: value at key not a hash.");
+      } else {
+        const hash = nodeAtKey.val;
+        Object.keys(hash).forEach((field) => {
+          returnArray.push(field);
+        });
+      }
+    }
+
+    this.lruCheckAndEvictToMaxMemory();
+    return returnArray;
+  }
+
+  hmget(key, ...fields) {
+    const nodeAtKey = this.mainHash[key];
+    const returnArray = [];
+
+    if (nodeAtKey) {
+      this.touch(nodeAtKey);
+      if (nodeAtKey.type !== "hash") {
+        throw new StoreError("StoreError: value at key not a hash.");
+      } else {
+        const hash = nodeAtKey.val;
+        fields.forEach((field) => {
+          const fieldValue = hash[field] ? hash[field] : null;
+          returnArray.push(fieldValue);
+        });
+      }
+    } else {
+      fields.forEach(() => {
+        returnArray.push(null);
+      });
+    }
+
+    this.lruCheckAndEvictToMaxMemory();
+    return returnArray;
+  }
+
+  hincrby(key, field, incrBy) {
+    let returnValue;
+    const nodeAtKey = this.mainHash[key];
+
+    if (nodeAtKey) {
+      this.touch(nodeAtKey);
+      if (nodeAtKey.type !== "hash") {
+        throw new StoreError("StoreError: value at key not a hash.");
+      } else {
+        const hash = nodeAtKey.val;
+        if (hash[field]) {
+          const oldValue = hash[field];
+          if (oldValue.match(/[^0-9]/)) {
+            throw new StoreError("StoreError: value at key is not a number string.");
+          } else {
+            returnValue = parseInt(oldValue, 10) + parseInt(incrBy, 10);
+            hash[field] = returnValue.toString();
+          }
+        } else {
+          hash[field] = incrBy;
+          returnValue = parseInt(incrBy, 10);
+        }
+      }
+    } else {
+      const newMainHashNode = new CorvoNode(key, {}, "hash");
+      this.mainHash[key] = newMainHashNode;
+      this.mainList.append(newMainHashNode);
+      newMainHashNode.val[field] = incrBy;
+      returnValue = parseInt(incrBy, 10);;
+    }
+
+    this.lruCheckAndEvictToMaxMemory();
+    return returnValue;
+  }
 }
 
 export default Store;
