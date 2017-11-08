@@ -84,10 +84,7 @@ class CorvoServer {
         const stringToReturn = this.prepareReturnString(result);
         conn.write(stringToReturn);
       } catch(err) {
-        if (err instanceof ParserError) {
-          const result = err.message;
-          conn.write(result);
-        } else if (err instanceof StoreError) {
+        if (err instanceof ParserError || err instanceof StoreError) {
           const result = err.message;
           conn.write(result);
         } else {
