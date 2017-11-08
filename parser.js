@@ -102,6 +102,75 @@ class Parser {
     }
   }
 
+  static processLINDEXRequest(tokens) {
+    if (tokens.length === 3) {
+      return tokens;
+    } else {
+      throw new Error("ParseError: Wrong number of arguments for LINDEX command");
+    }
+  }
+
+  static processLREMRequest(tokens) {
+    if (tokens.length === 4) {
+      return tokens;
+    } else {
+      throw new Error("ParseError: Wrong number of arguments for LREM command");
+    }
+  }
+
+  static processLLENRequest(tokens) {
+    if (tokens.length === 2) {
+      return tokens;
+    } else {
+      throw new Error("ParseError: Wrong number of arguments for LLEN command");
+    }
+  }
+
+  static processLINSERTRequest(tokens) {
+    if (tokens.length === 5) {
+      const flag = tokens[2].toUpperCase();
+      if (flag !== 'BEFORE' && flag !== 'AFTER') {
+        throw new Error("ParseError: syntax error - invalid flag on LINSERT command");
+      } else {
+        return tokens;
+      }
+    } else {
+      throw new Error("ParseError: Wrong number of arguments for LINSERT command");
+    }
+  }
+
+  static processLPUSHRequest(tokens) {
+    if (tokens.length === 3) {
+      return tokens;
+    } else {
+      throw new Error("ParseError: Wrong number of arguments for LPUSH command");
+    }
+  }
+
+  static processRPUSHRequest(tokens) {
+    if (tokens.length === 3) {
+      return tokens;
+    } else {
+      throw new Error("ParseError: Wrong number of arguments for RPUSH command");
+    }
+  }
+
+  static processLPOPRequest(tokens) {
+    if (tokens.length === 2) {
+      return tokens;
+    } else {
+      throw new Error("ParseError: Wrong number of arguments for LPOP command");
+    }
+  }
+
+  static processRPOPRequest(tokens) {
+    if (tokens.length === 2) {
+      return tokens;
+    } else {
+      throw new Error("ParseError: Wrong number of arguments for RPOP command");
+    }
+  }
+
   static chomp(s) {
     return s.slice().replace(/[\n|\r]*$/, '');
   }
@@ -187,6 +256,14 @@ const commandMap = {
   'RENAMENX': Parser.processRenameNXRequest,
   'TYPE': Parser.processTypeRequest,
   'DEL': Parser.processDelRequest,
+  'LINDEX': Parser.processLINDEXRequest,
+  'LREM': Parser.processLREMRequest,
+  'LLEN': Parser.processLLENRequest,
+  'LINSERT': Parser.processLINSERTRequest,
+  'LPUSH': Parser.processLPUSHRequest,
+  'RPUSH': Parser.processRPUSHRequest,
+  'LPOP': Parser.processLPOPRequest,
+  'RPOP': Parser.processRPOPRequest
 };
 
 export { commandMap, Parser };

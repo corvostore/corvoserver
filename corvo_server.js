@@ -20,6 +20,13 @@ class CorvoServer {
       'RENAMENX': this.store.renameNX,
       'TYPE': this.store.type,
       'DEL': this.store.del,
+      'LINDEX': this.store.lindex,
+      'LREM': this.store.lrem,
+      'LLEN': this.store.llen,
+      'LPUSH': this.store.lpush,
+      'RPUSH': this.store.rpush,
+      'LPOP': this.store.lpop,
+      'RPOP': this.store.rpop
     };
   }
 
@@ -74,6 +81,15 @@ class CorvoServer {
           } else {
             result = this.store.setString(...tokens.slice(1));
           }
+        } else if (command === 'LINSERT') {
+          const flag = tokens[2];
+
+          if (flag === 'BEFORE') {
+            result = this.store.linsertBefore(...tokens.slice(1));
+          } else if (flag === 'AFTER') {
+            result = this.store.linsertAfter(...tokens.slice(1));
+          }
+
         } else if (this.storeCommandMap[command]) {
           result = this.storeCommandMap[command].apply(this.store, tokens.slice(1));
         } else {

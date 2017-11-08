@@ -272,4 +272,99 @@ describe("Parser", () => {
     const command = '*2\r\n$3\r\nDEL\r\n$1\r\nk\r\n';
     expect(Parser.processIncomingString(command)).toEqual(['DEL', 'k']);
   });
+
+  it("throws an error if number of arguments for LINDEX command is not valid", () => {
+    const command = '*2\r\n$6\r\nLINDEX\r\n$1\r\nk\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for LINDEX command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("returns array of tokens for valid LINDEX command", () => {
+    const command = '*3\r\n$6\r\nLINDEX\r\n$1\r\nk\r\n$1\r\n1\r\n';
+    expect(Parser.processIncomingString(command)).toEqual(['LINDEX', 'k', '1']);
+  });
+
+  it("throws an error if number of arguments for LREM command is not valid", () => {
+    const command = '*2\r\n$4\r\nLREM\r\n$1\r\nk\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for LREM command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("returns array of tokens for valid LREM command", () => {
+    const command = '*4\r\n$4\r\nLREM\r\n$1\r\nk\r\n$1\r\n1\r\n$1\r\n1\r\n';
+    expect(Parser.processIncomingString(command)).toEqual(['LREM', 'k', '1', '1']);
+  });
+
+  it("throws an error if number of arguments for LLEN command is not valid", () => {
+    const command = '*1\r\n$4\r\nLLEN\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for LLEN command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("returns array of tokens for valid LLEN command", () => {
+    const command = '*2\r\n$4\r\nLLEN\r\n$1\r\nk\r\n';
+    expect(Parser.processIncomingString(command)).toEqual(['LLEN', 'k']);
+  });
+
+  it("throws an error if number of arguments for LINSERT command is not valid", () => {
+    const command = '*2\r\n$7\r\nLINSERT\r\n$1\r\nk\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for LINSERT command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("returns array of tokens for valid LINSERT command", () => {
+    const command = '*5\r\n$7\r\nLINSERT\r\n$1\r\nk\r\n$6\r\nBEFORE\r\n$1\r\n1\r\n$1\r\n1\r\n';
+    expect(Parser.processIncomingString(command)).toEqual(['LINSERT', 'k', 'BEFORE', '1', '1']);
+  });
+
+  it("throws an error if flag is invalid for LINSERT command", () => {
+    const command = '*5\r\n$7\r\nLINSERT\r\n$1\r\nk\r\n$1\r\nX\r\n$1\r\n1\r\n$1\r\n1\r\n';
+    const errorMessage = "ParseError: syntax error - invalid flag on LINSERT command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("throws an error if number of arguments for LPUSH command is not valid", () => {
+    const command = '*2\r\n$5\r\nLPUSH\r\n$1\r\nk\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for LPUSH command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("returns array of tokens for valid LPUSH command", () => {
+    const command = '*3\r\n$5\r\nLPUSH\r\n$1\r\nk\r\n$1\r\nv\r\n';
+    expect(Parser.processIncomingString(command)).toEqual(['LPUSH', 'k', 'v']);
+  });
+
+  it("throws an error if number of arguments for RPUSH command is not valid", () => {
+    const command = '*2\r\n$5\r\nRPUSH\r\n$1\r\nk\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for RPUSH command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("returns array of tokens for valid RPUSH command", () => {
+    const command = '*3\r\n$5\r\nRPUSH\r\n$1\r\nk\r\n$1\r\nv\r\n';
+    expect(Parser.processIncomingString(command)).toEqual(['RPUSH', 'k', 'v']);
+  });
+  
+  it("throws an error if number of arguments for LPOP command is not valid", () => {
+    const command = '*3\r\n$4\r\nLPOP\r\n$1\r\nk\r\n$1\r\nk\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for LPOP command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("returns array of tokens for valid LPOP command", () => {
+    const command = '*2\r\n$4\r\nLPOP\r\n$1\r\nk\r\n';
+    expect(Parser.processIncomingString(command)).toEqual(['LPOP', 'k']);
+  });
+
+  it("throws an error if number of arguments for RPOP command is not valid", () => {
+    const command = '*3\r\n$4\r\nRPOP\r\n$1\r\nk\r\n$1\r\nk\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for RPOP command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("returns array of tokens for valid RPOP command", () => {
+    const command = '*2\r\n$4\r\nRPOP\r\n$1\r\nk\r\n';
+    expect(Parser.processIncomingString(command)).toEqual(['RPOP', 'k']);
+  });
+
 });
