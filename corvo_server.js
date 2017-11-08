@@ -1,6 +1,8 @@
+import Net from 'net';
 import Store from './store';
 import { Parser } from './parser';
-import Net from 'net';
+import ParserError from './parser_error';
+import StoreError from './store_error';
 
 const DEFAULT_PORT = 6379;
 const DEFAULT_HOST = '127.0.0.1';
@@ -93,13 +95,17 @@ class CorvoServer {
         } else if (this.storeCommandMap[command]) {
           result = this.storeCommandMap[command].apply(this.store, tokens.slice(1));
         } else {
-          result = "StoreError: Command not found in storeCommandMap.";
+          result = "ServerError: Command not found in storeCommandMap.";
         }
         const stringToReturn = this.prepareReturnString(result);
         conn.write(stringToReturn);
       } catch(err) {
-        const result = err.message;
-        conn.write(result);
+        if (err instanceof ParserError || err instanceof StoreError) {
+          const result = err.message;
+          conn.write(result);
+        } else {
+          throw err;
+        }
       }
     }.bind(this));
   };
