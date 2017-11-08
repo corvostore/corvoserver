@@ -12,7 +12,7 @@ describe("Hash",  () => {
     const value = 'myValue';
 
     const node = new CorvoNode(key, { myField: value });
-  
+
     testStore.hset(key, myField, value);
 
     expect(testStore.hget(key, myField)).toBe(value);
@@ -103,5 +103,75 @@ describe("Hash",  () => {
     const value = "v";
     testStore.setString(key, value);
     expect(() => { testStore.hset(key, field, value) }).toThrow(new Error("StoreError: value at key not a hash."));
+  });
+
+  it("hvals returns an empty list when the key does not exist", () => {
+    const testStore = new Store();
+    const key = "k";
+    expect(testStore.hvals(key)).toEqual([]);
+  });
+
+  it("hvals returns list of values from the hash stored at key", () => {
+    const testStore = new Store();
+    const key = "k";
+    const field = "field1";
+    const value = "v";
+    testStore.hset(key, field, value);
+    expect(testStore.hvals(key)).toEqual(["v"]);
+  });
+
+  it("hstrlen returns string length of value associated with field in hash stored at key", () => {
+    const testStore = new Store();
+    const key = "k";
+    const field = "field1";
+    const value = "v";
+    testStore.hset(key, field, value);
+    expect(testStore.hstrlen(key, field)).toBe(1);
+  });
+
+  it("hstrlen returns 0 if key does not exist", () => {
+    const testStore = new Store();
+    const key = "k";
+    const key2 = "k2";
+    const field = "field1";
+    const value = "v";
+    testStore.hset(key, field, value);
+    expect(testStore.hstrlen(key2, field)).toBe(0);
+  });
+
+  it("hstrlen returns 0 if field in hash at key does not exist", () => {
+    const testStore = new Store();
+    const key = "k";
+    const field = "field1";
+    const value = "v";
+    testStore.hset(key, field, value);
+    expect(testStore.hstrlen(key, "field2")).toBe(0);
+  });
+
+  it("sets specified fields to their respective values in the hash stored at key and returns 'OK'", () => {
+    const testStore = new Store();
+    const key = "k";
+    const field1 = "field1";
+    const value1 = "v1";
+    const field2 = "field2";
+    const value2 = "v2";
+
+    const result = testStore.hmset(key, field1, value1, field2, value2);
+    expect(testStore.hget(key, field1)).toBe(value1);
+    expect(testStore.hget(key, field2)).toBe(value2);
+    expect(result).toBe("OK");
+  });
+
+  it("creates new hash at key if key does not exist", () => {
+    const testStore = new Store();
+    
+    const field1 = "field1";
+    const value1 = "v1";
+    const field2 = "field2";
+    const value2 = "v2";
+
+    testStore.hmset("key", field1, value1, field2, value2);
+    expect(testStore.hget("key", field1)).toBe(value1);
+    expect(testStore.hget("key", field2)).toBe(value2);
   });
 });

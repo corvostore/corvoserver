@@ -568,13 +568,75 @@ class Store {
       this.touch(node);
       this.lruCheckAndEvictToMaxMemory();
       return 0;
+    } else {
+      this.touch(node);
     }
     node.val[field] = value;
-    this.touch(node);
-    // update memory
+    // update memory - todo
     this.lruCheckAndEvictToMaxMemory();
     return 1;
   }
+
+  hvals(key) {
+    const nodeAtKey = this.mainHash[key];
+    let result = [];
+    if(!nodeAtKey) {
+      return result;
+    } else if (nodeAtKey.type !== "hash") {
+      this.touch(nodeAtKey);
+      throw new StoreError("StoreError: value at key not a hash.");
+    } else {
+      this.touch(nodeAtKey);
+      const obj = nodeAtKey.val;
+      for (const prop in obj) {
+        if (obj.hasOwnProperty(prop)) {
+          result.push(obj[prop]);
+        }
+      }
+    }
+    return result;
+  }
+
+  hstrlen(key, field) {
+    const nodeAtKey = this.mainHash[key];
+    if (!nodeAtKey) {
+      return 0;
+    } else if (nodeAtKey.type !== "hash") {
+      this.touch(nodeAtKey);
+      throw new StoreError("StoreError: value at key not a hash.");
+    } else {
+      this.touch(nodeAtKey);
+      if (!nodeAtKey.val[field]) {
+        return 0;
+      } else {
+        return nodeAtKey.val[field].length;
+      }
+    }
+  }
+
+  hmset(key, ...fieldVals) {
+    let node = this.mainHash[key];
+    if (!node) {
+      node = new CorvoNode(key, {}, "hash");
+      this.mainHash[key] = node;
+      this.mainList.append(node);
+      // this.memoryTracker.incrementMemoryUsed(key, {}, node.type);
+    } else if (this.mainHash[key].type !== "hash") {
+      this.touch(node);
+      throw new StoreError("StoreError: value at key not a hash.");
+    } else {
+      this.touch(node);
+    }
+    for (let i = 0; i < fieldVals.length - 1; i++) {
+      let field = fieldVals[i];
+      let value = fieldVals[i + 1];
+      node.val[field] = value;
+    }
+    // update memory - todo
+    // this.lruCheckAndEvictToMaxMemory();
+    return "OK";
+  }
+
 }
 
 export default Store;
