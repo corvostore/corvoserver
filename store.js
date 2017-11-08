@@ -575,6 +575,61 @@ class Store {
     this.lruCheckAndEvictToMaxMemory();
     return 1;
   }
+
+  hdel(key, field) {
+    const nodeAtKey = this.mainHash[key];
+
+    if (nodeAtKey === undefined) {
+      return 0;
+    } else if (nodeAtKey.type !== 'hash') {
+      this.touch(key);
+      throw new StoreError("StoreError: value at key not a hash.");
+    } else if (nodeAtKey.val[field] === undefined) {
+      this.touch(key);
+      return 0;
+    } else {
+      delete nodeAtKey.val[field];
+      this.touch(key);
+      return 1;
+    }
+  }
+
+  hGetAll(key) {
+    const nodeAtKey = this.mainHash[key];
+
+    if (nodeAtKey === undefined) {
+      return [];
+    } else if (nodeAtKey.type !== 'hash') {
+      this.touch(key);
+      throw new StoreError("StoreError: value at key not a hash.");
+    } else {
+      const fields = Object.keys(nodeAtKey.val);
+      const hash = this.mainHash[key].val;
+      const result = [];
+
+      fields.forEach((field) => {
+        result.push(field);
+        result.push(hash[field]);
+      });
+
+      this.touch(key);
+      return result;
+    }
+  }
+
+  hlen(key) {
+    const nodeAtKey = this.mainHash[key];
+
+    if (nodeAtKey === undefined) {
+      return 0;
+    } else if (nodeAtKey.type !== 'hash') {
+      this.touch(key);
+      throw new StoreError("StoreError: value at key not a hash.");
+    } else {
+      this.touch(key);
+      return Object.keys(nodeAtKey.val).length;
+    }
+  }
 }
 
 export default Store;
