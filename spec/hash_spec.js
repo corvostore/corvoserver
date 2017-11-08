@@ -12,9 +12,8 @@ describe("Hash",  () => {
     const value = 'myValue';
 
     const node = new CorvoNode(key, { myField: value });
-    testStore.mainHash[key] = node;
-    testStore.mainList.append(node);
-    // testStore.hset(key, field, value);
+  
+    testStore.hset(key, myField, value);
 
     expect(testStore.hget(key, myField)).toBe(value);
   });

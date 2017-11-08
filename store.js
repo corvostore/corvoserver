@@ -516,10 +516,13 @@ class Store {
     // return (nil) if key or field undefined
     // else return value
     const nodeAtKey = this.mainHash[key];
-    console.log(nodeAtKey);
     if (nodeAtKey === undefined) {
       return null;
+    } else if (nodeAtKey.type !== "hash") {
+      this.touch(nodeAtKey);
+      throw new StoreError("StoreError: value at key not a hash.");
     } else {
+      this.touch(nodeAtKey);
       const value = nodeAtKey.val[field];
       return value ? value : null;
     }
@@ -528,6 +531,7 @@ class Store {
   hsetnx(key, field, val) {
     const nodeAtKey = this.mainHash[key];
     if (nodeAtKey) {
+      this.touch(nodeAtKey);
       if (nodeAtKey.type !== "hash") {
         throw new StoreError("StoreError: value at key not a hash.");
       } else {
@@ -556,6 +560,7 @@ class Store {
       this.mainList.append(node);
       this.memoryTracker.incrementMemoryUsed(key, {}, node.type);
     } else if (this.mainHash[key].type !== "hash") {
+      this.touch(node);
       throw new StoreError("StoreError: value at key not a hash.");
     } else if (node && node.val[field]) {
       node.val[field] = value;
