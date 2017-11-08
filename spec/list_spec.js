@@ -109,6 +109,19 @@ describe("Store list", () => {
     expect(testStore.mainList.head.val.tail.val).toBe(val2);
   });
 
+  it("uses rpush to add two items to the list in one invocation", () => {
+    const testStore = new Store();
+    const key = "mykey";
+    const val1 = "value1";
+    const val2 = "value2";
+    testStore.rpush(key, val1, val2);
+    expect(testStore.memoryTracker.memoryUsed).toBe(180);
+
+    expect(testStore.mainHash[key].type).toBe("list");
+    expect(testStore.mainHash[key].val.head.val).toBe(val1);
+    expect(testStore.mainList.head.val.tail.val).toBe(val2);
+  });
+
   it("uses lpop to pop the leftmost node and return the value", () => {
     const testStore = new Store();
     const keyA = "keyA";

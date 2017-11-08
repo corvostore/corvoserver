@@ -310,31 +310,34 @@ class Store {
     }
   }
 
-  rpush(key, val) {
+  rpush(key, ...vals) {
     const nodeAtKey = this.mainHash[key];
     if (nodeAtKey && nodeAtKey.type === "list") {
-      const newListNode = new CorvoListNode(val);
-      const newListNodeMemory = this.memoryTracker.calculateListNodeSize(val);
       const oldListMemory = this.memoryTracker.calculateListSize(nodeAtKey.val);
-      const newListMemory = oldListMemory + newListNodeMemory;
+      let newListMemory = oldListMemory;
 
-      nodeAtKey.val.append(newListNode);
+      vals.forEach((val) => {
+        const newListNode = new CorvoListNode(val);
+        nodeAtKey.val.append(newListNode);
+        newListMemory += this.memoryTracker.calculateListNodeSize(val);
+      });
+
       this.memoryTracker.updateMemoryUsed(oldListMemory, newListMemory);
-
-      // increment memory tracker memoryUsed by size of node holding val
     } else if (nodeAtKey && nodeAtKey.type !== "list") {
       throw new StoreError("StoreError: value at key not a list.");
     } else {
-      // create new linked list at that key
-      // add node to mainList
-      // add key to mainHash
-      // add value to "list" linked list
-      const newListNode = this.createMainNodeForListType(key);
-      newListNode.val.append(new CorvoListNode(val));
-      this.mainHash[key] = newListNode;
-      this.mainList.append(newListNode);
+      const newMainListNode = this.createMainNodeForListType(key);
 
-      this.memoryTracker.incrementMemoryUsed(key, newListNode.val, "list");
+      this.mainHash[key] = newMainListNode;
+      this.mainList.append(newMainListNode);
+
+      vals.forEach((val) => {
+        const newListNode = new CorvoListNode(val);
+
+        newMainListNode.val.append(newListNode);
+      });
+
+      this.memoryTracker.incrementMemoryUsed(key, newMainListNode.val, "list");
     }
   }
 
