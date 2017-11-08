@@ -511,6 +511,29 @@ class Store {
 
     return this.mainHash[key].val.insertAfter(pivotVal, newVal);
   }
+
+  hsetnx(key, field, val) {
+    const nodeAtKey = this.mainHash[key];
+    if (nodeAtKey) {
+      if (nodeAtKey.type !== "hash") {
+        throw new StoreError("StoreError: value at key not a hash.");
+      } else {
+        const hash = nodeAtKey.val;
+        if (hash[field]) {
+          return 0;
+        } else {
+          hash[field] = val;
+          return 1;
+        }
+      }
+    } else {
+      const newMainHashNode = new CorvoNode(key, {}, "hash", null, null);
+      this.mainHash[key] = newMainHashNode;
+      this.mainList.append(newMainHashNode);
+      newMainHashNode.val[field] = val;
+      return 1;
+    }
+  }
 }
 
 export default Store;
