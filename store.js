@@ -624,6 +624,41 @@ class Store {
     this.lruCheckAndEvictToMaxMemory();
     return returnArray;
   }
+
+  hincrby(key, field, incrBy) {
+    let returnValue;
+    const nodeAtKey = this.mainHash[key];
+
+    if (nodeAtKey) {
+      this.touch(nodeAtKey);
+      if (nodeAtKey.type !== "hash") {
+        throw new StoreError("StoreError: value at key not a hash.");
+      } else {
+        const hash = nodeAtKey.val;
+        if (hash[field]) {
+          const oldValue = hash[field];
+          if (oldValue.match(/[^0-9]/)) {
+            throw new StoreError("StoreError: value at key is not a number string.");
+          } else {
+            returnValue = parseInt(oldValue, 10) + parseInt(incrBy, 10);
+            hash[field] = returnValue.toString();
+          }
+        } else {
+          hash[field] = incrBy;
+          returnValue = parseInt(incrBy, 10);
+        }
+      }
+    } else {
+      const newMainHashNode = new CorvoNode(key, {}, "hash");
+      this.mainHash[key] = newMainHashNode;
+      this.mainList.append(newMainHashNode);
+      newMainHashNode.val[field] = incrBy;
+      returnValue = parseInt(incrBy, 10);;
+    }
+
+    this.lruCheckAndEvictToMaxMemory();
+    return returnValue;
+  }
 }
 
 export default Store;

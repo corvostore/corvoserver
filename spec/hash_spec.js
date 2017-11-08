@@ -149,8 +149,6 @@ describe("Hash",  () => {
     expect(returnVal).toEqual(["field1", "field2", "field3"]);
   });
 
-  // ----- hmget tests
-
   it("uses hmget on a key that is non-hash type, throws error", () => {
     const key = "key1"
     const value = "value1";
@@ -181,5 +179,70 @@ describe("Hash",  () => {
     testStore.hset(key, field3, value3);
     const returnVal = testStore.hmget(key, field1, field2, "foo", "bar", field3);
     expect(returnVal).toEqual(["value1", "value2", null, null, "value3"]);
+  });
+
+  it("uses hincrby on a key that is non-hash type, throws error", () => {
+    const key = "key1"
+    const value = "value1";
+    const testStore = new Store();
+    testStore.setString(key, value);
+    expect(() => { testStore.hincrby(key, "foo") }).toThrow(new Error("StoreError: value at key not a hash."));
+  });
+
+  it("uses hincrby on a non-existent key, hash created with field and value set", () => {
+    const key = "key1"
+    const field = "field1";
+    const value = "10";
+    const incrBy = "5";
+
+    const testStore = new Store();
+    const returnVal = testStore.hincrby(key, field, incrBy);
+    expect(returnVal).toBe(5);
+    expect(testStore.hget(key, field)).toBe("5");
+  });
+
+  it("uses hincrby on a hash with field that contains a non-numeric string, throws error", () => {
+    const key = "key1"
+    const field1 = "field1";
+    const value1 = "value1";
+    const testStore = new Store();
+
+    testStore.hset(key, field1, value1);
+    expect(() => { testStore.hincrby(key, field1, "5") }).toThrow(new Error("StoreError: value at key is not a number string."));
+  });
+
+  it("uses hincrby on a hash with field that contains a numeric string, value incremented", () => {
+    const key = "key1"
+    const field1 = "field1";
+    const value1 = "value1";
+    const field2 = "field2";
+    const value2 = "10";
+    const incrBy = "5";
+
+    const testStore = new Store();
+    testStore.hset(key, field1, value1);
+    testStore.hset(key, field2, value2);
+    const returnVal = testStore.hincrby(key, field2, incrBy);
+    expect(returnVal).toBe(15);
+    expect(testStore.hget(key, field2)).toBe("15");
+  });
+
+  it("uses hincrby on a hash which does not contain the field specified, hash created with field and value set", () => {
+    const key = "key1"
+    const field1 = "field1";
+    const value1 = "value1";
+    const field2 = "field2";
+    const value2 = "value2";
+    const field3 = "field3";
+    const incrBy = "5";
+
+    const testStore = new Store();
+    testStore.hset(key, field1, value1);
+    testStore.hset(key, field2, value2);
+    const returnVal = testStore.hincrby(key, field3, incrBy);
+    expect(returnVal).toBe(5);
+    expect(testStore.hget(key, field1)).toBe("value1");
+    expect(testStore.hget(key, field2)).toBe("value2");
+    expect(testStore.hget(key, field3)).toBe("5");
   });
 });
