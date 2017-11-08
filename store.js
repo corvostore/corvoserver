@@ -547,6 +547,29 @@ class Store {
       return 1;
     }
   }
+
+  hset(key, field, value) {
+    let node = this.mainHash[key];
+    if (!node) {
+      node = new CorvoNode(key, {}, "hash");
+      this.mainHash[key] = node;
+      this.mainList.append(node);
+      this.memoryTracker.incrementMemoryUsed(key, {}, node.type);
+    } else if (this.mainHash[key].type !== "hash") {
+      throw new StoreError("StoreError: value at key not a hash.");
+    } else if (node && node.val[field]) {
+      node.val[field] = value;
+      // update memory
+      this.touch(node);
+      this.lruCheckAndEvictToMaxMemory();
+      return 0;
+    }
+    node.val[field] = value;
+    this.touch(node);
+    // update memory
+    this.lruCheckAndEvictToMaxMemory();
+    return 1;
+  }
 }
 
 export default Store;
