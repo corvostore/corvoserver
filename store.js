@@ -22,13 +22,11 @@ class Store {
       const newNode = new CorvoNode(key, value);
       this.mainHash[key] = newNode;
       this.mainList.append(newNode);
-      this.memoryTracker.incrementMemoryUsed(key, value, newNode.type);
+      this.memoryTracker.nodeCreation(newNode);
     } else {
       const oldValue = accessedNode.val;
-      const oldValueMemory = oldValue.length * STRING_ONE_CHAR_BYTES;
-      const newValueMemory = value.length * STRING_ONE_CHAR_BYTES;
       accessedNode.val = value;
-      this.memoryTracker.updateMemoryUsed(oldValueMemory, newValueMemory);
+      this.memoryTracker.stringUpdate(oldValue, value);
       this.touch(accessedNode);
     }
     this.lruCheckAndEvictToMaxMemory();
@@ -43,10 +41,8 @@ class Store {
       return null;
     }
     const oldValue = accessedNode.val;
-    const oldValueMemory = oldValue.length * STRING_ONE_CHAR_BYTES;
-    const newValueMemory = value.length * STRING_ONE_CHAR_BYTES;
     accessedNode.val = value;
-    this.memoryTracker.updateMemoryUsed(oldValueMemory, newValueMemory);
+    this.memoryTracker.stringUpdate(oldValue, value);
     this.touch(accessedNode);
     this.lruCheckAndEvictToMaxMemory();
     return "OK";
@@ -62,7 +58,7 @@ class Store {
     const newNode = new CorvoNode(key, value);
     this.mainHash[key] = newNode;
     this.mainList.append(newNode);
-    this.memoryTracker.incrementMemoryUsed(key, value, newNode.type);
+    this.memoryTracker.nodeCreation(newNode);
     this.lruCheckAndEvictToMaxMemory();
     return "OK";
   }
@@ -86,17 +82,16 @@ class Store {
       const newNode = new CorvoNode(key, valueToAppend);
       this.mainHash[key] = newNode;
       this.mainList.append(newNode);
-      this.memoryTracker.incrementMemoryUsed(key, valueToAppend, newNode.type);
+
+      this.memoryTracker.nodeCreation(newNode);
+
       lengthAppendedValue = valueToAppend.length;
     } else if (accessedNode.type === 'string') {
       this.touch(key);
       const oldValue = accessedNode.val;
       accessedNode.val += valueToAppend;
 
-      const oldValueMemory = oldValue.length * STRING_ONE_CHAR_BYTES;
-      const newValueMemory = accessedNode.val.length * STRING_ONE_CHAR_BYTES;
-      this.memoryTracker.updateMemoryUsed(oldValueMemory, newValueMemory);
-
+      this.memoryTracker.stringUpdate(oldValue, accessedNode.val);
       lengthAppendedValue = accessedNode.val.length;
     } else {
       throw new StoreError("StoreError: value at key not string type.");
@@ -148,10 +143,7 @@ class Store {
 
     accessedNode.val = (parseInt(accessedNode.val, 10) + 1).toString();
 
-    const oldValueMemory = oldValue.length * STRING_ONE_CHAR_BYTES;
-    const newValueMemory = accessedNode.val.length * STRING_ONE_CHAR_BYTES;
-
-    this.memoryTracker.updateMemoryUsed(oldValueMemory, newValueMemory);
+    this.memoryTracker.stringUpdate(oldValue, accessedNode.val);
     this.touch(accessedNode);
 
     this.lruCheckAndEvictToMaxMemory();
@@ -175,10 +167,7 @@ class Store {
     const oldValue = accessedNode.val;
     accessedNode.val = (parseInt(accessedNode.val, 10) - 1).toString();
 
-    const oldValueMemory = oldValue.length * STRING_ONE_CHAR_BYTES;
-    const newValueMemory = accessedNode.val.length * STRING_ONE_CHAR_BYTES;
-
-    this.memoryTracker.updateMemoryUsed(oldValueMemory, newValueMemory);
+    this.memoryTracker.stringUpdate(oldValue, accessedNode.val);
 
     this.touch(accessedNode);
 
@@ -252,7 +241,7 @@ class Store {
       if (node !== undefined) {
         const val = node.val;
         const type = node.type;
-        this.memoryTracker.decrementMemoryUsed(key, val, type);
+        // this.memoryTracker.decrementMemoryUsed(key, val, type);
         delete this.mainHash[key];
         this.mainList.remove(node);
         numDeleted += 1;
@@ -270,7 +259,7 @@ class Store {
     this.mainList.remove(head);
     const currentVal = this.mainHash[headKey];
     delete this.mainHash[headKey];
-    this.memoryTracker.decrementMemoryUsed(headKey, currentVal, currentVal.type);
+    // this.memoryTracker.decrementMemoryUsed(headKey, currentVal, currentVal.type);
   }
 
   lruCheckAndEvictToMaxMemory() {
@@ -282,16 +271,16 @@ class Store {
   lpush(key, ...vals) {
     const nodeAtKey = this.mainHash[key];
     if (nodeAtKey && nodeAtKey.type === "list") {
-      const oldListMemory = this.memoryTracker.calculateListSize(nodeAtKey.val);
-      let newListMemory = oldListMemory;
+      // const oldListMemory = this.memoryTracker.calculateListSize(nodeAtKey.val);
+      // let newListMemory = oldListMemory;
 
       vals.forEach((val) => {
         const newListNode = new CorvoListNode(val);
         nodeAtKey.val.prepend(newListNode);
-        newListMemory += this.memoryTracker.calculateListNodeSize(val);
+        // newListMemory += this.memoryTracker.calculateListNodeSize(val);
       });
 
-      this.memoryTracker.updateMemoryUsed(oldListMemory, newListMemory);
+      // this.memoryTracker.updateMemoryUsed(oldListMemory, newListMemory);
     } else if (nodeAtKey && nodeAtKey.type !== "list") {
       throw new StoreError("StoreError: value at key not a list.");
     } else {
@@ -306,23 +295,23 @@ class Store {
         newMainListNode.val.prepend(newListNode);
       });
 
-      this.memoryTracker.incrementMemoryUsed(key, newMainListNode.val, "list");
+      this.memoryTracker.nodeCreation(newMainListNode);
     }
   }
 
   rpush(key, ...vals) {
     const nodeAtKey = this.mainHash[key];
     if (nodeAtKey && nodeAtKey.type === "list") {
-      const oldListMemory = this.memoryTracker.calculateListSize(nodeAtKey.val);
-      let newListMemory = oldListMemory;
+      // const oldListMemory = this.memoryTracker.calculateListSize(nodeAtKey.val);
+      // let newListMemory = oldListMemory;
 
       vals.forEach((val) => {
         const newListNode = new CorvoListNode(val);
         nodeAtKey.val.append(newListNode);
-        newListMemory += this.memoryTracker.calculateListNodeSize(val);
+        // newListMemory += this.memoryTracker.calculateListNodeSize(val);
       });
 
-      this.memoryTracker.updateMemoryUsed(oldListMemory, newListMemory);
+      // this.memoryTracker.updateMemoryUsed(oldListMemory, newListMemory);
     } else if (nodeAtKey && nodeAtKey.type !== "list") {
       throw new StoreError("StoreError: value at key not a list.");
     } else {
@@ -337,7 +326,7 @@ class Store {
         newMainListNode.val.append(newListNode);
       });
 
-      this.memoryTracker.incrementMemoryUsed(key, newMainListNode.val, "list");
+      this.memoryTracker.nodeCreation(newMainListNode);
     }
   }
 
@@ -562,7 +551,7 @@ class Store {
       node = new CorvoNode(key, {}, "hash");
       this.mainHash[key] = node;
       this.mainList.append(node);
-      this.memoryTracker.incrementMemoryUsed(key, {}, node.type);
+      // this.memoryTracker.incrementMemoryUsed(key, {}, node.type);
     } else if (this.mainHash[key].type !== "hash") {
       this.touch(node);
       throw new StoreError("StoreError: value at key not a hash.");
