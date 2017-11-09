@@ -9,7 +9,7 @@ describe("MemoryTracker", () => {
     const testMemoryTracker = new MemoryTracker();
     const key = "a-key";
     const expectedSize = key.length * 2 + 8;
-    expect(testMemoryTracker.calculateHashItemSize(key)).toBe(expectedSize);
+    expect(testMemoryTracker.calculateMainHashKeySize(key)).toBe(expectedSize);
   });
 
   it("returns correct size for calculateNodeSize", () => {

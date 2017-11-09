@@ -186,7 +186,6 @@ class Store {
   }
 
   type(key) {
-    // alter to return null or none or type
     if (!this.mainHash[key]) {
       return "none";
     }
@@ -194,29 +193,36 @@ class Store {
   }
 
   rename(keyA, keyB) {
-    // alter after dataType prop and multiple data types added
-    // alter to reflect memory changes list data type
     if (!this.exists(keyA)) {
       throw new StoreError("StoreError: No such key.");
     }
 
-    const val = this.mainHash[keyA].val;
     const keyADataType = this.mainHash[keyA].type;
 
     if (keyADataType === 'string') {
+      const val = this.mainHash[keyA].val;
       if (this.mainHash[keyB]) {
-        del(keyA, keyB);
+        del(keyB);
       }
       this.setString(keyB, val);
     } else if (keyADataType === 'list') {
       if (this.mainHash[keyB]) {
-        del(keyA, keyB);
+        del(keyB);
       }
-      // work here next
+      const val = this.mainHash[keyA].val;
       const newMainListNode = new CorvoNode(keyB, val, "list");
       this.mainList.append(newMainListNode);
       this.mainList[keyB] = newMainListNode;
       this.memoryTracker.nodeCreation(newMainListNode);
+    } else if (keyADataType === 'hash') {
+      if (this.mainHash[keyB]) {
+        del(keyB);
+      }
+      const val = this.mainHash[keyA].val;
+      const newMainHashNode = new CorvoNode(keyB, val, "hash");
+      this.mainList.append(newMainHashNode);
+      this.mainList[keyB] = newMainHashNode;
+      this.memoryTracker.nodeCreation(newMainHashNode);
     }
 
     this.del(keyA);
@@ -224,7 +230,6 @@ class Store {
   }
 
   renameNX(keyA, keyB) {
-    // alter to accommodate memory mgmt for complex data types
     const keyAExists = !!this.mainHash[keyA];
     const keyBExists = !!this.mainHash[keyB];
 
@@ -259,14 +264,7 @@ class Store {
   }
 
   lruEvict() {
-    // alter to accommodate memory mgmt for complex data types
-    const head = this.mainList.head;
-    const headKey = head.key;
-
-    this.mainList.remove(head);
-    const currentVal = this.mainHash[headKey];
-    delete this.mainHash[headKey];
-    // this.memoryTracker.decrementMemoryUsed(headKey, currentVal, currentVal.type);
+    this.del(this.mainList.head.key);
   }
 
   lruCheckAndEvictToMaxMemory() {
@@ -416,7 +414,7 @@ class Store {
       while (currListNode) {
         if (currListNode.val === val) {
           const nextListNode = currListNode.nextNode;
-          // listItemDelete(currListNode)
+          this.memoryTracker.listItemDelete(currListNode);
           list.remove(currListNode);
           countRemoved += 1;
 
@@ -435,7 +433,7 @@ class Store {
       while (currListNode) {
         if (currListNode.val === val) {
           const prevListNode = currListNode.prevNode;
-          // listItemDelete(currListNode)
+          this.memoryTracker.listItemDelete(currListNode);
           list.remove(currListNode);
           countRemoved += 1;
 
@@ -455,7 +453,7 @@ class Store {
       while (currListNode) {
         if (currListNode.val === val) {
           const nextListNode = currListNode.nextNode;
-          // listItemDelete(currListNode)
+          this.memoryTracker.listItemDelete(currListNode);
           list.remove(currListNode);
           countRemoved += 1;
           currListNode = nextListNode;
@@ -557,7 +555,6 @@ class Store {
       node = new CorvoNode(key, {}, "hash");
       this.mainHash[key] = node;
       this.mainList.append(node);
-
       this.memoryTracker.nodeCreation(node);
     } else if (this.mainHash[key].type !== "hash") {
       this.touch(node);
