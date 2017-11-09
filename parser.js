@@ -205,6 +205,38 @@ class Parser {
     }
   }
 
+  static processHDELRequest(tokens) {
+    if (tokens.length === 2) {
+      return tokens;
+    } else {
+      throw new ParserError("ParseError: Wrong number of arguments for HDEL command");
+    }
+  }
+
+  static processHGETRequest(tokens) {
+    if (tokens.length === 2) {
+      return tokens;
+    } else {
+      throw new ParserError("ParseError: Wrong number of arguments for HGET command");
+    }
+  }
+
+  static processHGETALLRequest(tokens) {
+    if (tokens.length === 2) {
+      return tokens;
+    } else {
+      throw new ParserError("ParseError: Wrong number of arguments for HGETALL command");
+    }
+  }
+
+  static processHLENRequest(tokens) {
+    if (tokens.length === 2) {
+      return tokens;
+    } else {
+      throw new ParserError("ParseError: Wrong number of arguments for HLEN command");
+    }
+  }
+
   static chomp(s) {
     return s.slice().replace(/[\n|\r]*$/, '');
   }
@@ -301,7 +333,11 @@ const commandMap = {
   'HSET': Parser.processHSETRequest,
   'HVALS': Parser.processHVALSRequest,
   'HSTRLEN': Parser.processHSTRLENRequest,
-  'HMSET': Parser.processHMSETRequest
+  'HMSET': Parser.processHMSETRequest,
+  'HDEL': Parser.processHDELRequest,
+  'HGET': Parser.processHGETRequest,
+  'HGETALL': Parser.processHGETALLRequest,
+  'HLEN': Parser.processHLENRequest,
 };
 
 export { commandMap, Parser };
