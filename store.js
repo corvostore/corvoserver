@@ -271,16 +271,13 @@ class Store {
   lpush(key, ...vals) {
     const nodeAtKey = this.mainHash[key];
     if (nodeAtKey && nodeAtKey.type === "list") {
-      // const oldListMemory = this.memoryTracker.calculateListSize(nodeAtKey.val);
-      // let newListMemory = oldListMemory;
-
       vals.forEach((val) => {
         const newListNode = new CorvoListNode(val);
         nodeAtKey.val.prepend(newListNode);
-        // newListMemory += this.memoryTracker.calculateListNodeSize(val);
+
+        this.memoryTracker.listItemInsert(newListNode.val);
       });
 
-      // this.memoryTracker.updateMemoryUsed(oldListMemory, newListMemory);
     } else if (nodeAtKey && nodeAtKey.type !== "list") {
       throw new StoreError("StoreError: value at key not a list.");
     } else {
@@ -302,16 +299,13 @@ class Store {
   rpush(key, ...vals) {
     const nodeAtKey = this.mainHash[key];
     if (nodeAtKey && nodeAtKey.type === "list") {
-      // const oldListMemory = this.memoryTracker.calculateListSize(nodeAtKey.val);
-      // let newListMemory = oldListMemory;
-
       vals.forEach((val) => {
         const newListNode = new CorvoListNode(val);
         nodeAtKey.val.append(newListNode);
-        // newListMemory += this.memoryTracker.calculateListNodeSize(val);
+
+        this.memoryTracker.listItemInsert(newListNode.val);
       });
 
-      // this.memoryTracker.updateMemoryUsed(oldListMemory, newListMemory);
     } else if (nodeAtKey && nodeAtKey.type !== "list") {
       throw new StoreError("StoreError: value at key not a list.");
     } else {
@@ -415,6 +409,7 @@ class Store {
       while (currListNode) {
         if (currListNode.val === val) {
           const nextListNode = currListNode.nextNode;
+          // listItemDelete(currListNode)
           list.remove(currListNode);
           countRemoved += 1;
 
@@ -433,6 +428,7 @@ class Store {
       while (currListNode) {
         if (currListNode.val === val) {
           const prevListNode = currListNode.prevNode;
+          // listItemDelete(currListNode)
           list.remove(currListNode);
           countRemoved += 1;
 
@@ -452,6 +448,7 @@ class Store {
       while (currListNode) {
         if (currListNode.val === val) {
           const nextListNode = currListNode.nextNode;
+          // listItemDelete(currListNode)
           list.remove(currListNode);
           countRemoved += 1;
           currListNode = nextListNode;
@@ -485,7 +482,7 @@ class Store {
     if (this.mainHash[key].type !== "list") {
       throw new StoreError("StoreError: value at key not a list.");
     }
-
+    this.memoryTracker.listItemInsert(newVal);
     return this.mainHash[key].val.insertBefore(pivotVal, newVal);
   }
 
@@ -497,7 +494,7 @@ class Store {
     if (this.mainHash[key].type !== "list") {
       throw new StoreError("StoreError: value at key not a list.");
     }
-
+    this.memoryTracker.listItemInsert(newVal);
     return this.mainHash[key].val.insertAfter(pivotVal, newVal);
   }
 
@@ -530,6 +527,7 @@ class Store {
           returnValue = 0;
         } else {
           hash[field] = val;
+          this.memoryTracker.hashItemInsert(field, val);
           returnValue = 1;
         }
       }
@@ -538,6 +536,7 @@ class Store {
       this.mainHash[key] = newMainHashNode;
       this.mainList.append(newMainHashNode);
       newMainHashNode.val[field] = val;
+      this.memoryTracker.nodeCreation(newMainHashNode);
       returnValue = 1;
     }
 
@@ -551,13 +550,15 @@ class Store {
       node = new CorvoNode(key, {}, "hash");
       this.mainHash[key] = node;
       this.mainList.append(node);
-      // this.memoryTracker.incrementMemoryUsed(key, {}, node.type);
+
+      this.memoryTracker.nodeCreation(node);
     } else if (this.mainHash[key].type !== "hash") {
       this.touch(node);
       throw new StoreError("StoreError: value at key not a hash.");
     } else if (node && node.val[field]) {
+      const oldVal = node.val[field];
       node.val[field] = value;
-      // update memory
+      this.memoryTracker.hashItemUpdate(oldVal, node.val[field]);
       this.touch(node);
       this.lruCheckAndEvictToMaxMemory();
       return 0;
@@ -565,7 +566,7 @@ class Store {
       this.touch(node);
     }
     node.val[field] = value;
-    // update memory - todo
+    this.memoryTracker.hashItemInsert(field, value);
     this.lruCheckAndEvictToMaxMemory();
     return 1;
   }
@@ -613,7 +614,7 @@ class Store {
       node = new CorvoNode(key, {}, "hash");
       this.mainHash[key] = node;
       this.mainList.append(node);
-      // this.memoryTracker.incrementMemoryUsed(key, {}, node.type);
+      this.memoryTracker.nodeCreation(node);
     } else if (this.mainHash[key].type !== "hash") {
       this.touch(node);
       throw new StoreError("StoreError: value at key not a hash.");
@@ -623,10 +624,16 @@ class Store {
     for (let i = 0; i < fieldVals.length - 1; i++) {
       let field = fieldVals[i];
       let value = fieldVals[i + 1];
+      if (node.val[field]) {
+        const oldVal = node.val[field];
+        this.memoryTracker.hashItemUpdate(oldVal, value);
+      } else {
+        this.memoryTracker.hashItemInsert(field, value);
+      }
       node.val[field] = value;
     }
-    // update memory - todo
-    // this.lruCheckAndEvictToMaxMemory();
+
+    this.lruCheckAndEvictToMaxMemory();
     return "OK";
   }
 
@@ -642,6 +649,7 @@ class Store {
       this.touch(key);
       return 0;
     } else {
+      this.memoryTracker.hashItemDelete(field, nodeAtKey.val[field]);
       delete nodeAtKey.val[field];
       this.touch(key);
       return 1;
@@ -701,7 +709,6 @@ class Store {
       }
     }
 
-    this.lruCheckAndEvictToMaxMemory();
     return returnArray;
   }
 
@@ -726,7 +733,6 @@ class Store {
       });
     }
 
-    this.lruCheckAndEvictToMaxMemory();
     return returnArray;
   }
 
@@ -742,14 +748,17 @@ class Store {
         const hash = nodeAtKey.val;
         if (hash[field]) {
           const oldValue = hash[field];
+
           if (oldValue.match(/[^0-9]/)) {
             throw new StoreError("StoreError: value at key is not a number string.");
           } else {
             returnValue = parseInt(oldValue, 10) + parseInt(incrBy, 10);
             hash[field] = returnValue.toString();
+            this.memoryTracker.hashItemUpdate(oldValue, hash[field]);
           }
         } else {
           hash[field] = incrBy;
+          this.memoryTracker.hashItemInsert(field, incrBy);
           returnValue = parseInt(incrBy, 10);
         }
       }
@@ -757,6 +766,7 @@ class Store {
       const newMainHashNode = new CorvoNode(key, {}, "hash");
       this.mainHash[key] = newMainHashNode;
       this.mainList.append(newMainHashNode);
+      this.memoryTracker.nodeCreation(newMainHashNode);
       newMainHashNode.val[field] = incrBy;
       returnValue = parseInt(incrBy, 10);;
     }

@@ -22,7 +22,43 @@ class MemoryTracker {
     this.memoryUsed += newVal.length * STRING_ONE_CHAR_BYTES;
   }
 
-  calculateHashItemSize(key) {
+  stringDelete(key, val) {
+    this.memoryUsed -= this.calculateStoreItemSize(key, val, "string");
+  }
+
+  listItemInsert(val) {
+    this.memoryUsed += this.calculateListNodeSize(val);
+  }
+
+  listItemDelete(listNode) {
+    this.memoryUsed -= this.calculateListNodeSize(listNode.val);
+  }
+
+  listItemUpdate(oldVal, newVal) {
+    this.stringUpdate(oldVal, newVal);
+  }
+
+  listDelete(key, val) {
+    this.memoryUsed -= this.calculateStoreItemSize(key, val, "list");
+  }
+
+  hashItemInsert(field, val) {
+    this.memoryUsed += field.length * STRING_ONE_CHAR_BYTES + val.length * STRING_ONE_CHAR_BYTES;
+  }
+
+  hashItemUpdate(oldVal, newVal) {
+    this.stringUpdate(oldVal, newVal);
+  }
+
+  hashItemDelete(field, val) {
+    this.memoryUsed -= field.length * STRING_ONE_CHAR_BYTES + val.length * STRING_ONE_CHAR_BYTES;
+  }
+
+  hashDelete(key, val) {
+    this.memoryUsed -= this.calculateStoreItemSize(key, val, "hash");
+  }
+
+  calculateMainHashKeySize(key) {
     const keyBytes = STRING_ONE_CHAR_BYTES * key.length;
     return keyBytes + REFERENCE_SIZE_BYTES;
   }
@@ -70,13 +106,13 @@ class MemoryTracker {
     let returnVal;
     switch(type) {
       case "list":
-        returnVal = this.calculateHashItemSize(key) + this.calculateNodeSize(key, val, type) + this.calculateListSize(val);
+        returnVal = this.calculateMainHashKeySize(key) + this.calculateNodeSize(key, val, type) + this.calculateListSize(val);
         break;
       case "string":
-        returnVal = this.calculateHashItemSize(key) + this.calculateNodeSize(key, val, type);
+        returnVal = this.calculateMainHashKeySize(key) + this.calculateNodeSize(key, val, type);
         break;
       case "hash":
-        returnVal = this.calculateHashItemSize(key) + this.calculateNodeSize(kev, val, type) + this.calculateHashSize(val);
+        returnVal = this.calculateMainHashKeySize(key) + this.calculateNodeSize(key, val, type) + this.calculateHashSize(val);
         break;
     }
     return returnVal;
