@@ -58,6 +58,10 @@ class MemoryTracker {
     this.memoryUsed -= this.calculateStoreItemSize(key, val, "hash");
   }
 
+  deleteStoreItem(node) {
+    this.memoryUsed -= this.calculateStoreItemSize(node.key, node.val, node.type);
+  }
+
   calculateMainHashKeySize(key) {
     const keyBytes = STRING_ONE_CHAR_BYTES * key.length;
     return keyBytes + REFERENCE_SIZE_BYTES;

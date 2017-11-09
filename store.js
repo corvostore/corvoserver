@@ -204,11 +204,19 @@ class Store {
     const keyADataType = this.mainHash[keyA].type;
 
     if (keyADataType === 'string') {
+      if (this.mainHash[keyB]) {
+        del(keyA, keyB);
+      }
       this.setString(keyB, val);
     } else if (keyADataType === 'list') {
-      const newMainListNode = new CorvoNode(keyA, val, "list");
+      if (this.mainHash[keyB]) {
+        del(keyA, keyB);
+      }
+      // work here next
+      const newMainListNode = new CorvoNode(keyB, val, "list");
       this.mainList.append(newMainListNode);
       this.mainList[keyB] = newMainListNode;
+      this.memoryTracker.nodeCreation(newMainListNode);
     }
 
     this.del(keyA);
@@ -233,7 +241,6 @@ class Store {
   }
 
   del(...keys) {
-    // alter to accommodate memory mgmt for complex data types
     let numDeleted = 0;
 
     keys.forEach((key) => {
@@ -241,7 +248,7 @@ class Store {
       if (node !== undefined) {
         const val = node.val;
         const type = node.type;
-        // this.memoryTracker.decrementMemoryUsed(key, val, type);
+        this.memoryTracker.deleteStoreItem(node);
         delete this.mainHash[key];
         this.mainList.remove(node);
         numDeleted += 1;
