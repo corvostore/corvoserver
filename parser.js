@@ -108,7 +108,7 @@ class Parser {
     if (tokens.length === 3) {
       return tokens;
     } else {
-      throw new Error("ParseError: Wrong number of arguments for LINDEX command");
+      throw new ParserError("ParseError: Wrong number of arguments for LINDEX command");
     }
   }
 
@@ -116,7 +116,7 @@ class Parser {
     if (tokens.length === 4) {
       return tokens;
     } else {
-      throw new Error("ParseError: Wrong number of arguments for LREM command");
+      throw new ParserError("ParseError: Wrong number of arguments for LREM command");
     }
   }
 
@@ -124,7 +124,7 @@ class Parser {
     if (tokens.length === 2) {
       return tokens;
     } else {
-      throw new Error("ParseError: Wrong number of arguments for LLEN command");
+      throw new ParserError("ParseError: Wrong number of arguments for LLEN command");
     }
   }
 
@@ -132,12 +132,12 @@ class Parser {
     if (tokens.length === 5) {
       const flag = tokens[2].toUpperCase();
       if (flag !== 'BEFORE' && flag !== 'AFTER') {
-        throw new Error("ParseError: syntax error - invalid flag on LINSERT command");
+        throw new ParserError("ParseError: syntax error - invalid flag on LINSERT command");
       } else {
         return tokens;
       }
     } else {
-      throw new Error("ParseError: Wrong number of arguments for LINSERT command");
+      throw new ParserError("ParseError: Wrong number of arguments for LINSERT command");
     }
   }
 
@@ -145,7 +145,7 @@ class Parser {
     if (tokens.length === 3) {
       return tokens;
     } else {
-      throw new Error("ParseError: Wrong number of arguments for LPUSH command");
+      throw new ParserError("ParseError: Wrong number of arguments for LPUSH command");
     }
   }
 
@@ -153,7 +153,7 @@ class Parser {
     if (tokens.length === 3) {
       return tokens;
     } else {
-      throw new Error("ParseError: Wrong number of arguments for RPUSH command");
+      throw new ParserError("ParseError: Wrong number of arguments for RPUSH command");
     }
   }
 
@@ -161,7 +161,7 @@ class Parser {
     if (tokens.length === 2) {
       return tokens;
     } else {
-      throw new Error("ParseError: Wrong number of arguments for LPOP command");
+      throw new ParserError("ParseError: Wrong number of arguments for LPOP command");
     }
   }
 
@@ -169,7 +169,7 @@ class Parser {
     if (tokens.length === 2) {
       return tokens;
     } else {
-      throw new Error("ParseError: Wrong number of arguments for RPOP command");
+      throw new ParserError("ParseError: Wrong number of arguments for RPOP command");
     }
   }
 
@@ -177,7 +177,7 @@ class Parser {
     if (tokens.length === 4) {
       return tokens;
     } else {
-      throw new Error("ParseError: Wrong number of arguments for HSET command");
+      throw new ParserError("ParseError: Wrong number of arguments for HSET command");
     }
   }
 
@@ -185,7 +185,7 @@ class Parser {
     if (tokens.length === 2) {
       return tokens;
     } else {
-      throw new Error("ParseError: Wrong number of arguments for HVALS command");
+      throw new ParserError("ParseError: Wrong number of arguments for HVALS command");
     }
   }
 
@@ -193,7 +193,7 @@ class Parser {
     if (tokens.length === 3) {
       return tokens;
     } else {
-      throw new Error("ParseError: Wrong number of arguments for HSTRLEN command");
+      throw new ParserError("ParseError: Wrong number of arguments for HSTRLEN command");
     }
   }
 
@@ -201,7 +201,7 @@ class Parser {
     if (tokens.length >= 4 && tokens.length % 2 === 0) {
       return tokens;
     } else {
-      throw new Error("ParseError: Wrong number of arguments for HMSET command");
+      throw new ParserError("ParseError: Wrong number of arguments for HMSET command");
     }
   }
 
@@ -241,7 +241,7 @@ class Parser {
     if (tokens.length === 4) {
       return tokens;
     } else {
-      throw new Error("ParseError: Wrong number of arguments for HSETNX command");
+      throw new ParserError("ParseError: Wrong number of arguments for HSETNX command");
     }
   }
 
@@ -257,7 +257,7 @@ class Parser {
     if (tokens.length === 4) {
       return tokens;
     } else {
-      throw new Error("ParseError: Wrong number of arguments for HINCRBY command");
+      throw new ParserError("ParseError: Wrong number of arguments for HINCRBY command");
     }
   }
 
@@ -265,7 +265,7 @@ class Parser {
     if (tokens.length === 2) {
       return tokens;
     } else {
-      throw new Error("ParseError: Wrong number of arguments for HKEYS command");
+      throw new ParserError("ParseError: Wrong number of arguments for HKEYS command");
     }
   }
 

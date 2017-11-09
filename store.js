@@ -27,7 +27,7 @@ class Store {
       const oldValue = accessedNode.val;
       accessedNode.val = value;
       this.memoryTracker.stringUpdate(oldValue, value);
-      this.touch(accessedNode);
+      this.touch(key);
     }
     this.lruCheckAndEvictToMaxMemory();
     return "OK";
@@ -43,7 +43,7 @@ class Store {
     const oldValue = accessedNode.val;
     accessedNode.val = value;
     this.memoryTracker.stringUpdate(oldValue, value);
-    this.touch(accessedNode);
+    this.touch(key);
     this.lruCheckAndEvictToMaxMemory();
     return "OK";
   }
@@ -117,8 +117,10 @@ class Store {
   getStrLen(key) {
     const accessedNode = this.mainHash[key];
     if (accessedNode !== undefined && accessedNode.type === 'string') {
+      this.touch(key);
       return accessedNode.val.length;
     } else if (accessedNode) {
+      this.touch(key);
       throw new StoreError("StoreError: value at key is not string type.")
     } else {
       return 0;
@@ -144,7 +146,7 @@ class Store {
     accessedNode.val = (parseInt(accessedNode.val, 10) + 1).toString();
 
     this.memoryTracker.stringUpdate(oldValue, accessedNode.val);
-    this.touch(accessedNode);
+    this.touch(key);
 
     this.lruCheckAndEvictToMaxMemory();
     return parseInt(accessedNode.val, 10);
@@ -169,7 +171,7 @@ class Store {
 
     this.memoryTracker.stringUpdate(oldValue, accessedNode.val);
 
-    this.touch(accessedNode);
+    this.touch(key);
 
     this.lruCheckAndEvictToMaxMemory();
     return parseInt(accessedNode.val, 10);
@@ -202,12 +204,12 @@ class Store {
     if (keyADataType === 'string') {
       const val = this.mainHash[keyA].val;
       if (this.mainHash[keyB]) {
-        del(keyB);
+        this.del(keyB);
       }
       this.setString(keyB, val);
     } else if (keyADataType === 'list') {
       if (this.mainHash[keyB]) {
-        del(keyB);
+        this.del(keyB);
       }
       const val = this.mainHash[keyA].val;
       const newMainListNode = new CorvoNode(keyB, val, "list");
@@ -216,7 +218,7 @@ class Store {
       this.memoryTracker.nodeCreation(newMainListNode);
     } else if (keyADataType === 'hash') {
       if (this.mainHash[keyB]) {
-        del(keyB);
+        this.del(keyB);
       }
       const val = this.mainHash[keyA].val;
       const newMainHashNode = new CorvoNode(keyB, val, "hash");
@@ -276,6 +278,7 @@ class Store {
   lpush(key, ...vals) {
     const nodeAtKey = this.mainHash[key];
     if (nodeAtKey && nodeAtKey.type === "list") {
+      this.touch(key);
       vals.forEach((val) => {
         const newListNode = new CorvoListNode(val);
         nodeAtKey.val.prepend(newListNode);
@@ -284,6 +287,7 @@ class Store {
       });
 
     } else if (nodeAtKey && nodeAtKey.type !== "list") {
+      this.touch(key);
       throw new StoreError("StoreError: value at key not a list.");
     } else {
       const newMainListNode = this.createMainNodeForListType(key);
@@ -304,6 +308,7 @@ class Store {
   rpush(key, ...vals) {
     const nodeAtKey = this.mainHash[key];
     if (nodeAtKey && nodeAtKey.type === "list") {
+      this.touch(key);
       vals.forEach((val) => {
         const newListNode = new CorvoListNode(val);
         nodeAtKey.val.append(newListNode);
@@ -312,6 +317,7 @@ class Store {
       });
 
     } else if (nodeAtKey && nodeAtKey.type !== "list") {
+      this.touch(key);
       throw new StoreError("StoreError: value at key not a list.");
     } else {
       const newMainListNode = this.createMainNodeForListType(key);
@@ -337,6 +343,7 @@ class Store {
 
   lpop(key) {
     if (this.mainHash[key]) {
+      this.touch(key);
       const list = this.mainHash[key].val;
 
       return list.lpop().val;
@@ -347,6 +354,7 @@ class Store {
 
   rpop(key) {
     if (this.mainHash[key]) {
+      this.touch(key);
       const list = this.mainHash[key].val;
 
       return list.rpop().val;
@@ -361,10 +369,12 @@ class Store {
     }
 
     if (this.mainHash[key].type !== "list") {
+      this.touch(key);
       throw new StoreError("StoreError: value at key not a list.");
     }
 
     const list = this.mainHash[key].val;
+    this.touch(key);
     let currIdx;
     let currListNode;
     if (idx >= 0) {
@@ -402,10 +412,12 @@ class Store {
     }
 
     if (this.mainHash[key].type !== "list") {
+      this.touch(key);
       throw new StoreError("StoreError: value at key not a list.");
     }
 
     const list = this.mainHash[key].val;
+    this.touch(key);
     let countRemoved = 0;;
     let currListNode;
 
@@ -473,9 +485,11 @@ class Store {
     }
 
     if (this.mainHash[key].type !== "list") {
+      this.touch(key);
       throw new StoreError("StoreError: value at key not a list.");
     }
 
+    this.touch(key);
     return this.mainHash[key].val.length;
   }
 
@@ -485,8 +499,10 @@ class Store {
     }
 
     if (this.mainHash[key].type !== "list") {
+      this.touch(key);
       throw new StoreError("StoreError: value at key not a list.");
     }
+    this.touch(key);
     this.memoryTracker.listItemInsert(newVal);
     return this.mainHash[key].val.insertBefore(pivotVal, newVal);
   }
@@ -497,8 +513,10 @@ class Store {
     }
 
     if (this.mainHash[key].type !== "list") {
+      this.touch(key);
       throw new StoreError("StoreError: value at key not a list.");
     }
+    this.touch(key);
     this.memoryTracker.listItemInsert(newVal);
     return this.mainHash[key].val.insertAfter(pivotVal, newVal);
   }
@@ -510,10 +528,10 @@ class Store {
     if (nodeAtKey === undefined) {
       return null;
     } else if (nodeAtKey.type !== "hash") {
-      this.touch(nodeAtKey);
+      this.touch(key);
       throw new StoreError("StoreError: value at key not a hash.");
     } else {
-      this.touch(nodeAtKey);
+      this.touch(key);
       const value = nodeAtKey.val[field];
       return value ? value : null;
     }
@@ -523,7 +541,7 @@ class Store {
     let returnValue;
     const nodeAtKey = this.mainHash[key];
     if (nodeAtKey) {
-      this.touch(nodeAtKey);
+      this.touch(key);
       if (nodeAtKey.type !== "hash") {
         throw new StoreError("StoreError: value at key not a hash.");
       } else {
@@ -557,17 +575,17 @@ class Store {
       this.mainList.append(node);
       this.memoryTracker.nodeCreation(node);
     } else if (this.mainHash[key].type !== "hash") {
-      this.touch(node);
+      this.touch(key);
       throw new StoreError("StoreError: value at key not a hash.");
     } else if (node && node.val[field]) {
       const oldVal = node.val[field];
       node.val[field] = value;
       this.memoryTracker.hashItemUpdate(oldVal, node.val[field]);
-      this.touch(node);
+      this.touch(key);
       this.lruCheckAndEvictToMaxMemory();
       return 0;
     } else {
-      this.touch(node);
+      this.touch(key);
     }
     node.val[field] = value;
     this.memoryTracker.hashItemInsert(field, value);
@@ -581,10 +599,10 @@ class Store {
     if(!nodeAtKey) {
       return result;
     } else if (nodeAtKey.type !== "hash") {
-      this.touch(nodeAtKey);
+      this.touch(key);
       throw new StoreError("StoreError: value at key not a hash.");
     } else {
-      this.touch(nodeAtKey);
+      this.touch(key);
       const obj = nodeAtKey.val;
       for (const prop in obj) {
         if (obj.hasOwnProperty(prop)) {
@@ -600,10 +618,10 @@ class Store {
     if (!nodeAtKey) {
       return 0;
     } else if (nodeAtKey.type !== "hash") {
-      this.touch(nodeAtKey);
+      this.touch(key);
       throw new StoreError("StoreError: value at key not a hash.");
     } else {
-      this.touch(nodeAtKey);
+      this.touch(key);
       if (!nodeAtKey.val[field]) {
         return 0;
       } else {
@@ -620,10 +638,10 @@ class Store {
       this.mainList.append(node);
       this.memoryTracker.nodeCreation(node);
     } else if (this.mainHash[key].type !== "hash") {
-      this.touch(node);
+      this.touch(key);
       throw new StoreError("StoreError: value at key not a hash.");
     } else {
-      this.touch(node);
+      this.touch(key);
     }
     for (let i = 0; i < fieldVals.length - 1; i++) {
       let field = fieldVals[i];
@@ -702,7 +720,7 @@ class Store {
     const returnArray = [];
 
     if (nodeAtKey) {
-      this.touch(nodeAtKey);
+      this.touch(key);
       if (nodeAtKey.type !== "hash") {
         throw new StoreError("StoreError: value at key not a hash.");
       } else {
@@ -721,7 +739,7 @@ class Store {
     const returnArray = [];
 
     if (nodeAtKey) {
-      this.touch(nodeAtKey);
+      this.touch(key);
       if (nodeAtKey.type !== "hash") {
         throw new StoreError("StoreError: value at key not a hash.");
       } else {
@@ -745,7 +763,7 @@ class Store {
     const nodeAtKey = this.mainHash[key];
 
     if (nodeAtKey) {
-      this.touch(nodeAtKey);
+      this.touch(key);
       if (nodeAtKey.type !== "hash") {
         throw new StoreError("StoreError: value at key not a hash.");
       } else {
