@@ -580,4 +580,72 @@ it("linsertAfter maintains existing state of the list when inserting after tail 
   expect(list.nextNode.nextNode.nextNode).toBe(null);
 });
 
+  it("lset throws error when operation performed on a non-existent key", () => {
+    const testStore = new Store();
+    const key1 = "key-1";
+    const val1 = "value-1";
+
+    expect(() => { testStore.lset(key1, 0, val1) }).toThrow(new Error("StoreError: no such key."));
+  });
+
+  it("lset throws error when operation performed on a key that is not of list type", () => {
+    const testStore = new Store();
+    const key1 = "key-1";
+    const val1 = "value-1";
+    testStore.setString(key1, val1);
+
+    expect(() => { testStore.lset(key1, 0, val1) }).toThrow(new Error("StoreError: value at key not a list."));
+  });
+
+  it("lset throws error when operation performed on a index that is out of range", () => {
+    const testStore = new Store();
+    const key1 = "key-1";
+    const val1 = "value-1";
+    const val2 = "value-2";
+    const val3 = "value-3";
+
+    testStore.rpush(key1, val1);
+    testStore.rpush(key1, val2);
+    testStore.rpush(key1, val3);
+
+    expect(() => { testStore.lset(key1, 5, "foo") }).toThrow(new Error("StoreError: index out of range."));
+  });
+
+  it("lset sets value of field to new value and returns OK", () => {
+    const testStore = new Store();
+    const key1 = "key-1";
+    const val1 = "value-1";
+    const val2 = "value-2";
+    const val3 = "value-3";
+    const updatedVal = "new-value";
+    const idx = 1;
+
+    testStore.rpush(key1, val1);
+    testStore.rpush(key1, val2);
+    testStore.rpush(key1, val3);
+
+    const returnVal = testStore.lset(key1, idx, updatedVal);
+    expect(returnVal).toBe("OK");
+    expect(testStore.lindex(key1, idx)).toBe(updatedVal);
+  });
+
+  it("lset uses negative index to set value of field to new value and returns OK", () => {
+    const testStore = new Store();
+    const key1 = "key-1";
+    const val1 = "value-1";
+    const val2 = "value-2";
+    const val3 = "value-3";
+    const val4 = "value-4";
+    const updatedVal = "new-value";
+    const idx = -2;
+
+    testStore.rpush(key1, val1);
+    testStore.rpush(key1, val2);
+    testStore.rpush(key1, val3);
+    testStore.rpush(key1, val4);
+
+    const returnVal = testStore.lset(key1, idx, updatedVal);
+    expect(returnVal).toBe("OK");
+    expect(testStore.lindex(key1, 2)).toBe(updatedVal);
+  });
 });

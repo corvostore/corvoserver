@@ -503,6 +503,23 @@ class Store {
     return this.mainHash[key].val.insertAfter(pivotVal, newVal);
   }
 
+  lset(key, idx, value) {
+    if (!this.mainHash[key]) {
+      throw new StoreError("StoreError: no such key.");
+    }
+
+    const nodeAtKey = this.mainHash[key];
+    if (nodeAtKey.type !== "list") {
+      throw new StoreError("StoreError: value at key not a list.");
+    } else {
+      const listLength = nodeAtKey.val.length;
+      const normalizedIdx = (idx >= 0) ? idx : (listLength + idx);
+      if (normalizedIdx < 0 || normalizedIdx >= listLength) {
+        throw new StoreError("StoreError: index out of range.");
+      }
+    }
+  }
+
   hget(key, field) {
     // return (nil) if key or field undefined
     // else return value
