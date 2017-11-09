@@ -344,7 +344,7 @@ describe("Parser", () => {
     const command = '*3\r\n$5\r\nRPUSH\r\n$1\r\nk\r\n$1\r\nv\r\n';
     expect(Parser.processIncomingString(command)).toEqual(['RPUSH', 'k', 'v']);
   });
-  
+
   it("throws an error if number of arguments for LPOP command is not valid", () => {
     const command = '*3\r\n$4\r\nLPOP\r\n$1\r\nk\r\n$1\r\nk\r\n';
     const errorMessage = "ParseError: Wrong number of arguments for LPOP command";
@@ -365,6 +365,53 @@ describe("Parser", () => {
   it("returns array of tokens for valid RPOP command", () => {
     const command = '*2\r\n$4\r\nRPOP\r\n$1\r\nk\r\n';
     expect(Parser.processIncomingString(command)).toEqual(['RPOP', 'k']);
+  });
+
+  /// hash tests
+  it("throws an error if number of arguments for HSET command is not valid", () => {
+    const command = '*3\r\n$4\r\nHSET\r\n$1\r\nk\r\n$1\r\nk\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for HSET command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("returns array of tokens for valid HSET command", () => {
+    const command = '*4\r\n$4\r\nHSET\r\n$1\r\nk\r\n$1\r\nf\r\n$1\r\nv\r\n';
+    expect(Parser.processIncomingString(command)).toEqual(['HSET', 'k', 'f', 'v']);
+  });
+
+  it("throws an error if number of arguments for HVALS command is not valid", () => {
+    const command = '*3\r\n$5\r\nHVALS\r\n$1\r\nk\r\n$1\r\nk\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for HVALS command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("returns array of tokens for valid HVALS command", () => {
+    const command = '*2\r\n$5\r\nHVALS\r\n$1\r\nk\r\n';
+    expect(Parser.processIncomingString(command)).toEqual(['HVALS', 'k']);
+  });
+
+  it("throws an error if number of arguments for HSTRLEN command is not valid", () => {
+    const command = '*2\r\n$7\r\nHSTRLEN\r\n$1\r\nk\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for HSTRLEN command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("returns array of tokens for valid HSTRLEN command", () => {
+    const command = '*3\r\n$7\r\nHSTRLEN\r\n$1\r\nk\r\n$1\r\nf\r\n';
+    expect(Parser.processIncomingString(command)).toEqual(['HSTRLEN', 'k', 'f']);
+  });
+
+  it("throws an error if number of arguments for HMSET command is not valid", () => {
+    const command = '*3\r\n$5\r\nHMSET\r\n$1\r\nk\r\n$1\r\nk\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for HMSET command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("returns array of tokens for valid HMSET command", () => {
+    const command = '*4\r\n$5\r\nHMSET\r\n$1\r\nk\r\n$1\r\nf\r\n$1\r\nv\r\n';
+    const command2 = '*6\r\n$5\r\nHMSET\r\n$1\r\nk\r\n$1\r\nf\r\n$1\r\nv\r\n$1\r\na\r\n$1\r\nb\r\n';
+    expect(Parser.processIncomingString(command)).toEqual(['HMSET', 'k', 'f', 'v']);
+    expect(Parser.processIncomingString(command2)).toEqual(['HMSET', 'k', 'f', 'v', 'a', 'b']);
   });
 
 });
