@@ -344,7 +344,7 @@ describe("Parser", () => {
     const command = '*3\r\n$5\r\nRPUSH\r\n$1\r\nk\r\n$1\r\nv\r\n';
     expect(Parser.processIncomingString(command)).toEqual(['RPUSH', 'k', 'v']);
   });
-  
+
   it("throws an error if number of arguments for LPOP command is not valid", () => {
     const command = '*3\r\n$4\r\nLPOP\r\n$1\r\nk\r\n$1\r\nk\r\n';
     const errorMessage = "ParseError: Wrong number of arguments for LPOP command";
@@ -367,4 +367,47 @@ describe("Parser", () => {
     expect(Parser.processIncomingString(command)).toEqual(['RPOP', 'k']);
   });
 
+  it("returns array of tokens for valid HDEL command", () => {
+    const command = '*2\r\n$4\r\nHDEL\r\n$1\r\nk\r\n';
+    expect(Parser.processIncomingString(command)).toEqual(['HDEL', 'k']);
+  });
+
+  it("returns array of tokens for valid HGET command", () => {
+    const command = '*2\r\n$4\r\nHGET\r\n$1\r\nk\r\n';
+    expect(Parser.processIncomingString(command)).toEqual(['HGET', 'k']);
+  });
+
+  it("returns array of tokens for valid HGETALL command", () => {
+    const command = '*2\r\n$7\r\nHGETALL\r\n$1\r\nk\r\n';
+    expect(Parser.processIncomingString(command)).toEqual(['HGETALL', 'k']);
+  });
+
+  it("returns array of tokens for valid HLEN command", () => {
+    const command = '*2\r\n$4\r\nHLEN\r\n$1\r\nk\r\n';
+    expect(Parser.processIncomingString(command)).toEqual(['HLEN', 'k']);
+  });
+
+  it("throws an error if number of arguments for HDEL command is not valid", () => {
+    const command = '*3\r\n$4\r\nHDEL\r\n$1\r\nk\r\n$1\r\nk\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for HDEL command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("throws an error if number of arguments for HGET command is not valid", () => {
+    const command = '*3\r\n$4\r\nHGET\r\n$1\r\nk\r\n$1\r\nk\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for HGET command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("throws an error if number of arguments for HGETALL command is not valid", () => {
+    const command = '*3\r\n$7\r\nHGETALL\r\n$1\r\nk\r\n$1\r\nk\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for HGETALL command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("throws an error if number of arguments for HLEN command is not valid", () => {
+    const command = '*3\r\n$4\r\nHLEN\r\n$1\r\nk\r\n$1\r\nk\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for HLEN command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
 });
