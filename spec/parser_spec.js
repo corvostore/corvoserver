@@ -367,7 +367,6 @@ describe("Parser", () => {
     expect(Parser.processIncomingString(command)).toEqual(['RPOP', 'k']);
   });
 
-  /// hash tests
   it("throws an error if number of arguments for HSET command is not valid", () => {
     const command = '*3\r\n$4\r\nHSET\r\n$1\r\nk\r\n$1\r\nk\r\n';
     const errorMessage = "ParseError: Wrong number of arguments for HSET command";
@@ -455,6 +454,55 @@ describe("Parser", () => {
   it("throws an error if number of arguments for HLEN command is not valid", () => {
     const command = '*3\r\n$4\r\nHLEN\r\n$1\r\nk\r\n$1\r\nk\r\n';
     const errorMessage = "ParseError: Wrong number of arguments for HLEN command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("returns array of tokens for valid HSETNX command", () => {
+    const command = '*4\r\n$6\r\nHSETNX\r\n$4\r\nkey1\r\n$6\r\nfield1\r\n$6\r\nvalue1\r\n';
+    expect(Parser.processIncomingString(command)).toEqual(['HSETNX', 'key1', 'field1', 'value1']);
+  });
+
+  it("throws an error if number of arguments for HSETNX command is not valid", () => {
+    const command = '*3\r\n$6\r\nHSETNX\r\n$4\r\nkey1\r\n$6\r\nfield1\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for HSETNX command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("returns array of tokens for valid HMGET command", () => {
+    const command = '*3\r\n$5\r\nHMGET\r\n$4\r\nkey1\r\n$6\r\nfield1\r\n';
+    expect(Parser.processIncomingString(command)).toEqual(['HMGET', 'key1', 'field1']);
+  });
+
+  it("returns array of tokens for HMGET command that requests multiple fields", () => {
+    const command = '*4\r\n$5\r\nHMGET\r\n$4\r\nkey1\r\n$6\r\nfield1\r\n$6\r\nfield2\r\n';
+    expect(Parser.processIncomingString(command)).toEqual(['HMGET', 'key1', 'field1', 'field2']);
+  });
+
+  it("throws an error if number of arguments for HMGET command is less than required", () => {
+    const command = '*2\r\n$5\r\nHMGET\r\n$4\r\nkey1\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for HMGET command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("returns array of tokens for valid HINCRBY command", () => {
+    const command = '*4\r\n$7\r\nHINCRBY\r\n$4\r\nkey1\r\n$6\r\nfield1\r\n$2\r\n10\r\n';
+    expect(Parser.processIncomingString(command)).toEqual(['HINCRBY', 'key1', 'field1', '10']);
+  });
+
+  it("throws an error if number of arguments for HINCRBY command is not valid", () => {
+    const command = '*3\r\n$7\r\nHINCRBY\r\n$4\r\nkey1\r\n$6\r\nfield1\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for HINCRBY command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("returns array of tokens for valid HKEYS command", () => {
+    const command = '*2\r\n$5\r\nHKEYS\r\n$4\r\nkey1\r\n';
+    expect(Parser.processIncomingString(command)).toEqual(['HKEYS', 'key1']);
+  });
+
+  it("throws an error if number of arguments for HKEYS command is not valid", () => {
+    const command = '*1\r\n$5\r\nHKEYS\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for HKEYS command";
     expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
   });
 });
