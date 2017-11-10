@@ -367,6 +367,17 @@ describe("Parser", () => {
     expect(Parser.processIncomingString(command)).toEqual(['RPOP', 'k']);
   });
 
+  it("throws an error if number of arguments for LSET command is not valid", () => {
+    const command = '*3\r\n$4\r\nLSET\r\n$4\r\nkey1\r\n$1\r\n5\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for LSET command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("returns array of tokens for valid LSET command", () => {
+    const command = '*4\r\n$4\r\nLSET\r\n$4\r\nkey1\r\n$1\r\n5\r\n$4\r\nval1\r\n';
+    expect(Parser.processIncomingString(command)).toEqual(['LSET', 'key1', '5', 'val1']);
+  });
+
   it("throws an error if number of arguments for HSET command is not valid", () => {
     const command = '*3\r\n$4\r\nHSET\r\n$1\r\nk\r\n$1\r\nk\r\n';
     const errorMessage = "ParseError: Wrong number of arguments for HSET command";

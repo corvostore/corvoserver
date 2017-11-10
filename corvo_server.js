@@ -29,31 +29,56 @@ class CorvoServer {
       'RPUSH': this.store.rpush,
       'LPOP': this.store.lpop,
       'RPOP': this.store.rpop,
+      'LSET': this.store.lset,
       'HSET': this.store.hset,
       'HVALS': this.store.hvals,
       'HSTRLEN': this.store.hstrlen,
+      'HKEYS': this.store.hkeys,
       'HMSET': this.store.hmset
     };
   }
 
-  prepareReturnString(result) {
-    let newResult;
+  prepareRespReturn(result) {
 
+    // handle null
     if (result === null) {
-      return "+(nil)\r\n";
+      return "$-1\r\n";
     }
 
-    switch(typeof result) {
-      case 'string':
-        const stringToReturn = !!result ? "" + result : "(nil)";
-        newResult = "+" + stringToReturn + "\r\n";
-        break
-      case 'number':
-        newResult = ":" + result + "\r\n";
-        break;
+    // handle array
+    if (result instanceof Array) {
+      let respResult = "*" + result.length + "\r\n";
+
+      result.forEach((elem) => {
+        if (elem === null) {
+          respResult += "$-1\r\n";
+        } else if (typeof elem === 'string') {
+          respResult += "$" + elem.length + "\r\n" + elem + "\r\n";
+        } else if (typeof elem === 'number') {
+          respResult += ":" + elem + "\r\n";
+        }
+      });
+
+      return respResult;
     }
 
-    return newResult;
+    // handle string
+    if (typeof result === 'string') {
+      let respResult;
+      if (result.length === 0) {
+        respResult = "$0\r\n\r\n";
+      } else {
+        respResult = "+" + result + "\r\n";
+      }
+
+      return respResult;
+    }
+
+    // handle number
+    if (typeof result === 'number') {
+      return ":" + result + "\r\n";;
+    }
+
   }
 
   startServer(port=DEFAULT_PORT, host=DEFAULT_HOST) {
@@ -101,7 +126,7 @@ class CorvoServer {
         } else {
           result = "ServerError: Command not found in storeCommandMap.";
         }
-        const stringToReturn = this.prepareReturnString(result);
+        const stringToReturn = this.prepareRespReturn(result);
         conn.write(stringToReturn);
       } catch(err) {
         if (err instanceof ParserError || err instanceof StoreError) {

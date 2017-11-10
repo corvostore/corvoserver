@@ -521,6 +521,49 @@ class Store {
     return this.mainHash[key].val.insertAfter(pivotVal, newVal);
   }
 
+  lset(key, idx, value) {
+    if (!this.mainHash[key]) {
+      throw new StoreError("StoreError: no such key.");
+    }
+
+    const nodeAtKey = this.mainHash[key];
+    if (nodeAtKey.type !== "list") {
+      throw new StoreError("StoreError: value at key not a list.");
+    } else {
+      const listLength = nodeAtKey.val.length;
+      const normalizedIdx = (idx >= 0) ? idx : (listLength + idx);
+      if (normalizedIdx < 0 || normalizedIdx >= listLength) {
+        throw new StoreError("StoreError: index out of range.");
+      }
+
+      const list = nodeAtKey.val;
+      let oldValue;
+
+      // accessing indices at head and tail are required to be O(1)
+      if (normalizedIdx === 0) {
+        oldValue = list.head.val;
+        list.head.val = value;
+      } else if (normalizedIdx === (listLength - 1)) {
+        oldValue = list.tail.val;
+        list.tail.val = value;
+      } else {
+        let currListNode = list.head;
+        for (let i = 0; i < normalizedIdx; i += 1) {
+          currListNode = currListNode.nextNode
+        }
+
+        oldValue = currListNode.val;
+        currListNode.val = value;
+      }
+
+      this.touch(nodeAtKey);
+      this.memoryTracker.listItemUpdate(oldValue, value);
+    }
+
+    this.lruCheckAndEvictToMaxMemory();
+    return "OK";
+  }
+
   hget(key, field) {
     // return (nil) if key or field undefined
     // else return value
@@ -788,8 +831,8 @@ class Store {
       const newMainHashNode = new CorvoNode(key, {}, "hash");
       this.mainHash[key] = newMainHashNode;
       this.mainList.append(newMainHashNode);
-      this.memoryTracker.nodeCreation(newMainHashNode);
       newMainHashNode.val[field] = incrBy;
+      this.memoryTracker.nodeCreation(newMainHashNode);
       returnValue = parseInt(incrBy, 10);;
     }
 

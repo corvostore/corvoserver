@@ -3,19 +3,6 @@ import CorvoServer from '../corvo_server.js';
 import Net from 'net';
 
 describe("CorvoServer", () => {
-  // function runClient(request, expectedVal) {
-  //   const client = new Net.Socket();
-  //   client.connect(6379, '127.0.0.1', function() {
-  //     client.setEncoding('utf8');
-  //     client.write(request);
-  //   });
-  //
-  //   client.on('data', function(data) {
-  //     expect(data).toBe(expectedVal);
-  //     client.destroy(); // kill client after server's response
-  //   });
-  // }
-
   it("exists as a class", () => {
     const server = new CorvoServer();
     expect(server.constructor).toBe(CorvoServer);
@@ -24,6 +11,38 @@ describe("CorvoServer", () => {
   it("instantiates a store", () => {
     const server = new CorvoServer();
     expect(server.store.constructor).toBe(Store);
+  });
+
+  it("prepareRespReturn returns Resp response for a null", () => {
+    const corvoServer = new CorvoServer();
+    expect(corvoServer.prepareRespReturn(null)).toBe("$-1\r\n");
+  });
+
+  it("prepareRespReturn returns Resp response for an empty string", () => {
+    const corvoServer = new CorvoServer();
+    expect(corvoServer.prepareRespReturn("")).toBe("$0\r\n\r\n");
+  });
+
+  it("prepareRespReturn returns Resp response for a string", () => {
+    const corvoServer = new CorvoServer();
+    expect(corvoServer.prepareRespReturn("some-str")).toBe("+some-str\r\n");
+  });
+
+  it("prepareRespReturn returns Resp response for a number", () => {
+    const corvoServer = new CorvoServer();
+    expect(corvoServer.prepareRespReturn(345)).toBe(":345\r\n");
+  });
+
+  it("prepareRespReturn returns Resp response for an empty array", () => {
+    const corvoServer = new CorvoServer();
+    expect(corvoServer.prepareRespReturn([])).toBe("*0\r\n");
+  });
+
+  it("prepareRespReturn returns Resp response for an array", () => {
+    const corvoServer = new CorvoServer();
+    const arr = ['abc', 22, 'defghi'];
+    const response = "*3\r\n$3\r\nabc\r\n:22\r\n$6\r\ndefghi\r\n";
+    expect(corvoServer.prepareRespReturn(arr)).toBe(response);
   });
 
   // it("returns (nil) for GET command with non-existant key", () => {

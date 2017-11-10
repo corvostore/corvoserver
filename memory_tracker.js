@@ -43,7 +43,7 @@ class MemoryTracker {
   }
 
   hashItemInsert(field, val) {
-    this.memoryUsed += field.length * STRING_ONE_CHAR_BYTES + val.length * STRING_ONE_CHAR_BYTES;
+    this.memoryUsed += field.length * STRING_ONE_CHAR_BYTES + val.length * STRING_ONE_CHAR_BYTES + REFERENCE_SIZE_BYTES;
   }
 
   hashItemUpdate(oldVal, newVal) {
