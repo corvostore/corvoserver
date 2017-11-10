@@ -34,7 +34,14 @@ class CorvoServer {
       'HVALS': this.store.hvals,
       'HSTRLEN': this.store.hstrlen,
       'HKEYS': this.store.hkeys,
-      'HMSET': this.store.hmset
+      'HMSET': this.store.hmset,
+      'HDEL': this.store.hdel,
+      'HGET': this.store.hget,
+      'HGETALL': this.store.hGetAll,
+      'HLEN': this.store.hlen,
+      'HSETNX': this.store.hsetnx,
+      'HMGET': this.store.hmget,
+      'HINCRBY': this.store.hincrby,
     };
   }
 

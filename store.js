@@ -686,7 +686,7 @@ class Store {
     } else {
       this.touch(key);
     }
-    for (let i = 0; i < fieldVals.length - 1; i++) {
+    for (let i = 0; i < fieldVals.length; i+=2) {
       let field = fieldVals[i];
       let value = fieldVals[i + 1];
       if (node.val[field]) {
@@ -697,7 +697,6 @@ class Store {
       }
       node.val[field] = value;
     }
-
     this.lruCheckAndEvictToMaxMemory();
     return "OK";
   }
