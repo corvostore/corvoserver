@@ -82,6 +82,7 @@ describe("Hash",  () => {
     const field = "field1";
     const value = "v";
     const result = testStore.hset(key, field, value);
+    expect(testStore.memoryTracker.memoryUsed).toBe(74);
     expect(result).toBe(1);
   });
 
@@ -93,7 +94,7 @@ describe("Hash",  () => {
     const value2 = "v2";
     let result = testStore.hset(key, field, value);
     result = testStore.hset(key, field, value2);
-
+    expect(testStore.memoryTracker.memoryUsed).toBe(76);
     expect(result).toBe(0);
   });
 
@@ -174,7 +175,7 @@ describe("Hash",  () => {
     expect(testStore.hstrlen(key, "field2")).toBe(0);
   });
 
-  it("sets specified fields to their respective values in the hash stored at key and returns 'OK'", () => {
+  it("hmset sets specified fields to their respective values in the hash stored at key and returns 'OK'", () => {
     const testStore = new Store();
     const key = "k";
     const field1 = "field1";
@@ -188,7 +189,7 @@ describe("Hash",  () => {
     expect(result).toBe("OK");
   });
 
-  it("creates new hash at key if key does not exist", () => {
+  it("hmset creates new hash at key if key does not exist", () => {
     const testStore = new Store();
 
     const field1 = "field1";
@@ -197,6 +198,7 @@ describe("Hash",  () => {
     const value2 = "v2";
 
     testStore.hmset("key", field1, value1, field2, value2);
+    expect(testStore.memoryTracker.memoryUsed).toBe(116);
     expect(testStore.hget("key", field1)).toBe(value1);
     expect(testStore.hget("key", field2)).toBe(value2);
   });
