@@ -5,7 +5,6 @@ import StoreError from "../store_error";
 import MemoryTracker from "../memory_tracker";
 
 describe("Hash",  () => {
-
   it("uses hget to get a value from an existing hash using a field", () => {
     const testStore = new Store();
     const key = 'key';
@@ -129,9 +128,12 @@ describe("Hash",  () => {
     const value = "v";
 
     testStore.hset(key, field, value);
+    expect(testStore.memoryTracker.memoryUsed).toBe(74);
+
     const resultDel = testStore.hdel(key, field);
     const resultLookup = testStore.hget(key, field);
     expect(resultDel).toBe(1);
+    expect(testStore.memoryTracker.memoryUsed).toBe(60);
     expect(resultLookup).toBe(null);
   });
 
@@ -144,6 +146,7 @@ describe("Hash",  () => {
     testStore.hset(key, field, value);
     const result = testStore.hdel(key, 'ZZZZ');
     expect(result).toBe(0);
+    expect(testStore.memoryTracker.memoryUsed).toBe(74);
   });
 
   it("hstrlen returns string length of value associated with field in hash stored at key", () => {
