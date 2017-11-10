@@ -131,7 +131,7 @@ describe("Hash",  () => {
     const value = "v";
 
     testStore.hset(key, field, value);
-    expect(testStore.memoryTracker.memoryUsed).toBe(74);
+    expect(testStore.memoryTracker.memoryUsed).toBe(82);
 
     const resultDel = testStore.hdel(key, field);
     const resultLookup = testStore.hget(key, field);
@@ -149,7 +149,7 @@ describe("Hash",  () => {
     testStore.hset(key, field, value);
     const result = testStore.hdel(key, 'ZZZZ');
     expect(result).toBe(0);
-    expect(testStore.memoryTracker.memoryUsed).toBe(74);
+    expect(testStore.memoryTracker.memoryUsed).toBe(82);
   });
 
   it("hstrlen returns string length of value associated with field in hash stored at key", () => {

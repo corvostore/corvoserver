@@ -51,7 +51,7 @@ class MemoryTracker {
   }
 
   hashItemDelete(field, val) {
-    this.memoryUsed -= field.length * STRING_ONE_CHAR_BYTES + val.length * STRING_ONE_CHAR_BYTES;
+    this.memoryUsed -= field.length * STRING_ONE_CHAR_BYTES + val.length * STRING_ONE_CHAR_BYTES + REFERENCE_SIZE_BYTES;
   }
 
   hashDelete(key, val) {
