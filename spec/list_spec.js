@@ -624,9 +624,11 @@ it("linsertAfter maintains existing state of the list when inserting after tail 
     testStore.rpush(key1, val2);
     testStore.rpush(key1, val3);
 
+    expect(testStore.memoryTracker.memoryUsed).toBe(222);
     const returnVal = testStore.lset(key1, idx, updatedVal);
     expect(returnVal).toBe("OK");
     expect(testStore.lindex(key1, idx)).toBe(updatedVal);
+    expect(testStore.memoryTracker.memoryUsed).toBe(226);
   });
 
   it("lset uses negative index to set value of field to new value and returns OK", () => {

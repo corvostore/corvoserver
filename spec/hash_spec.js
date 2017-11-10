@@ -28,6 +28,7 @@ describe("Hash",  () => {
     const returnVal = testStore.hsetnx(key, field, value);
     expect(returnVal).toBe(1);
     expect(testStore.mainHash[key].val[field]).toBe(value);
+    expect(testStore.memoryTracker.memoryUsed).toBe(104)
   });
 
   it("uses hsetnx throws error when called on a key that holds a non-hash value", () => {
@@ -48,7 +49,9 @@ describe("Hash",  () => {
     const testStore = new Store();
 
     testStore.hsetnx(key, field1, value1);
+    expect(testStore.memoryTracker.memoryUsed).toBe(104);
     const returnVal = testStore.hsetnx(key, field2, value2);
+    expect(testStore.memoryTracker.memoryUsed).toBe(136);
     expect(returnVal).toBe(1);
     expect(testStore.mainHash[key].val[field1]).toBe(value1);
     expect(testStore.mainHash[key].val[field2]).toBe(value2);
@@ -362,6 +365,7 @@ describe("Hash",  () => {
     const returnVal = testStore.hincrby(key, field, incrBy);
     expect(returnVal).toBe(5);
     expect(testStore.hget(key, field)).toBe("5");
+    expect(testStore.memoryTracker.memoryUsed).toBe(94);
   });
 
   it("uses hincrby on a hash with field that contains a non-numeric string, throws error", () => {
@@ -380,14 +384,16 @@ describe("Hash",  () => {
     const value1 = "value1";
     const field2 = "field2";
     const value2 = "10";
-    const incrBy = "5";
+    const incrBy = "90";
 
     const testStore = new Store();
     testStore.hset(key, field1, value1);
     testStore.hset(key, field2, value2);
+    expect(testStore.memoryTracker.memoryUsed).toBe(128);
     const returnVal = testStore.hincrby(key, field2, incrBy);
-    expect(returnVal).toBe(15);
-    expect(testStore.hget(key, field2)).toBe("15");
+    expect(testStore.memoryTracker.memoryUsed).toBe(130);
+    expect(returnVal).toBe(100);
+    expect(testStore.hget(key, field2)).toBe("100");
   });
 
   it("uses hincrby on a hash which does not contain the field specified, hash created with field and value set", () => {

@@ -29,6 +29,7 @@ class CorvoServer {
       'RPUSH': this.store.rpush,
       'LPOP': this.store.lpop,
       'RPOP': this.store.rpop,
+      'LSET': this.store.lset,
       'HSET': this.store.hset,
       'HVALS': this.store.hvals,
       'HSTRLEN': this.store.hstrlen,

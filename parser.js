@@ -173,6 +173,14 @@ class Parser {
     }
   }
 
+  static processLSETRequest(tokens) {
+    if (tokens.length === 4) {
+      return tokens;
+    } else {
+      throw new Error("ParseError: Wrong number of arguments for LSET command");
+    }
+  }
+
   static processHSETRequest(tokens) {
     if (tokens.length === 4) {
       return tokens;
@@ -362,6 +370,7 @@ const commandMap = {
   'RPUSH': Parser.processRPUSHRequest,
   'LPOP': Parser.processLPOPRequest,
   'RPOP': Parser.processRPOPRequest,
+  'LSET': Parser.processLSETRequest,
   'HSET': Parser.processHSETRequest,
   'HVALS': Parser.processHVALSRequest,
   'HSTRLEN': Parser.processHSTRLENRequest,
