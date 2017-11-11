@@ -142,7 +142,7 @@ class Parser {
   }
 
   static processLPUSHRequest(tokens) {
-    if (tokens.length === 3) {
+    if (tokens.length >= 3) {
       return tokens;
     } else {
       throw new ParserError("ParseError: Wrong number of arguments for LPUSH command");
