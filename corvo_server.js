@@ -46,7 +46,7 @@ class CorvoServer {
   }
 
   prepareRespReturn(result, isError=false) {
-    console.log("RESULT", result);
+
     // handle error
     if (isError) {
       return "-" + result + "\r\n";
@@ -108,7 +108,7 @@ class CorvoServer {
       console.log("data =", data);
       try {
         const tokens = Parser.processIncomingString(data);
-        const command = tokens[0];
+        const command = tokens[0].toUpperCase();
         let result;
 
         if (command === 'SET') {

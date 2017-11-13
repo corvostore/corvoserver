@@ -845,6 +845,10 @@ class Store {
     this.lruCheckAndEvictToMaxMemory();
     return returnValue;
   }
+
+  command() {
+    return "*0\r\n";
+  }
 }
 
 export default Store;
