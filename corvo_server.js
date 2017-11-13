@@ -45,7 +45,12 @@ class CorvoServer {
     };
   }
 
-  prepareRespReturn(result) {
+  prepareRespReturn(result, isError=false) {
+
+    // handle error
+    if (isError) {
+      return "-" + result + "\r\n";
+    }
 
     // handle null
     if (result === null) {
@@ -137,8 +142,8 @@ class CorvoServer {
         conn.write(stringToReturn);
       } catch(err) {
         if (err instanceof ParserError || err instanceof StoreError) {
-          const result = err.message;
-          conn.write(result);
+          const stringToReturn = this.prepareRespReturn(err.message, true);
+          conn.write(stringToReturn);
         } else {
           throw err;
         }

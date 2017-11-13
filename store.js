@@ -218,7 +218,6 @@ class Store {
       this.memoryTracker.nodeCreation(newMainListNode);
     } else if (keyADataType === 'hash') {
       if (this.mainHash[keyB]) {
-        this.del(keyB);
       }
       const val = this.mainHash[keyA].val;
       const newMainHashNode = new CorvoNode(keyB, val, "hash");
@@ -701,7 +700,7 @@ class Store {
     return "OK";
   }
 
-  hdel(key, field) {
+  hdel(key, ...fields) {
     const nodeAtKey = this.mainHash[key];
 
     if (nodeAtKey === undefined) {
@@ -709,14 +708,20 @@ class Store {
     } else if (nodeAtKey.type !== 'hash') {
       this.touch(key);
       throw new StoreError("StoreError: value at key not a hash.");
-    } else if (nodeAtKey.val[field] === undefined) {
-      this.touch(key);
-      return 0;
     } else {
-      this.memoryTracker.hashItemDelete(field, nodeAtKey.val[field]);
-      delete nodeAtKey.val[field];
+      const hash = nodeAtKey.val;
+      let numDeleted = 0;
+
+      fields.forEach((field) => {
+        if (hash[field]) {
+          numDeleted += 1;
+          this.memoryTracker.hashItemDelete(field, hash[field]);
+          delete hash[field];
+        }
+      });
+
       this.touch(key);
-      return 1;
+      return numDeleted;
     }
   }
 

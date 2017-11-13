@@ -45,6 +45,13 @@ describe("CorvoServer", () => {
     expect(corvoServer.prepareRespReturn(arr)).toBe(response);
   });
 
+  it("prepareRespReturn returns Resp response for an error", () => {
+    const corvoServer = new CorvoServer();
+    const errMessage = "this is the error message";
+    const response = "-" + errMessage + "\r\n";
+    expect(corvoServer.prepareRespReturn(errMessage, true)).toBe(response);
+  });
+
   // it("returns (nil) for GET command with non-existant key", () => {
   //   const request = '*2\r\n$3\r\nGET\r\n$1\r\nz\r\n';
   //   const expectedVal = '(nil)';
