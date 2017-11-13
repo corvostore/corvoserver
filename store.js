@@ -365,6 +365,8 @@ class Store {
   }
 
   lindex(key, idx) {
+    idx = +idx;
+
     if (!this.mainHash[key]) {
       return null;
     }
@@ -494,7 +496,7 @@ class Store {
     return this.mainHash[key].val.length;
   }
 
-  linsertBefore(key, pivotVal, newVal) {
+  linsertBefore(key, flag, pivotVal, newVal) {
     if (!this.mainHash[key]) {
       return 0;
     }
@@ -508,7 +510,7 @@ class Store {
     return this.mainHash[key].val.insertBefore(pivotVal, newVal);
   }
 
-  linsertAfter(key, pivotVal, newVal) {
+  linsertAfter(key, flag, pivotVal, newVal) {
     if (!this.mainHash[key]) {
       return 0;
     }
