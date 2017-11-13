@@ -425,13 +425,13 @@ describe("Parser", () => {
   });
 
   it("returns array of tokens for valid HDEL command", () => {
-    const command = '*2\r\n$4\r\nHDEL\r\n$1\r\nk\r\n';
-    expect(Parser.processIncomingString(command)).toEqual(['HDEL', 'k']);
+    const command = '*3\r\n$4\r\nHDEL\r\n$1\r\nk\r\n$6\r\nfield1\r\n';
+    expect(Parser.processIncomingString(command)).toEqual(['HDEL', 'k', 'field1']);
   });
 
   it("returns array of tokens for valid HGET command", () => {
-    const command = '*2\r\n$4\r\nHGET\r\n$1\r\nk\r\n';
-    expect(Parser.processIncomingString(command)).toEqual(['HGET', 'k']);
+    const command = '*3\r\n$4\r\nHGET\r\n$1\r\nk\r\n$6\r\nfield1\r\n';
+    expect(Parser.processIncomingString(command)).toEqual(['HGET', 'k', 'field1']);
   });
 
   it("returns array of tokens for valid HGETALL command", () => {
@@ -445,13 +445,13 @@ describe("Parser", () => {
   });
 
   it("throws an error if number of arguments for HDEL command is not valid", () => {
-    const command = '*3\r\n$4\r\nHDEL\r\n$1\r\nk\r\n$1\r\nk\r\n';
+    const command = '*2\r\n$4\r\nHDEL\r\n$1\r\nk\r\n';
     const errorMessage = "ParseError: Wrong number of arguments for HDEL command";
     expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
   });
 
   it("throws an error if number of arguments for HGET command is not valid", () => {
-    const command = '*3\r\n$4\r\nHGET\r\n$1\r\nk\r\n$1\r\nk\r\n';
+    const command = '*2\r\n$4\r\nHGET\r\n$1\r\nk\r\n';
     const errorMessage = "ParseError: Wrong number of arguments for HGET command";
     expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
   });

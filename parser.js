@@ -214,7 +214,7 @@ class Parser {
   }
 
   static processHDELRequest(tokens) {
-    if (tokens.length === 2) {
+    if (tokens.length >= 3) {
       return tokens;
     } else {
       throw new ParserError("ParseError: Wrong number of arguments for HDEL command");
@@ -222,7 +222,7 @@ class Parser {
   }
 
   static processHGETRequest(tokens) {
-    if (tokens.length === 2) {
+    if (tokens.length === 3) {
       return tokens;
     } else {
       throw new ParserError("ParseError: Wrong number of arguments for HGET command");
