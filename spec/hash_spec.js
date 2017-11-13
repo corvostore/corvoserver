@@ -153,6 +153,12 @@ describe("Hash",  () => {
     expect(testStore.memoryTracker.memoryUsed).toBe(82);
   });
 
+  it("returns 0 when hdel is passed a nonexistent key", () => {
+    const testStore = new Store();
+    const result = testStore.hdel("no-such-key", 'ZZZZ');
+    expect(result).toBe(0);
+  });
+
   it("hstrlen returns string length of value associated with field in hash stored at key", () => {
     const testStore = new Store();
     const key = "k";
