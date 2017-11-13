@@ -46,7 +46,7 @@ class CorvoServer {
   }
 
   prepareRespReturn(result, isError=false) {
-
+    console.log("RESULT", result);
     // handle error
     if (isError) {
       return "-" + result + "\r\n";
@@ -134,6 +134,7 @@ class CorvoServer {
           }
 
         } else if (this.storeCommandMap[command]) {
+          console.log("TOKENS", tokens);
           result = this.storeCommandMap[command].apply(this.store, tokens.slice(1));
         } else {
           result = "ServerError: Command not found in storeCommandMap.";

@@ -284,7 +284,7 @@ class Store {
 
         this.memoryTracker.listItemInsert(newListNode.val);
       });
-
+      return nodeAtKey.val.length;
     } else if (nodeAtKey && nodeAtKey.type !== "list") {
       this.touch(key);
       throw new StoreError("StoreError: value at key not a list.");
@@ -301,6 +301,7 @@ class Store {
       });
 
       this.memoryTracker.nodeCreation(newMainListNode);
+      return newMainListNode.val.length;
     }
   }
 
@@ -314,7 +315,7 @@ class Store {
 
         this.memoryTracker.listItemInsert(newListNode.val);
       });
-
+      return nodeAtKey.val.length;
     } else if (nodeAtKey && nodeAtKey.type !== "list") {
       this.touch(key);
       throw new StoreError("StoreError: value at key not a list.");
@@ -331,6 +332,7 @@ class Store {
       });
 
       this.memoryTracker.nodeCreation(newMainListNode);
+      return newMainListNode.val.length;
     }
   }
 
