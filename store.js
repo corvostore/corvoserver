@@ -866,7 +866,52 @@ class Store {
       throw new StoreError("StoreError: value at key not a sorted set.");
     } else {
       // update the existing sorted set
+      while (scoreAndMembers.length) {
+        const score = scoreAndMembers.shift();
+        const member = scoreAndMembers.shift();
+        sortedSet.add(parseFloat(score, 10), member);
+      }
     }
+  }
+
+  zunionstore(destination, numkeys, ...keys) {
+    // pick source key, iterate over sorted set at key,
+    // add values to destination
+    // if destination already exists, it is overwritten.
+    // weights flag defaults to 1
+    // aggregate flag defaults to SUM
+
+    const sortedSet = new CorvoSortedSet();
+    const newMainZsetNode = new CorvoNode(destination, sortedSet, "zset");
+    this.mainHash[destination] = newMainZsetNode;
+    this.mainList.append(newMainZsetNode);
+
+    if (numkeys !== keys.length) {
+      throw new StoreError("SyntaxError: numkeys does not match number of keys provided.");
+    }
+
+    keys.forEach((key) => {
+      let nodeAtKey = this.mainHash[key];
+      if (nodeAtKey && nodeAtKey.type !== "zset") {
+        throw new StoreError("StoreError: value at key is not type sorted set.");
+      }
+    });
+
+    let unionHash = {};
+
+    keys.forEach((key) => {
+      let hash = this.mainHash[key].val.hash;
+
+      Object.keys(hash).forEach((member) => {
+        let score = hash[member];
+        unionHash[member] = unionHash[member] || 0;
+        unionHash[member] += score;
+      });
+    });
+
+    Object.keys(unionHash).forEach((member) => {
+      sortedSet.add(unionHash[member], member);
+    });
   }
 
   command() {

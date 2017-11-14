@@ -672,4 +672,24 @@ describe("store", () => {
     expect(sortedSet.skipList.findNode(scoreA, memberA).member).toBe(memberA);
     expect(sortedSet.skipList.findNode(scoreB, memberB).member).toBe(memberB);
   });
+
+  it("uses zunionstore to add the union of one or more sorted sets", () => {
+    const key1 = "k1";
+    const key2 = "k2";
+
+    const scoreA = '10';
+    const scoreB = '10';
+    const memberA = 'memberA';
+    const memberB = 'memberB';
+    const testStore = new Store();
+
+    testStore.zadd(key1, scoreA, memberA, scoreB, memberB);
+    testStore.zadd(key2, scoreA, memberA, "12", "member1");
+
+    testStore.zunionstore("destKey", 2, key1, key2);
+
+    const destList = testStore.mainHash["destKey"].val;
+
+    expect(destList.cardinality).toBe(3);
+  });
 });
