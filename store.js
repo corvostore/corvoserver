@@ -2,6 +2,7 @@ import CorvoLinkedList from './corvo_linked_list';
 import CorvoNode from './corvo_node';
 import CorvoListNode from './data_types/corvo_list_node';
 import MemoryTracker from './memory_tracker';
+import CorvoSortedSet from './data_types/corvo_sorted_set.js';
 import StoreError from './store_error';
 
 const DEFAULT_MAX_MEMORY = 104857600; // equals 100MB
@@ -851,15 +852,15 @@ class Store {
 
     if (!nodeAtKey) {
       // create a new sorted set
-      const skipList = new CorvoSkipList();
-      const newMainZsetNode = new CorvoNode(key, skipList, "zset");
-      this.mainHash[key] = newMainHashNode;
-      this.mainList.append(newMainHashNode);
+      const sortedSet = new CorvoSortedSet();
+      const newMainZsetNode = new CorvoNode(key, sortedSet, "zset");
+      this.mainHash[key] = newMainZsetNode;
+      this.mainList.append(newMainZsetNode);
 
       while (scoreAndMembers.length) {
         const score = scoreAndMembers.shift();
         const member = scoreAndMembers.shift();
-        skipList.add(score, member);
+        sortedSet.add(parseFloat(score, 10), member);
       }
     } else if (nodeAtKey.type !== "zset") {
       throw new StoreError("StoreError: value at key not a sorted set.");

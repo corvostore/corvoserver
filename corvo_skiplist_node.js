@@ -10,7 +10,7 @@ class CorvoSkipListNode {
   }
 }
 
-SkipListNode.posInf = Number.POSITIVE_INFINITY;
-SkipListNode.negInf = Number.NEGATIVE_INFINITY;
+CorvoSkipListNode.posInf = Number.POSITIVE_INFINITY;
+CorvoSkipListNode.negInf = Number.NEGATIVE_INFINITY;
 
 export default CorvoSkipListNode;

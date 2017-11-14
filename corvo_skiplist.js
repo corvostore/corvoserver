@@ -2,12 +2,11 @@ import CorvoSkipListNode from './corvo_skiplist_node.js';
 const MAX_LEVELS = 29;
 
 class CorvoSkipList {
-
   constructor() {
     // First element of the top level
-    this.head = new CorvoSkipListNode(SkipListNode.negInf);
+    this.head = new CorvoSkipListNode(CorvoSkipListNode.negInf);
     // Last element of the top level
-    this.tail = new CorvoSkipListNode(SkipListNode.posInf);
+    this.tail = new CorvoSkipListNode(CorvoSkipListNode.posInf);
 
     this.head.right = this.tail;
     this.tail.left = this.head;
@@ -19,63 +18,45 @@ class CorvoSkipList {
     this.randomNum = Math.random();
   }
 
-  findNode(key) { // finds skip list node with key that is <= specified key
-
+  findNode(score, member) { // finds skip list node with key that is <= specified key
     let p = this.head; // pointer to head
     while (true) {
-      while (p.right.key != CorvoSkipListNode.posInf &&
-              p.right.key <= key) {
+      while (p.right.score != CorvoSkipListNode.posInf && p.right.score <= score && p.right.member <= member) {
          p = p.right;         // Move to right
       }
 
       if (p.down != null) {
         p = p.down;          // Go downwards
-      }
-      else {
+      } else {
           break;       // lowest level reached
       }
     }
     return p; // returns node
   }
 
-  get(key) { // returns the value associated with a key (or score?)
-    let p = this.findNode(key);
-    if (p.key === key) {
-      return p.value;
+  get(score, member) { // returns the value associated with a key (or score?)
+    let p = this.findNode(score, member);
+    if (p.key === key && p.member === member) {
+      return p.member;
     }
   }
 
   insert(score, member) {
     let p = this.findNode(score, member);
-    if (p.member === member) {
-      if (p.member === member && p.score === score) {
-        // do nothing
-      } else {
-        delete(p.score, p.member);
-        insertNow(p.score, p.member);
-        // update value
-        // p.value = val;
-      return p.value;
-      }
-    }
 
     // insert (k, v) after p
     // make a column of (k, v) of random height
-    let q = new CorvoSkipListNode(key, val);       // Create a new node with k and v
+    let q = new CorvoSkipListNode(score, member);       // Create a new node with k and v
 
      // Insert q into lowest level after p
-
      q.left = p;
      q.right = p.right;
      p.right.left = q;
      p.right = q;
 
      // add copy of node q to every upper level up to a random height
-
      let i = 0;                   // Current level = 0
-     console.log("outside while", i);
      while (Math.random() < 0.5 && i < MAX_LEVELS) { // coin toss algo?
-       console.log("inside while", i);
        if (i >= this.height) { // if current max height of skip list is reached, add an empty layer to the top
          this.addLayerToSkipList();
        }
@@ -84,7 +65,7 @@ class CorvoSkipList {
        }
        p = p.up;
 
-       const newUpperLevelNode = new CorvoSkipListNode(key, val);
+       const newUpperLevelNode = new CorvoSkipListNode(score, member);
        newUpperLevelNode.left = p;
        newUpperLevelNode.right = p.right;
        newUpperLevelNode.down = q;

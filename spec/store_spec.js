@@ -2,6 +2,8 @@ import Store from "../store.js";
 import CorvoLinkedList from "../corvo_linked_list.js";
 import CorvoNode from "../corvo_node.js";
 import MemoryTracker from "../memory_tracker";
+import CorvoSkipList from "../corvo_skiplist.js";
+import CorvoSkipListNode from "../corvo_skiplist_node.js";
 
 describe("corvo node", () => {
   it("exists as a class", () => {
@@ -637,5 +639,37 @@ describe("store", () => {
     testStore.lpush(key, val1, val2);
 
     expect(testStore.mainHash[key].val.length).toBe(2);
+  });
+
+  it("uses zadd to add a new member to a new sorted set", () => {
+    const key = 'k';
+    const score = '5';
+    const member = '1';
+    const testStore = new Store();
+
+    testStore.zadd(key, score, member);
+    const sortedSet = testStore.mainList.head.val;
+
+    expect(sortedSet.cardinality).toBe(1);
+    expect(sortedSet.memberExists(member)).toBe(true);
+    expect(sortedSet.skipList.findNode(score, member).member).toBe(member);
+  });
+
+  it("uses zadd to add multiple new members to a sorted set w multiple score", () => {
+    const key = 'k';
+    const scoreA = '5';
+    const scoreB = '10';
+    const memberA = '1';
+    const memberB = '2';
+    const testStore = new Store();
+
+    testStore.zadd(key, scoreA, memberA, scoreB, memberB);
+    const sortedSet = testStore.mainList.head.val;
+
+    expect(sortedSet.cardinality).toBe(2);
+    expect(sortedSet.memberExists(memberA)).toBe(true);
+    expect(sortedSet.memberExists(memberB)).toBe(true);
+    expect(sortedSet.skipList.findNode(scoreA, memberA).member).toBe(memberA);
+    expect(sortedSet.skipList.findNode(scoreB, memberB).member).toBe(memberB);
   });
 });
