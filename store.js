@@ -846,6 +846,28 @@ class Store {
     return returnValue;
   }
 
+  zadd(key, ...scoreAndMembers) {
+    const nodeAtKey = this.mainHash[key];
+
+    if (!nodeAtKey) {
+      // create a new sorted set
+      const skipList = new CorvoSkipList();
+      const newMainZsetNode = new CorvoNode(key, skipList, "zset");
+      this.mainHash[key] = newMainHashNode;
+      this.mainList.append(newMainHashNode);
+
+      while (scoreAndMembers.length) {
+        const score = scoreAndMembers.shift();
+        const member = scoreAndMembers.shift();
+        skipList.add(score, member);
+      }
+    } else if (nodeAtKey.type !== "zset") {
+      throw new StoreError("StoreError: value at key not a sorted set.");
+    } else {
+      // update the existing sorted set
+    }
+  }
+
   command() {
     return "*0\r\n";
   }

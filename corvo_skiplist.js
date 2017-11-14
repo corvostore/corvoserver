@@ -1,13 +1,13 @@
-import SkipListNode from './corvo_skiplist_node.js';
+import CorvoSkipListNode from './corvo_skiplist_node.js';
 const MAX_LEVELS = 29;
 
-class SkipList {
+class CorvoSkipList {
 
   constructor() {
     // First element of the top level
-    this.head = new SkipListNode(SkipListNode.negInf);
+    this.head = new CorvoSkipListNode(SkipListNode.negInf);
     // Last element of the top level
-    this.tail = new SkipListNode(SkipListNode.posInf);
+    this.tail = new CorvoSkipListNode(SkipListNode.posInf);
 
     this.head.right = this.tail;
     this.tail.left = this.head;
@@ -23,7 +23,7 @@ class SkipList {
 
     let p = this.head; // pointer to head
     while (true) {
-      while (p.right.key != SkipListNode.posInf &&
+      while (p.right.key != CorvoSkipListNode.posInf &&
               p.right.key <= key) {
          p = p.right;         // Move to right
       }
@@ -45,16 +45,23 @@ class SkipList {
     }
   }
 
-  insert(key, val) {
-    let p = this.findNode(key);
-    if (p.key === key) {
-      // update value
-      p.value = val;
+  insert(score, member) {
+    let p = this.findNode(score, member);
+    if (p.member === member) {
+      if (p.member === member && p.score === score) {
+        // do nothing
+      } else {
+        delete(p.score, p.member);
+        insertNow(p.score, p.member);
+        // update value
+        // p.value = val;
       return p.value;
+      }
     }
+
     // insert (k, v) after p
     // make a column of (k, v) of random height
-    let q = new SkipListNode(key, val);       // Create a new node with k and v
+    let q = new CorvoSkipListNode(key, val);       // Create a new node with k and v
 
      // Insert q into lowest level after p
 
@@ -77,7 +84,7 @@ class SkipList {
        }
        p = p.up;
 
-       const newUpperLevelNode = new SkipListNode(key, val);
+       const newUpperLevelNode = new CorvoSkipListNode(key, val);
        newUpperLevelNode.left = p;
        newUpperLevelNode.right = p.right;
        newUpperLevelNode.down = q;
@@ -100,8 +107,8 @@ class SkipList {
   }
 
   addLayerToSkipList() {
-    const p1 = new SkipListNode(SkipListNode.negInf);
-    const p2 = new SkipListNode(SkipListNode.posInf);
+    const p1 = new CorvoSkipListNode(CorvoSkipListNode.negInf);
+    const p2 = new CorvoSkipListNode(CorvoSkipListNode.posInf);
 
     p1.right = p2;
     p1.down = this.head;
@@ -118,11 +125,19 @@ class SkipList {
     this.height += 1;
   }
 
-  remove() {
+  remove(key) {
+    p = this.findNode(key);
 
+    if (p.key !== k) {
+      return null;
+    }
+
+    while (p !== null) {
+      p.left.right = p.right;
+      p.right.left = p.left;
+      p = p.up;
+    }
   }
-
-
 }
 
-export default SkipList;
+export default CorvoSkipList;

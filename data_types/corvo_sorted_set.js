@@ -4,18 +4,17 @@ import SkipList from './corvo_skiplist';
 class CorvoSortedSet {
   constructor() {
     this.skiplist = new SkipList();
-    this.hash = {};
+    this.hash = {};  // key = member,  value = score
     this.cardinality = 0;
   }
 
-  add() {
-
+  add(score, member) {
+    this.skiplist.insert(
   }
 
   remove() {
 
   }
-
 
 }
 
