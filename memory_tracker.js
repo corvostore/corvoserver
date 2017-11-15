@@ -1,6 +1,8 @@
 const REFERENCE_SIZE_BYTES = 8;
 const STRING_ONE_CHAR_BYTES = 2;
 const NODE_NUM_REFS = 3;
+const NUMBER_BYTES = 8;
+const SKIPLIST_NODE_SIZE = 48;
 
 class MemoryTracker {
   constructor(maxMemory) {
@@ -58,6 +60,10 @@ class MemoryTracker {
     this.memoryUsed -= this.calculateStoreItemSize(key, val, "hash");
   }
 
+  sortedSetElementInsert(oldVal, newVal) {
+    this.memoryUsed += (newVal - oldVal);
+  }
+
   deleteStoreItem(node) {
     this.memoryUsed -= this.calculateStoreItemSize(node.key, node.val, node.type);
   }
@@ -100,8 +106,23 @@ class MemoryTracker {
     Object.keys(hash).forEach((key) => {
       total += REFERENCE_SIZE_BYTES;
       total += key.length * STRING_ONE_CHAR_BYTES;
-      total += hash[key].length * STRING_ONE_CHAR_BYTES;
+      if (hash[key].constructor === String) {
+        total += hash[key].length * STRING_ONE_CHAR_BYTES;
+      } else if (hash[key].constructor === Number) {
+        total += NUMBER_BYTES;
+      }
     });
+
+    return total;
+  }
+
+  calculateSortedSetSize(sortedSet) {
+    let total = 3 * REFERENCE_SIZE_BYTES;
+
+    // add the size of the hash AND the score/member pair for each skipList node
+    total += this.calculateHashSize(sortedSet.hash);
+    // add shallow size of skipList nodes to total
+    total += sortedSet.skipList.memoryUsed;
 
     return total;
   }
@@ -117,6 +138,9 @@ class MemoryTracker {
         break;
       case "hash":
         returnVal = this.calculateMainHashKeySize(key) + this.calculateNodeSize(key, val, type) + this.calculateHashSize(val);
+        break;
+      case "zset":
+        returnVal = this.calculateMainHashKeySize(key) + this.calculateNodeSize(key, val, type) + this.calculateSortedSetSize(val);
         break;
     }
     return returnVal;

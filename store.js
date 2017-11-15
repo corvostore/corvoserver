@@ -862,15 +862,21 @@ class Store {
         const member = scoreAndMembers.shift();
         sortedSet.add(parseFloat(score, 10), member);
       }
+      this.memoryTracker.nodeCreation(newMainZsetNode);
     } else if (nodeAtKey.type !== "zset") {
+      this.touch(key);
       throw new StoreError("StoreError: value at key not a sorted set.");
     } else {
       // update the existing sorted set
+      const oldMemory = this.memoryTracker.calculateStoreItemSize(nodeAtKey);
+      this.touch(key);
       while (scoreAndMembers.length) {
         const score = scoreAndMembers.shift();
         const member = scoreAndMembers.shift();
         sortedSet.add(parseFloat(score, 10), member);
       }
+      const newMemory = this.memoryTracker.calculateStoreItemSize(nodeAtKey);
+      this.memoryTracker.sortedSetElementInsert(oldMemory, newMemory);
     }
   }
 
@@ -890,6 +896,7 @@ class Store {
     keys.forEach((key) => {
       let nodeAtKey = this.mainHash[key];
       if (nodeAtKey && nodeAtKey.type !== "zset") {
+        this.touch(key);
         throw new StoreError("StoreError: value at key is not type sorted set.");
       }
     });
@@ -926,32 +933,63 @@ class Store {
   }
 
   zcard(key) {
-    return this.mainHash[key].val.cardinality;
+    const nodeAtKey = this.mainHash[key];
+    if(!nodeAtKey) {
+      return 0;
+    } else if (nodeAtKey.type !== "zset") {
+      this.touch(key);
+      throw new StoreError("StoreError: value at key is not type sorted set.");
+    }
+    this.touch(key);
+    return nodeAtKey.val.cardinality;
   }
 
   zrem(key, ...members) {
     let countRemoved = 0;
     const nodeAtKey = this.mainHash[key];
     if (nodeAtKey && nodeAtKey.type !== "zset") {
+      this.touch(key);
       throw new StoreError("StoreError: value at key is not type sorted set.");
     }
+    this.touch(key);
     const sortedSet = nodeAtKey.val;
+    const oldMemory = this.memoryTracker.calculateStoreItemSize(nodeAtKey);
     members.forEach((member) => {
       if (sortedSet.memberExists(member)) {
         sortedSet.remove(member);
         countRemoved += 1;
       }
     });
+    const newMemory = this.memoryTracker.calculateStoreItemSize(nodeAtKey);
+    this.memoryTracker.sortedSetElementInsert(oldMemory, newMemory);
     return countRemoved;
   }
 
   zscore(key, member) {
+    const nodeAtKey = this.mainHash[key];
+    if (!nodeAtKey) {
+      return null;
+    }
+    if (nodeAtKey && nodeAtKey.type !== "zset") {
+      this.touch(key);
+      throw new StoreError("StoreError: value at key is not type sorted set.");
+    }
+    this.touch(key);
     return this.mainHash[key].val.getScore(member);
   }
 
   zincrby(key, increment, member) {
-    const newScore = this.zscore(key, member) + increment;
-    return this.mainHash[key].val.setScore(member, newScore);
+    const nodeAtKey = this.mainHash[key];
+    if (nodeAtKey && nodeAtKey.type !== 'zset') {
+      this.touch(key);
+      throw new StoreError("StoreError: value at key is not type sorted set.");
+    } else if (nodeAtKey === undefined) {
+      this.zadd(key, increment, member);
+      return increment;
+    } else {
+      const newScore = this.zscore(key, member) + increment;
+      return this.mainHash[key].val.setScore(member, newScore);
+    }
   }
 
   calcScoreAggr(aggregationType, prevScore, nextHashScore) {

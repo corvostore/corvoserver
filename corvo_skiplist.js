@@ -1,8 +1,11 @@
 import CorvoSkipListNode from './corvo_skiplist_node.js';
 const MAX_LEVELS = 29;
+const STRING_ONE_CHAR_BYTES = 2;
+const NUMBER_BYTES = 8;
 
 class CorvoSkipList {
   constructor() {
+
     // First element of the top level
     this.head = new CorvoSkipListNode(CorvoSkipListNode.negInf);
     // Last element of the top level
@@ -10,12 +13,10 @@ class CorvoSkipList {
 
     this.head.right = this.tail;
     this.tail.left = this.head;
+    this.memoryUsed = 112; // memory allocated to all skip list nodes
 
     this.n = 0;
     this.height = 0; // Height of skip list
-
-    // random value r used to determine height of a newly added node
-    this.randomNum = Math.random();
   }
 
   findNode(score, member) { // finds skip list node with key that is <= specified key
@@ -47,7 +48,7 @@ class CorvoSkipList {
     // insert (k, v) after p
     // make a column of (k, v) of random height
     let q = new CorvoSkipListNode(score, member);       // Create a new node with k and v
-
+    this.incrementMemoryForNode(score, member);
      // Insert q into lowest level after p
      q.left = p;
      q.right = p.right;
@@ -66,6 +67,8 @@ class CorvoSkipList {
        p = p.up;
 
        const newUpperLevelNode = new CorvoSkipListNode(score, member);
+       this.incrementMemoryForNode(score, member);
+
        newUpperLevelNode.left = p;
        newUpperLevelNode.right = p.right;
        newUpperLevelNode.down = q;
@@ -83,13 +86,15 @@ class CorvoSkipList {
      return null;   // No old value
   }
 
-  makeCol(k, v) {
-
+  incrementMemoryForNode(score, member) {
+    this.memoryUsed += 64 + (member.length * STRING_ONE_CHAR_BYTES) + NUMBER_BYTES;
   }
 
   addLayerToSkipList() {
     const p1 = new CorvoSkipListNode(CorvoSkipListNode.negInf);
     const p2 = new CorvoSkipListNode(CorvoSkipListNode.posInf);
+    this.memoryUsed += 112;
+
 
     p1.right = p2;
     p1.down = this.head;
