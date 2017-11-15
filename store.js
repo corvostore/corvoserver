@@ -849,8 +849,8 @@ class Store {
 
   processZaddParams(...restOfParams) {
     let xxNxFlag = "";
-    let chFound = false;
-    let incrFound = false;
+    let chFlag = false;
+    let incrFlag = false;
 
     let token;
     while(restOfParams.length) {
@@ -868,9 +868,9 @@ class Store {
 
         xxNxFlag = token;
       } else if (token === "CH") {
-        chFound = true;
+        chFlag = true;
       } else if (token === "INCR") {
-        incrFound = true;
+        incrFlag = true;
       } else {
         break;
       }
@@ -881,8 +881,8 @@ class Store {
 
     return {
       xxNxFlag,
-      chFound,
-      incrFound,
+      chFlag,
+      incrFlag,
       scoreAndMembers,
     };
   }
@@ -893,6 +893,14 @@ class Store {
     const chFlag = paramsObject.chFlag;
     const incrFlag = paramsObject.incrFlag;
     const scoreAndMembers = paramsObject.scoreAndMembers;
+
+    if (incrFlag) {
+      if (scoreAndMembers.length > 2) {
+        throw new StoreError("StoreError: INCR option supports a single increment-element pair.");
+      } else {
+        return this.zincrby(key, ...scoreAndMembers);
+      }
+    }
 
     const nodeAtKey = this.mainHash[key];
     let numElems = 0;
@@ -914,13 +922,21 @@ class Store {
             sortedSet.add(parseFloat(score, 10), member);
             numElems += 1;
           }
-        } else if (xxNxFlag === 'XX' && sortedSet.memberExists(member)) {
+        } else if (xxNxFlag === 'XX') {
           if (sortedSet.memberExists(member)) {
+            const oldScore = sortedSet.getScore(member);
             sortedSet.add(parseFloat(score, 10), member);
-            numElems += 1;
+            if (chFlag && oldScore !== parseFloat(score, 10)) {
+              numElems += 1;
+            }
           }
         } else {
-          if (!sortedSet.memberExists(member)) {
+          const oldScore = sortedSet.getScore(member);
+          if (chFlag) {
+            if (oldScore !== parseFloat(score, 10))  {
+              numElems += 1;
+            }
+          } else if (!sortedSet.memberExists(member)) {
             numElems += 1;
           }
           sortedSet.add(parseFloat(score, 10), member);
@@ -945,12 +961,20 @@ class Store {
             numElems += 1;
           }
         } else if (xxNxFlag === 'XX') {
+          const oldScore = sortedSet.getScore(member);
           if (sortedSet.memberExists(member)) {
             sortedSet.add(parseFloat(score, 10), member);
-            numElems += 1;
+            if (chFlag && oldScore !== parseFloat(score, 10)) {
+              numElems += 1;
+            }
           }
         } else {
-          if (!sortedSet.memberExists(member)) {
+          const oldScore = sortedSet.getScore(member);
+          if (chFlag) {
+            if (oldScore !== parseFloat(score, 10))  {
+              numElems += 1;
+            }
+          } else if (!sortedSet.memberExists(member)) {
             numElems += 1;
           }
           sortedSet.add(parseFloat(score, 10), member);
@@ -1070,6 +1094,7 @@ class Store {
   }
 
   zincrby(key, increment, member) {
+    increment = parseInt(increment, 10);
     const nodeAtKey = this.mainHash[key];
     if (nodeAtKey && nodeAtKey.type !== 'zset') {
       this.touch(key);
