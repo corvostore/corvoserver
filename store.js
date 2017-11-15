@@ -874,21 +874,18 @@ class Store {
     }
   }
 
-  zunionstore(destination, numkeys, ...keys) {
+  zunionstore(destination, ...restOfParams) {
     // pick source key, iterate over sorted set at key,
     // add values to destination
     // if destination already exists, it is overwritten.
     // weights flag defaults to 1
     // aggregate flag defaults to SUM
 
-    const sortedSet = new CorvoSortedSet();
-    const newMainZsetNode = new CorvoNode(destination, sortedSet, "zset");
-    this.mainHash[destination] = newMainZsetNode;
-    this.mainList.append(newMainZsetNode);
+    const paramsObject = this.processUnionInterParams(...restOfParams);
 
-    if (numkeys !== keys.length) {
-      throw new StoreError("SyntaxError: numkeys does not match number of keys provided.");
-    }
+    const keys        = paramsObject.keys;
+    const weightsArr  = paramsObject.weightsArr;
+    const aggregation = paramsObject.aggregation;
 
     keys.forEach((key) => {
       let nodeAtKey = this.mainHash[key];
@@ -897,15 +894,28 @@ class Store {
       }
     });
 
+    const sortedSet = new CorvoSortedSet();
+    const newMainZsetNode = new CorvoNode(destination, sortedSet, "zset");
+    this.mainHash[destination] = newMainZsetNode;
+    this.mainList.append(newMainZsetNode);
+
     let unionHash = {};
 
-    keys.forEach((key) => {
+    keys.forEach((key, idx) => {
       let hash = this.mainHash[key].val.hash;
 
       Object.keys(hash).forEach((member) => {
-        let score = hash[member];
-        unionHash[member] = unionHash[member] || 0;
-        unionHash[member] += score;
+        let weightToApply = (weightsArr.length === 0) ? 1 : weightsArr[idx];
+        if (unionHash[member]) {
+          let newScore = this.calcScoreAggr(
+                          aggregation,
+                          unionHash[member],
+                          (hash[member] * weightToApply));
+          unionHash[member] = newScore;
+        } else {
+          let score = hash[member] * weightToApply;
+          unionHash[member] = score;
+        }
       });
     });
 
@@ -1076,8 +1086,8 @@ class Store {
       interHash[member] = score;
     });
 
-    // for each item in interHash check if the curr Hash contains the key
-    // if yes keep in interHash (apply weight and aggregation)
+    // for each item in interHash check if the next source Hash contains
+    // the key, if yes keep in interHash (apply weight and aggregation)
     // otherwise remove from interHash
     keys.slice(1).forEach((key, idx) => {
       let sourceHash = this.mainHash[key].val.hash;

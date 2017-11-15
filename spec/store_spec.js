@@ -686,11 +686,60 @@ describe("store", () => {
     testStore.zadd(key1, scoreA, memberA, scoreB, memberB);
     testStore.zadd(key2, scoreA, memberA, "12", "member1");
 
-    testStore.zunionstore("destKey", 2, key1, key2);
+    testStore.zunionstore("destKey", "2", key1, key2);
 
     const destList = testStore.mainHash["destKey"].val;
 
     expect(destList.cardinality).toBe(3);
+  });
+
+  it("uses zunionstore returns union of two sorted sets", () => {
+    const key1 = "key1";
+    const key2 = "key2";
+    const destKey = "destKey";
+    const member1 = "m1";
+    const score1  = "10";
+    const member2 = "m2";
+    const score21 = "20";
+    const score22 = "222";
+    const member3 = "m3";
+    const score31 = "30";
+    const score32 = "333";
+    const member4 = "m4";
+    const score4  = "444";
+    const testStore = new Store();
+    testStore.zadd(key1, score1, member1, score21, member2, score31, member3);
+    testStore.zadd(key2, score22, member2, score32, member3, score4, member4);
+
+    const returnVal = testStore.zunionstore(destKey, "2", key1, key2);
+    const destSortedSet = testStore.mainHash[destKey].val;
+    expect(destSortedSet.hash).toEqual({ "m1": 10, "m2": 242, "m3": 363, "m4": 444 });
+  });
+
+  it("uses zunionstore on two sorted sets with weights and aggregate", () => {
+    const key1 = "key1";
+    const key2 = "key2";
+    const destKey = "destKey";
+    const member1 = "m1";
+    const score1  = "10";
+    const member2 = "m2";
+    const score21 = "20";
+    const score22 = "222";
+    const member3 = "m3";
+    const score31 = "8000";
+    const score32 = "333";
+    const member4 = "m4";
+    const score4  = "444";
+    const weight1 = "5";
+    const weight2 = "11";
+    const testStore = new Store();
+    testStore.zadd(key1, score1, member1, score21, member2, score31, member3);
+    testStore.zadd(key2, score22, member2, score32, member3, score4, member4);
+
+    const returnVal = testStore.zunionstore(
+      destKey, "2", key1, key2, "WEIGHTS", weight1, weight2, "AGGREGATE", "MIN");
+    const destSortedSet = testStore.mainHash[destKey].val;
+    expect(destSortedSet.hash).toEqual({ "m1": 50, "m2": 100, "m3": 3663, "m4": 4884 });
   });
 
   it("uses zrem to remove members from the sorted set", () => {
@@ -896,7 +945,7 @@ describe("store", () => {
     expect(destSortedSet.hash).toEqual({ "m2": 222, "m3": 3000 });
   });
 
-  it("uses zinterstore between two sorted sets with weights", () => {
+  it("uses zinterstore between two sorted sets with weights and aggregate", () => {
     const key1 = "key1";
     const key2 = "key2";
     const destKey = "destKey";
