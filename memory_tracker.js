@@ -60,6 +60,10 @@ class MemoryTracker {
     this.memoryUsed -= this.calculateStoreItemSize(key, val, "hash");
   }
 
+  sortedSetElementInsert(oldVal, newVal) {
+    this.memoryUsed += (newVal - oldVal);
+  }
+
   deleteStoreItem(node) {
     this.memoryUsed -= this.calculateStoreItemSize(node.key, node.val, node.type);
   }

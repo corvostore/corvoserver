@@ -868,12 +868,15 @@ class Store {
       throw new StoreError("StoreError: value at key not a sorted set.");
     } else {
       // update the existing sorted set
+      const oldMemory = this.memoryTracker.calculateStoreItemSize(nodeAtKey);
       this.touch(key);
       while (scoreAndMembers.length) {
         const score = scoreAndMembers.shift();
         const member = scoreAndMembers.shift();
         sortedSet.add(parseFloat(score, 10), member);
       }
+      const newMemory = this.memoryTracker.calculateStoreItemSize(nodeAtKey);
+      this.memoryTracker.sortedSetElementInsert(oldMemory, newMemory);
     }
   }
 
@@ -939,12 +942,15 @@ class Store {
     }
     this.touch(key);
     const sortedSet = nodeAtKey.val;
+    const oldMemory = this.memoryTracker.calculateStoreItemSize(nodeAtKey);
     members.forEach((member) => {
       if (sortedSet.memberExists(member)) {
         sortedSet.remove(member);
         countRemoved += 1;
       }
     });
+    const newMemory = this.memoryTracker.calculateStoreItemSize(nodeAtKey);
+    this.memoryTracker.sortedSetElementInsert(oldMemory, newMemory);
     return countRemoved;
   }
 
