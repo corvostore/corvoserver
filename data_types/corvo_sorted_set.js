@@ -14,8 +14,8 @@ class CorvoSortedSet {
 
   add(score, member) {
     if(this.memberExists(member)) {
-      const oldNode = this.skipList.findNode(score, member);
-      this.remove(oldNode);
+      // const oldNode = this.skipList.findNode(score, member);
+      this.remove(member);
       this.add(score, member);
     } else {
       this.hash[member] = score;

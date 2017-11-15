@@ -657,8 +657,8 @@ describe("store", () => {
 
   it("uses zadd to add multiple new members to a sorted set w multiple score", () => {
     const key = 'k';
-    const scoreA = 5;
-    const scoreB = 10;
+    const scoreA = '5';
+    const scoreB = '10';
     const memberA = '1';
     const memberB = '2';
     const testStore = new Store();
@@ -675,6 +675,55 @@ describe("store", () => {
     expect(testStore.memoryTracker.memoryUsed).not.toBeLessThan(380);
   });
 
+  it("uses zadd to add multiple new members to a sorted set w multiple score", () => {
+    const key = 'k';
+    const scoreA = '10';
+    const scoreB = '20';
+    const scoreC = '30';
+    const memberA = 'aa';
+    const memberB = 'bb';
+    const memberC = 'aa';
+    const testStore = new Store();
+
+    const returnVal = testStore.zadd(key, scoreA, memberA, scoreB, memberB, scoreC, memberC);
+    const destSortedSet = testStore.mainHash[key].val;
+    expect(returnVal).toBe(2);
+    expect(destSortedSet.hash).toEqual({ "aa": 30, "bb": 20 });
+  });
+
+  it("uses zadd to add multiple new members to a sorted set with NX", () => {
+    const key = 'k';
+    const scoreA = '10';
+    const scoreB = '20';
+    const scoreC = '30';
+    const memberA = 'aa';
+    const memberB = 'bb';
+    const memberC = 'aa';
+    const testStore = new Store();
+
+    const returnVal = testStore.zadd(key, "nx", scoreA, memberA, scoreB, memberB, scoreC, memberC);
+    const destSortedSet = testStore.mainHash[key].val;
+    expect(returnVal).toBe(2);
+    expect(destSortedSet.hash).toEqual({ "aa": 10, "bb": 20 });
+  });
+ 
+  it("uses zadd to add multiple new members to a sorted set with NX", () => {
+    const key = 'k';
+    const scoreA = '10';
+    const scoreB = '20';
+    const scoreC = '30';
+    const memberA = 'aa';
+    const memberB = 'bb';
+    const memberC = 'aa';
+    const testStore = new Store();
+
+    testStore.zadd(key, "1000", "some-member");
+    const returnVal = testStore.zadd(key, "nx", scoreA, memberA, scoreB, memberB, scoreC, memberC);
+    const destSortedSet = testStore.mainHash[key].val;
+    expect(returnVal).toBe(2);
+    expect(destSortedSet.hash).toEqual({ "some-member": 1000, "aa": 10, "bb": 20 });
+  });
+ 
   it("uses zunionstore to add the union of one or more sorted sets", () => {
     const key1 = "k1";
     const key2 = "k2";
@@ -762,8 +811,8 @@ describe("store", () => {
   it("uses zscore to get the score of a member", () => {
     const key1 = "k1";
 
-    const scoreA = 10;
-    const scoreB = 10;
+    const scoreA = '10';
+    const scoreB = '10';
     const memberA = 'memberA';
     const memberB = 'memberB';
     const testStore = new Store();
@@ -771,14 +820,14 @@ describe("store", () => {
     testStore.zadd(key1, scoreA, memberA, scoreB, memberB);
     const result = testStore.zscore(key1, memberB);
 
-    expect(result).toBe(scoreA);
+    expect(result).toBe(parseInt(scoreA, 10));
   });
 
   it("uses zincrby to increment the score of a member", () => {
     const key1 = "k1";
 
-    const scoreA = 10;
-    const scoreB = 10;
+    const scoreA = '10';
+    const scoreB = '10';
     const memberA = 'memberA';
     const memberB = 'memberB';
     const testStore = new Store();

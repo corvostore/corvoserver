@@ -847,13 +847,56 @@ class Store {
     return returnValue;
   }
 
-  zadd(key, ...scoreAndMembers) {
+  processZaddParams(...restOfParams) {
+    let xxNxFlag = "";
+    let chFound = false;
+    let incrFound = false;
+
+    let token;
+    while(restOfParams.length) {
+      token = restOfParams.shift().toUpperCase();
+      if (token === "XX") {
+        if (xxNxFlag) {
+          throw new StoreError("StoreError: only one of NX or XX can be specified.");
+        }
+
+        xxNxFlag = token;
+      } else if (token === "NX") {
+        if (xxNxFlag) {
+          throw new StoreError("StoreError: only one of NX or XX can be specified.");
+        }
+
+        xxNxFlag = token;
+      } else if (token === "CH") {
+        chFound = true;
+      } else if (token === "INCR") {
+        incrFound = true;
+      } else {
+        break;
+      }
+    }
+
+    restOfParams.unshift(token);
+    let scoreAndMembers = restOfParams.slice();
+
+    return {
+      xxNxFlag,
+      chFound,
+      incrFound,
+      scoreAndMembers,
+    };
+  }
+
+  zadd(key, ...restOfParams) {
+    const paramsObject = this.processZaddParams(...restOfParams);
+    const xxNxFlag = paramsObject.xxNxFlag;
+    const chFlag = paramsObject.chFlag;
+    const incrFlag = paramsObject.incrFlag;
+    const scoreAndMembers = paramsObject.scoreAndMembers;
+
     const nodeAtKey = this.mainHash[key];
     let numElems = 0;
     // Todo - accomodate flags (nx/xx, ch, incr)
-    const xxNxFlag = ''; // 'XX'; 'NX'; ''
-    const chFlag = '';
-    const incrFlag = '';
 
 
     if (!nodeAtKey) {
@@ -866,14 +909,18 @@ class Store {
       while (scoreAndMembers.length) {
         const score = scoreAndMembers.shift();
         const member = scoreAndMembers.shift();
-        if (xxNxFlag === 'NX' && !sortedSet.memberExists(member)) {
-          sortedSet.add(parseFloat(score, 10), member);
-          numElems += 1;
+        if (xxNxFlag === 'NX') {
+          if (!sortedSet.memberExists(member)) {
+            sortedSet.add(parseFloat(score, 10), member);
+            numElems += 1;
+          }
         } else if (xxNxFlag === 'XX' && sortedSet.memberExists(member)) {
-          sortedSet.add(parseFloat(score, 10), member);
-          numElems += 1;
-        } else {
           if (sortedSet.memberExists(member)) {
+            sortedSet.add(parseFloat(score, 10), member);
+            numElems += 1;
+          }
+        } else {
+          if (!sortedSet.memberExists(member)) {
             numElems += 1;
           }
           sortedSet.add(parseFloat(score, 10), member);
@@ -888,17 +935,22 @@ class Store {
       // update the existing sorted set
       const oldMemory = this.memoryTracker.calculateStoreItemSize(nodeAtKey);
       this.touch(key);
+      const sortedSet = this.mainHash[key].val;
       while (scoreAndMembers.length) {
         const score = scoreAndMembers.shift();
         const member = scoreAndMembers.shift();
-        if (xxNxFlag === 'NX' && !sortedSet.memberExists(member)) {
-          sortedSet.add(parseFloat(score, 10), member);
-          numElems += 1;
-        } else if (xxNxFlag === 'XX' && sortedSet.memberExists(member)) {
-          sortedSet.add(parseFloat(score, 10), member);
-          numElems += 1;
-        } else {
+        if (xxNxFlag === 'NX') {
+          if (!sortedSet.memberExists(member)) {
+            sortedSet.add(parseFloat(score, 10), member);
+            numElems += 1;
+          }
+        } else if (xxNxFlag === 'XX') {
           if (sortedSet.memberExists(member)) {
+            sortedSet.add(parseFloat(score, 10), member);
+            numElems += 1;
+          }
+        } else {
+          if (!sortedSet.memberExists(member)) {
             numElems += 1;
           }
           sortedSet.add(parseFloat(score, 10), member);
