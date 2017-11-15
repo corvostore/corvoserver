@@ -943,6 +943,154 @@ class Store {
     return this.mainHash[key].val.setScore(member, newScore);
   }
 
+  calcScoreAggr(aggregationType, prevScore, nextHashScore) {
+    let newScore;
+
+    switch(aggregationType) {
+      case "SUM":
+        newScore = prevScore + nextHashScore;
+        break;
+      case "MIN":
+        newScore = (nextHashScore < prevScore) ? nextHashScore : prevScore;
+        break;
+      case "MAX":
+        newScore = (nextHashScore > prevScore) ? nextHashScore : prevScore;
+        break;
+    }
+
+    return newScore;
+  }
+
+  zinterstore(destKey, ...restOfParams) {
+    const numKeysString = restOfParams.shift();
+    if (numKeysString.match(/[^0-9]/)) {
+      throw new StoreError("StoreError: numkeys needs to be numeric.");
+    }
+
+    const numKeys = parseInt(numKeysString, 10);
+    if (numKeys > restOfParams.length) {
+      throw new StoreError("StoreError: numkeys does not match number of keys provided.");
+    }
+
+    let keys = [];
+    for (let i = 0; i < numKeys; i += 1) {
+      keys.push(restOfParams.shift());
+    }
+
+    keys.forEach((key) => {
+      let nodeAtKey = this.mainHash[key];
+      if (nodeAtKey && nodeAtKey.type !== "zset") {
+        throw new StoreError("StoreError: value at key is not type sorted set.");
+      }
+    });
+
+    let optionsKeywordIsWeights;
+    if (restOfParams.length) {
+      const optionsKeyword = restOfParams.shift().toUpperCase();
+      if (optionsKeyword !== "WEIGHTS" && optionsKeyword !== "AGGREGATE") {
+        throw new StoreError("StoreError: unexpected options keyword.");
+      }
+
+      optionsKeywordIsWeights = (optionsKeyword === "WEIGHTS");
+    }
+
+    let weightsArr = [];
+    let aggregation = "SUM";
+    let anOptionProcessed = false;
+    while (restOfParams.length) {
+      if (anOptionProcessed) {
+        const newOptionKeyword = restOfParams.shift().toUpperCase();
+        if (optionsKeywordIsWeights && newOptionKeyword === "AGGREGATE") {
+          throw new StoreError("StoreError: invalid or duplicate options keyword.");
+        }
+
+        if (!optionsKeywordIsWeights && newOptionKeyword === "WEIGHTS") {
+          throw new StoreError("StoreError: invalid or duplicate options keyword.");
+        }
+      }
+
+      if (optionsKeywordIsWeights) {
+        // process weights
+        if (numKeys > restOfParams.length) {
+          throw new StoreError("StoreError: weights not provided for all keys.");
+        }
+
+        for (let i = 0; i < numKeys; i += 1) {
+          weightsArr.push(parseInt(restOfParams.shift(), 10));
+        }
+
+        anOptionProcessed = true;
+        optionsKeywordIsWeights = false;
+      } else {
+        // process aggregate
+        if (restOfParams.length > 1) {
+          throw new StoreError("StoreError: syntax error, more tokens than expected.");
+        }
+
+        if (restOfParams.length === 0) {
+          throw new StoreError("StoreError: aggregation option not provided.");
+        }
+
+        aggregation = restOfParams.shift().toUpperCase();
+        if (aggregation !== "SUM" && aggregation !== "MIN" && aggregation !== "MAX") {
+          throw new StoreError("StoreError: invalid aggregation option.");
+        }
+
+        anOptionProcessed = true;
+        optionsKeywordIsWeights = true;
+      }
+    }
+
+    keys.forEach((key) => {
+      let nodeAtKey = this.mainHash[key];
+      if (nodeAtKey && nodeAtKey.type !== "zset") {
+        throw new StoreError("StoreError: value at key is not type sorted set.");
+      }
+    });
+
+    const sortedSet = new CorvoSortedSet();
+    const newMainZsetNode = new CorvoNode(destKey, sortedSet, "zset");
+    this.mainHash[destKey] = newMainZsetNode;
+    this.mainList.append(newMainZsetNode);
+
+    // initialize interHash with first source sorted set, apply weight
+    let interHash = {};
+    const firstKeyHash = this.mainHash[keys[0]].val.hash;
+    Object.keys(firstKeyHash).forEach((member) => {
+      let weightToApply = (weightsArr.length === 0) ? 1 : weightsArr[0];
+      let score = firstKeyHash[member] * weightToApply;
+      interHash[member] = score;
+    });
+
+    // for each item in interHash check if the curr Hash contains the key
+    // if yes keep in interHash (apply weight and aggregation)
+    // otherwise remove from interHash
+    keys.slice(1).forEach((key, idx) => {
+      let sourceHash = this.mainHash[key].val.hash;
+
+      Object.keys(interHash).forEach((interMember) => {
+        let interScore = interHash[interMember];
+        if (sourceHash[interMember]) {
+          // apply weight and aggregation
+          let weightToApply = (weightsArr.length === 0) ? 1 : weightsArr[idx + 1];
+          let newScore = this.calcScoreAggr(
+                          aggregation,
+                          interHash[interMember],
+                          (sourceHash[interMember] * weightToApply));
+          interHash[interMember] = newScore;
+        } else {
+          delete interHash[interMember];
+        }
+      });
+    });
+
+    Object.keys(interHash).forEach((member) => {
+      sortedSet.add(interHash[member], member);
+    });
+
+    return Object.keys(interHash).length;
+  }
+
   command() {
     return "*0\r\n";
   }
