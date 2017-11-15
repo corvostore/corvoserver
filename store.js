@@ -863,9 +863,11 @@ class Store {
         sortedSet.add(parseFloat(score, 10), member);
       }
     } else if (nodeAtKey.type !== "zset") {
+      this.touch(key);
       throw new StoreError("StoreError: value at key not a sorted set.");
     } else {
       // update the existing sorted set
+      this.touch(key);
       while (scoreAndMembers.length) {
         const score = scoreAndMembers.shift();
         const member = scoreAndMembers.shift();
@@ -893,6 +895,7 @@ class Store {
     keys.forEach((key) => {
       let nodeAtKey = this.mainHash[key];
       if (nodeAtKey && nodeAtKey.type !== "zset") {
+        this.touch(key);
         throw new StoreError("StoreError: value at key is not type sorted set.");
       }
     });
@@ -915,15 +918,25 @@ class Store {
   }
 
   zcard(key) {
-    return this.mainHash[key].val.cardinality;
+    const nodeAtKey = this.mainHash[key];
+    if(!nodeAtKey) {
+      return 0;
+    } else if (nodeAtKey.type !== "zset") {
+      this.touch(key);
+      throw new StoreError("StoreError: value at key is not type sorted set.");
+    }
+    this.touch(key);
+    return nodeAtKey.val.cardinality;
   }
 
   zrem(key, ...members) {
     let countRemoved = 0;
     const nodeAtKey = this.mainHash[key];
     if (nodeAtKey && nodeAtKey.type !== "zset") {
+      this.touch(key);
       throw new StoreError("StoreError: value at key is not type sorted set.");
     }
+    this.touch(key);
     const sortedSet = nodeAtKey.val;
     members.forEach((member) => {
       if (sortedSet.memberExists(member)) {
@@ -935,6 +948,14 @@ class Store {
   }
 
   zscore(key, member) {
+    if (!nodeAtKey) {
+      return null;
+    }
+    if (nodeAtKey && nodeAtKey.type !== "zset") {
+      this.touch(key);
+      throw new StoreError("StoreError: value at key is not type sorted set.");
+    }
+    this.touch(key);
     return this.mainHash[key].val.getScore(member);
   }
 
