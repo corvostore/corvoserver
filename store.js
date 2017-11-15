@@ -948,6 +948,7 @@ class Store {
   }
 
   zscore(key, member) {
+    const nodeAtKey = this.mainHash[key];
     if (!nodeAtKey) {
       return null;
     }
@@ -960,8 +961,17 @@ class Store {
   }
 
   zincrby(key, increment, member) {
-    const newScore = this.zscore(key, member) + increment;
-    return this.mainHash[key].val.setScore(member, newScore);
+    const nodeAtKey = this.mainHash[key];
+    if (nodeAtKey && nodeAtKey.type !== 'zset') {
+      this.touch(key);
+      throw new StoreError("StoreError: value at key is not type sorted set.");
+    } else if (nodeAtKey === undefined) {
+      this.zadd(key, increment, member);
+      return increment;
+    } else {
+      const newScore = this.zscore(key, member) + increment;
+      return this.mainHash[key].val.setScore(member, newScore);
+    }
   }
 
   calcScoreAggr(aggregationType, prevScore, nextHashScore) {
