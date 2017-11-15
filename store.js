@@ -894,15 +894,11 @@ class Store {
       }
     });
 
-    const sortedSet = new CorvoSortedSet();
-    const newMainZsetNode = new CorvoNode(destination, sortedSet, "zset");
-    this.mainHash[destination] = newMainZsetNode;
-    this.mainList.append(newMainZsetNode);
-
     let unionHash = {};
 
     keys.forEach((key, idx) => {
       let hash = this.mainHash[key].val.hash;
+      this.touch(key);
 
       Object.keys(hash).forEach((member) => {
         let weightToApply = (weightsArr.length === 0) ? 1 : weightsArr[idx];
@@ -918,6 +914,11 @@ class Store {
         }
       });
     });
+
+    const sortedSet = new CorvoSortedSet();
+    const newMainZsetNode = new CorvoNode(destination, sortedSet, "zset");
+    this.mainHash[destination] = newMainZsetNode;
+    this.mainList.append(newMainZsetNode);
 
     Object.keys(unionHash).forEach((member) => {
       sortedSet.add(unionHash[member], member);
@@ -1072,14 +1073,10 @@ class Store {
       }
     });
 
-    const sortedSet = new CorvoSortedSet();
-    const newMainZsetNode = new CorvoNode(destKey, sortedSet, "zset");
-    this.mainHash[destKey] = newMainZsetNode;
-    this.mainList.append(newMainZsetNode);
-
     // initialize interHash with first source sorted set, apply weight
     let interHash = {};
     const firstKeyHash = this.mainHash[keys[0]].val.hash;
+    this.touch(keys[0]);
     Object.keys(firstKeyHash).forEach((member) => {
       let weightToApply = (weightsArr.length === 0) ? 1 : weightsArr[0];
       let score = firstKeyHash[member] * weightToApply;
@@ -1091,6 +1088,7 @@ class Store {
     // otherwise remove from interHash
     keys.slice(1).forEach((key, idx) => {
       let sourceHash = this.mainHash[key].val.hash;
+      this.touch(key);
 
       Object.keys(interHash).forEach((interMember) => {
         let interScore = interHash[interMember];
@@ -1107,6 +1105,11 @@ class Store {
         }
       });
     });
+
+    const sortedSet = new CorvoSortedSet();
+    const newMainZsetNode = new CorvoNode(destKey, sortedSet, "zset");
+    this.mainHash[destKey] = newMainZsetNode;
+    this.mainList.append(newMainZsetNode);
 
     Object.keys(interHash).forEach((member) => {
       sortedSet.add(interHash[member], member);
