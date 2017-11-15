@@ -849,6 +849,7 @@ class Store {
 
   zadd(key, ...scoreAndMembers) {
     const nodeAtKey = this.mainHash[key];
+    let numElems = 0;
 
     if (!nodeAtKey) {
       // create a new sorted set
@@ -861,6 +862,7 @@ class Store {
         const score = scoreAndMembers.shift();
         const member = scoreAndMembers.shift();
         sortedSet.add(parseFloat(score, 10), member);
+        numElems += 1;
       }
       this.memoryTracker.nodeCreation(newMainZsetNode);
     } else if (nodeAtKey.type !== "zset") {
@@ -873,11 +875,16 @@ class Store {
       while (scoreAndMembers.length) {
         const score = scoreAndMembers.shift();
         const member = scoreAndMembers.shift();
+        if (!sortedSet.memberExists(member)) {
+          numElems += 1;
+        }
         sortedSet.add(parseFloat(score, 10), member);
       }
       const newMemory = this.memoryTracker.calculateStoreItemSize(nodeAtKey);
       this.memoryTracker.sortedSetElementInsert(oldMemory, newMemory);
     }
+    this.lruCheckAndEvictToMaxMemory();
+    return numElems;
   }
 
   zunionstore(destination, ...restOfParams) {
@@ -922,6 +929,9 @@ class Store {
       });
     });
 
+    if (this.mainHash[destination]) {
+      this.del(destination);
+    }
     const sortedSet = new CorvoSortedSet();
     const newMainZsetNode = new CorvoNode(destination, sortedSet, "zset");
     this.mainHash[destination] = newMainZsetNode;
@@ -930,6 +940,10 @@ class Store {
     Object.keys(unionHash).forEach((member) => {
       sortedSet.add(unionHash[member], member);
     });
+
+    this.memoryTracker.nodeCreation(newMainZsetNode);
+    this.lruCheckAndEvictToMaxMemory();
+    return Object.keys(unionHash).length;
   }
 
   zcard(key) {
@@ -962,6 +976,7 @@ class Store {
     });
     const newMemory = this.memoryTracker.calculateStoreItemSize(nodeAtKey);
     this.memoryTracker.sortedSetElementInsert(oldMemory, newMemory);
+    this.lruCheckAndEvictToMaxMemory();
     return countRemoved;
   }
 
@@ -985,9 +1000,11 @@ class Store {
       throw new StoreError("StoreError: value at key is not type sorted set.");
     } else if (nodeAtKey === undefined) {
       this.zadd(key, increment, member);
+      this.lruCheckAndEvictToMaxMemory();
       return increment;
     } else {
       const newScore = this.zscore(key, member) + increment;
+      this.lruCheckAndEvictToMaxMemory();
       return this.mainHash[key].val.setScore(member, newScore);
     }
   }
@@ -1144,6 +1161,9 @@ class Store {
       });
     });
 
+    if (this.mainHash[destKey]) {
+      this.del(destKey);
+    }
     const sortedSet = new CorvoSortedSet();
     const newMainZsetNode = new CorvoNode(destKey, sortedSet, "zset");
     this.mainHash[destKey] = newMainZsetNode;
@@ -1152,7 +1172,8 @@ class Store {
     Object.keys(interHash).forEach((member) => {
       sortedSet.add(interHash[member], member);
     });
-
+    this.memoryTracker.nodeCreation(newMainZsetNode);
+    this.lruCheckAndEvictToMaxMemory();
     return Object.keys(interHash).length;
   }
 
