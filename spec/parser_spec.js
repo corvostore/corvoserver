@@ -516,4 +516,26 @@ describe("Parser", () => {
     const errorMessage = "ParseError: Wrong number of arguments for HKEYS command";
     expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
   });
+
+  it("returns array of tokens for valid ZINCRBY command", () => {
+    const command = '*4\r\n$7\r\nZINCRBY\r\n$1\r\nk\r\n$1\r\n5\r\n$1\r\nv\r\n';
+    expect(Parser.processIncomingString(command)).toEqual(['ZINCRBY', 'k', '5', 'v']);
+  });
+
+  it("throws an error if number of arguments for ZINCRBY command is not valid", () => {
+    const command = '*5\r\n$7\r\nZINCRBY\r\n$1\r\nk\r\n$1\r\n5\r\n$1\r\nv\r\n$2\r\nvb\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for ZINCRBY command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("returns array of tokens for valid ZSCORE command", () => {
+    const command = '*3\r\n$6\r\nZSCORE\r\n$1\r\nk\r\n$6\r\nmember\r\n';
+    expect(Parser.processIncomingString(command)).toEqual(['ZSCORE', 'k', 'member']);
+  });
+
+  it("throws an error if number of arguments for ZSCORE command is not valid", () => {
+    const command = '*2\r\n$6\r\nZSCORE\r\n$1\r\nk\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for ZSCORE command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
 });
