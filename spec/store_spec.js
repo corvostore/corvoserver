@@ -692,4 +692,34 @@ describe("store", () => {
 
     expect(destList.cardinality).toBe(3);
   });
+
+  it("uses zscore to get the score of a member", () => {
+    const key1 = "k1";
+
+    const scoreA = 10;
+    const scoreB = 10;
+    const memberA = 'memberA';
+    const memberB = 'memberB';
+    const testStore = new Store();
+
+    testStore.zadd(key1, scoreA, memberA, scoreB, memberB);
+    const result = testStore.zscore(key1, memberB);
+
+    expect(result).toBe(scoreA);
+  });
+
+  it("uses zincrby to increment the score of a member", () => {
+    const key1 = "k1";
+
+    const scoreA = 10;
+    const scoreB = 10;
+    const memberA = 'memberA';
+    const memberB = 'memberB';
+    const testStore = new Store();
+
+    testStore.zadd(key1, scoreA, memberA, scoreB, memberB);
+    const result = testStore.zincrby(key1, 5, memberB);
+
+    expect(result).toBe(15);
+  });
 });

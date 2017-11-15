@@ -29,6 +29,11 @@ class CorvoSortedSet {
     return this.hash[member];
   }
 
+  setScore(member, newScore) {
+    this.hash[member] = newScore;
+    return newScore;
+  }
+
   remove() {
 
   }

@@ -914,6 +914,15 @@ class Store {
     });
   }
 
+  zscore(key, member) {
+    return this.mainHash[key].val.getScore(member);
+  }
+
+  zincrby(key, increment, member) {
+    const newScore = this.zscore(key, member) + increment;
+    return this.mainHash[key].val.setScore(member, newScore);
+  }
+
   command() {
     return "*0\r\n";
   }
