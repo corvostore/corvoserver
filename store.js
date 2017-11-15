@@ -914,6 +914,26 @@ class Store {
     });
   }
 
+  zcard(key) {
+    return this.mainHash[key].val.cardinality;
+  }
+
+  zrem(key, ...members) {
+    let countRemoved = 0;
+    const nodeAtKey = this.mainHash[key];
+    if (nodeAtKey && nodeAtKey.type !== "zset") {
+      throw new StoreError("StoreError: value at key is not type sorted set.");
+    }
+    const sortedSet = nodeAtKey.val;
+    members.forEach((member) => {
+      if (sortedSet.memberExists(member)) {
+        sortedSet.remove(member);
+        countRemoved += 1;
+      }
+    });
+    return countRemoved;
+  }
+
   command() {
     return "*0\r\n";
   }

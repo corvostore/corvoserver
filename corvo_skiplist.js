@@ -107,9 +107,9 @@ class CorvoSkipList {
   }
 
   remove(key) {
-    p = this.findNode(key);
+    let p = this.findNode(key);
 
-    if (p.key !== k) {
+    if (p.key !== key) {
       return null;
     }
 

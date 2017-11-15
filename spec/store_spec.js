@@ -692,4 +692,20 @@ describe("store", () => {
 
     expect(destList.cardinality).toBe(3);
   });
+
+  it("uses zrem to remove members from the sorted set", () => {
+    const key1 = "k1";
+
+    const scoreA = '10';
+    const scoreB = '10';
+    const memberA = 'memberA';
+    const memberB = 'memberB';
+    const testStore = new Store();
+
+    testStore.zadd(key1, scoreA, memberA, scoreB, memberB);
+
+    const result = testStore.zrem(key1, memberA);
+    expect(result).toBe(1);
+    expect(testStore.mainList.head.val.memberExists(memberA)).toBe(false);
+  });
 });

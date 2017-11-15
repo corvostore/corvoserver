@@ -29,8 +29,10 @@ class CorvoSortedSet {
     return this.hash[member];
   }
 
-  remove() {
-
+  remove(member) {
+    this.skipList.remove(this.hash[member]);
+    delete this.hash[member];
+    this.cardinality -= 1;
   }
 
 }
