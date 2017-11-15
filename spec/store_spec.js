@@ -657,8 +657,8 @@ describe("store", () => {
 
   it("uses zadd to add multiple new members to a sorted set w multiple score", () => {
     const key = 'k';
-    const scoreA = '5';
-    const scoreB = '10';
+    const scoreA = 5;
+    const scoreB = 10;
     const memberA = '1';
     const memberB = '2';
     const testStore = new Store();
@@ -671,6 +671,8 @@ describe("store", () => {
     expect(sortedSet.memberExists(memberB)).toBe(true);
     expect(sortedSet.skipList.findNode(scoreA, memberA).member).toBe(memberA);
     expect(sortedSet.skipList.findNode(scoreB, memberB).member).toBe(memberB);
+
+    expect(testStore.memoryTracker.memoryUsed).not.toBeLessThan(380);
   });
 
   it("uses zunionstore to add the union of one or more sorted sets", () => {

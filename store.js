@@ -862,6 +862,7 @@ class Store {
         const member = scoreAndMembers.shift();
         sortedSet.add(parseFloat(score, 10), member);
       }
+      this.memoryTracker.nodeCreation(newMainZsetNode);
     } else if (nodeAtKey.type !== "zset") {
       this.touch(key);
       throw new StoreError("StoreError: value at key not a sorted set.");
