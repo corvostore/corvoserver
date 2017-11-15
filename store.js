@@ -961,7 +961,7 @@ class Store {
     return newScore;
   }
 
-  zinterstore(destKey, ...restOfParams) {
+  processUnionInterParams(...restOfParams) {
     const numKeysString = restOfParams.shift();
     if (numKeysString.match(/[^0-9]/)) {
       throw new StoreError("StoreError: numkeys needs to be numeric.");
@@ -1040,6 +1040,20 @@ class Store {
         optionsKeywordIsWeights = true;
       }
     }
+
+    return {
+      "keys": keys,
+      "weightsArr": weightsArr,
+      "aggregation": aggregation,
+    };
+  }
+
+  zinterstore(destKey, ...restOfParams) {
+    const paramsObject = this.processUnionInterParams(...restOfParams);
+
+    const keys        = paramsObject.keys;
+    const weightsArr  = paramsObject.weightsArr;
+    const aggregation = paramsObject.aggregation;
 
     keys.forEach((key) => {
       let nodeAtKey = this.mainHash[key];
