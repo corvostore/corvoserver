@@ -692,4 +692,94 @@ describe("store", () => {
 
     expect(destList.cardinality).toBe(3);
   });
+
+  it("uses zinterstore with mismatch between numkeys argument and actual keys", () => {
+    const testStore = new Store();
+    expect(function() { testStore.zinterstore("destKey", '2', "somekey")})
+      .toThrow(new Error("StoreError: numkeys does not match number of keys provided."));
+  });
+
+  it("uses zinterstore with a non-numeric string for numkeys argument", () => {
+    const testStore = new Store();
+    expect(function() { testStore.zinterstore("destKey", 'aaa', "somekey")})
+      .toThrow(new Error("StoreError: numkeys needs to be numeric."));
+  });
+
+  it("uses zinterstore with a non-zset key", () => {
+    const testStore = new Store();
+    testStore.setString("key1", "val1");
+    expect(function() { testStore.zinterstore("dest", '1', "key1")})
+      .toThrow(new Error("StoreError: value at key is not type sorted set."));
+  });
+
+  it("uses zinterstore with an invalid options keyword", () => {
+    const testStore = new Store();
+    expect(function() { testStore.zinterstore("dest", '1', "key1", "ABCD")})
+      .toThrow(new Error("StoreError: unexpected options keyword."));
+  });
+
+  it("uses zinterstore returns intersection of two sorted sets", () => {
+    const key1 = "key1";
+    const key2 = "key2";
+    const destKey = "destKey";
+    const member1 = "m1";
+    const score1  = "10";
+    const member2 = "m2";
+    const score21 = "20";
+    const score22 = "222";
+    const member3 = "m3";
+    const score31 = "30";
+    const score32 = "333";
+    const member4 = "m4";
+    const score4  = "444";
+    const testStore = new Store();
+    testStore.zadd(key1, score1, member1, score21, member2, score31, member3);
+    testStore.zadd(key2, score22, member2, score32, member3, score4, member4);
+
+    const returnVal = testStore.zinterstore(destKey, "2", key1, key2);
+    const destSortedSet = testStore.mainHash[destKey].val;
+    expect(destSortedSet.hash).toEqual({ "m2": 242, "m3": 363 });
+  });
+
+  it("uses zinterstore between two sorted sets with weights", () => {
+    const key1 = "key1";
+    const key2 = "key2";
+    const destKey = "destKey";
+    const member1 = "m1";
+    const score1  = "10";
+    const member2 = "m2";
+    const score21 = "20";
+    const score22 = "222";
+    const member3 = "m3";
+    const score31 = "30";
+    const score32 = "333";
+    const member4 = "m4";
+    const score4  = "444";
+    const weight1 = "5";
+    const weight2 = "11";
+    const testStore = new Store();
+    testStore.zadd(key1, score1, member1, score21, member2, score31, member3);
+    testStore.zadd(key2, score22, member2, score32, member3, score4, member4);
+
+    const returnVal = testStore.zinterstore(
+                        destKey, "2", key1, key2, "WEIGHTS", weight1, weight2);
+    const destSortedSet = testStore.mainHash[destKey].val;
+    expect(destSortedSet.hash).toEqual({ "m2": 2542, "m3": 3813 });
+  });
+
+  it("uses zinterstore with duplicate weights keyword", () => {
+    const testStore = new Store();
+    expect(function() {
+      testStore.zinterstore(
+        "destKey, "2", "key1", "key2", "WEIGHTS", "10", "20", "WEIGHTS")
+    }).toThrow(new Error("StoreError: invalid or duplicate options keyword."));
+  });
+
+  it("uses zinterstore with duplicate AGGREGATE keyword", () => {
+    const testStore = new Store();
+    expect(function() {
+      testStore.zinterstore(
+        "destKey, "2", "key1", "key2", "AGGREGATE", "SUM", "AGGREGATE")
+    }).toThrow(new Error("StoreError: invalid or duplicate options keyword."));
+  });
 });
