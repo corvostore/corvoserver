@@ -850,6 +850,11 @@ class Store {
   zadd(key, ...scoreAndMembers) {
     const nodeAtKey = this.mainHash[key];
     let numElems = 0;
+    // Todo - accomodate flags (nx/xx, ch, incr)
+    const xxNxFlag = ''; // 'XX'; 'NX'; ''
+    const chFlag = '';
+    const incrFlag = '';
+
 
     if (!nodeAtKey) {
       // create a new sorted set
@@ -861,8 +866,19 @@ class Store {
       while (scoreAndMembers.length) {
         const score = scoreAndMembers.shift();
         const member = scoreAndMembers.shift();
-        sortedSet.add(parseFloat(score, 10), member);
-        numElems += 1;
+        if (xxNxFlag === 'NX' && !sortedSet.memberExists(member)) {
+          sortedSet.add(parseFloat(score, 10), member);
+          numElems += 1;
+        } else if (xxNxFlag === 'XX' && sortedSet.memberExists(member)) {
+          sortedSet.add(parseFloat(score, 10), member);
+          numElems += 1;
+        } else {
+          if (sortedSet.memberExists(member)) {
+            numElems += 1;
+          }
+          sortedSet.add(parseFloat(score, 10), member);
+        }
+
       }
       this.memoryTracker.nodeCreation(newMainZsetNode);
     } else if (nodeAtKey.type !== "zset") {
@@ -875,10 +891,18 @@ class Store {
       while (scoreAndMembers.length) {
         const score = scoreAndMembers.shift();
         const member = scoreAndMembers.shift();
-        if (!sortedSet.memberExists(member)) {
+        if (xxNxFlag === 'NX' && !sortedSet.memberExists(member)) {
+          sortedSet.add(parseFloat(score, 10), member);
           numElems += 1;
+        } else if (xxNxFlag === 'XX' && sortedSet.memberExists(member)) {
+          sortedSet.add(parseFloat(score, 10), member);
+          numElems += 1;
+        } else {
+          if (sortedSet.memberExists(member)) {
+            numElems += 1;
+          }
+          sortedSet.add(parseFloat(score, 10), member);
         }
-        sortedSet.add(parseFloat(score, 10), member);
       }
       const newMemory = this.memoryTracker.calculateStoreItemSize(nodeAtKey);
       this.memoryTracker.sortedSetElementInsert(oldMemory, newMemory);
