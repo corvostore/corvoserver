@@ -770,8 +770,7 @@ describe("store", () => {
   it("uses zinterstore with duplicate weights keyword", () => {
     const testStore = new Store();
     expect(function() {
-      testStore.zinterstore(
-        "destKey, "2", "key1", "key2", "WEIGHTS", "10", "20", "WEIGHTS")
+      testStore.zinterstore("destKey", "2", "key1", "key2", "WEIGHTS", "10", "20", "WEIGHTS")
     }).toThrow(new Error("StoreError: invalid or duplicate options keyword."));
   });
 
@@ -779,7 +778,102 @@ describe("store", () => {
     const testStore = new Store();
     expect(function() {
       testStore.zinterstore(
-        "destKey, "2", "key1", "key2", "AGGREGATE", "SUM", "AGGREGATE")
-    }).toThrow(new Error("StoreError: invalid or duplicate options keyword."));
+        "destKey", "2", "key1", "key2", "AGGREGATE", "SUM", "AGGREGATE")
+    }).toThrow(new Error("StoreError: syntax error, more tokens than expected."));
+  });
+
+  it("uses zinterstore returns intersection of two sorted sets with AGGREGATE", () => {
+    const key1 = "key1";
+    const key2 = "key2";
+    const destKey = "destKey";
+    const member1 = "m1";
+    const score1  = "10";
+    const member2 = "m2";
+    const score21 = "20";
+    const score22 = "222";
+    const member3 = "m3";
+    const score31 = "30";
+    const score32 = "333";
+    const member4 = "m4";
+    const score4  = "444";
+    const testStore = new Store();
+    testStore.zadd(key1, score1, member1, score21, member2, score31, member3);
+    testStore.zadd(key2, score22, member2, score32, member3, score4, member4);
+
+    const returnVal = testStore.zinterstore(destKey, "2", key1, key2, "AGGREGATE", "SUM");
+    const destSortedSet = testStore.mainHash[destKey].val;
+    expect(destSortedSet.hash).toEqual({ "m2": 242, "m3": 363 });
+  });
+
+  it("uses zinterstore returns intersection with AGGREGATE MIN", () => {
+    const key1 = "key1";
+    const key2 = "key2";
+    const destKey = "destKey";
+    const member1 = "m1";
+    const score1  = "10";
+    const member2 = "m2";
+    const score21 = "20";
+    const score22 = "222";
+    const member3 = "m3";
+    const score31 = "3000";
+    const score32 = "333";
+    const member4 = "m4";
+    const score4  = "444";
+    const testStore = new Store();
+    testStore.zadd(key1, score1, member1, score21, member2, score31, member3);
+    testStore.zadd(key2, score22, member2, score32, member3, score4, member4);
+
+    const returnVal = testStore.zinterstore(destKey, "2", key1, key2, "AGGREGATE", "MIN");
+    const destSortedSet = testStore.mainHash[destKey].val;
+    expect(destSortedSet.hash).toEqual({ "m2": 20, "m3": 333 });
+  });
+
+  it("uses zinterstore returns intersection with AGGREGATE MAX", () => {
+    const key1 = "key1";
+    const key2 = "key2";
+    const destKey = "destKey";
+    const member1 = "m1";
+    const score1  = "10";
+    const member2 = "m2";
+    const score21 = "20";
+    const score22 = "222";
+    const member3 = "m3";
+    const score31 = "3000";
+    const score32 = "333";
+    const member4 = "m4";
+    const score4  = "444";
+    const testStore = new Store();
+    testStore.zadd(key1, score1, member1, score21, member2, score31, member3);
+    testStore.zadd(key2, score22, member2, score32, member3, score4, member4);
+
+    const returnVal = testStore.zinterstore(destKey, "2", key1, key2, "AGGREGATE", "MAX");
+    const destSortedSet = testStore.mainHash[destKey].val;
+    expect(destSortedSet.hash).toEqual({ "m2": 222, "m3": 3000 });
+  });
+
+  it("uses zinterstore between two sorted sets with weights", () => {
+    const key1 = "key1";
+    const key2 = "key2";
+    const destKey = "destKey";
+    const member1 = "m1";
+    const score1  = "10";
+    const member2 = "m2";
+    const score21 = "20";
+    const score22 = "222";
+    const member3 = "m3";
+    const score31 = "8000";
+    const score32 = "333";
+    const member4 = "m4";
+    const score4  = "444";
+    const weight1 = "5";
+    const weight2 = "11";
+    const testStore = new Store();
+    testStore.zadd(key1, score1, member1, score21, member2, score31, member3);
+    testStore.zadd(key2, score22, member2, score32, member3, score4, member4);
+
+    const returnVal = testStore.zinterstore(
+      destKey, "2", key1, key2, "WEIGHTS", weight1, weight2, "AGGREGATE", "MIN");
+    const destSortedSet = testStore.mainHash[destKey].val;
+    expect(destSortedSet.hash).toEqual({ "m2": 100, "m3": 3663 });
   });
 });
