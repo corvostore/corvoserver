@@ -917,6 +917,11 @@ class Store {
       while (scoreAndMembers.length) {
         const score = scoreAndMembers.shift();
         const member = scoreAndMembers.shift();
+
+        if (isNaN(+score)) {
+          throw new StoreError("StoreError: score should be numeric.");
+        }
+
         if (xxNxFlag === 'NX') {
           if (!sortedSet.memberExists(member)) {
             sortedSet.add(parseFloat(score, 10), member);
@@ -955,6 +960,11 @@ class Store {
       while (scoreAndMembers.length) {
         const score = scoreAndMembers.shift();
         const member = scoreAndMembers.shift();
+
+        if (isNaN(+score)) {
+          throw new StoreError("StoreError: score should be numeric.");
+        }
+
         if (xxNxFlag === 'NX') {
           if (!sortedSet.memberExists(member)) {
             sortedSet.add(parseFloat(score, 10), member);
@@ -1019,7 +1029,7 @@ class Store {
         if (unionHash[member]) {
           let newScore = this.calcScoreAggr(
                           aggregation,
-                          unionHash[member],
+                          parseFloat(unionHash[member], 10),
                           (hash[member] * weightToApply));
           unionHash[member] = newScore;
         } else {
@@ -1094,7 +1104,11 @@ class Store {
   }
 
   zincrby(key, increment, member) {
-    increment = parseInt(increment, 10);
+    if (isNaN(+increment)) {
+      throw new StoreError("StoreError: increment should be numeric.");
+    }
+
+    increment = parseFloat(increment, 10);
     const nodeAtKey = this.mainHash[key];
     if (nodeAtKey && nodeAtKey.type !== 'zset') {
       this.touch(key);
@@ -1183,7 +1197,7 @@ class Store {
         }
 
         for (let i = 0; i < numKeys; i += 1) {
-          weightsArr.push(parseInt(restOfParams.shift(), 10));
+          weightsArr.push(parseFloat(restOfParams.shift(), 10));
         }
 
         anOptionProcessed = true;
