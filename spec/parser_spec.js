@@ -516,4 +516,26 @@ describe("Parser", () => {
     const errorMessage = "ParseError: Wrong number of arguments for HKEYS command";
     expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
   });
+
+  it("returns array of tokens for valid ZINTERSTORE command", () => {
+    const command = '*4\r\n$11\r\nZINTERSTORE\r\n$7\r\ndestkey\r\n$1\r\n1\r\n$4\r\nkey1\r\n';
+    expect(Parser.processIncomingString(command)).toEqual(['ZINTERSTORE', 'destkey', '1', 'key1']);
+  });
+
+  it("throws an error if number of arguments for ZINTERSTORE command is not value", () => {
+    const command = '*3\r\n$11\r\nZINTERSTORE\r\n$7\r\ndestkey\r\n$1\r\n1\r\n';
+    const errMessage = "ParseError: Wrong number of arguments for ZINTERSTORE command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errMessage));
+  });
+
+  it("returns array of tokens for valid ZUNIONSTORE command", () => {
+    const command = '*4\r\n$11\r\nZUNIONSTORE\r\n$7\r\ndestkey\r\n$1\r\n1\r\n$4\r\nkey1\r\n';
+    expect(Parser.processIncomingString(command)).toEqual(['ZUNIONSTORE', 'destkey', '1', 'key1']);
+  });
+
+  it("throws an error if number of arguments for ZUNIONSTORE command is not value", () => {
+    const command = '*3\r\n$11\r\nZUNIONSTORE\r\n$7\r\ndestkey\r\n$1\r\n1\r\n';
+    const errMessage = "ParseError: Wrong number of arguments for ZUNIONSTORE command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errMessage));
+  });
 });

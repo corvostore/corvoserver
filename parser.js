@@ -277,6 +277,22 @@ class Parser {
     }
   }
 
+  static processZINTERSTORERequest(tokens) {
+    if (tokens.length >= 4) {
+      return tokens;
+    } else {
+      throw new ParserError("ParseError: Wrong number of arguments for ZINTERSTORE command");
+    }
+  }
+
+  static processZUNIONSTORERequest(tokens) {
+    if (tokens.length >= 4) {
+      return tokens;
+    } else {
+      throw new ParserError("ParseError: Wrong number of arguments for ZUNIONSTORE command");
+    }
+  }
+
   static chomp(s) {
     return s.slice().replace(/[\n|\r]*$/, '');
   }
@@ -383,6 +399,8 @@ const commandMap = {
   'HMGET': Parser.processHMGETRequest,
   'HINCRBY': Parser.processHINCRBYRequest,
   'HKEYS': Parser.processHKEYSRequest,
+  'ZINTERSTORE': Parser.processZINTERSTORERequest,
+  'ZUNIONSTORE': Parser.processZUNIONSTORERequest,
 };
 
 export { commandMap, Parser };
