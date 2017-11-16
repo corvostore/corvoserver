@@ -3,12 +3,39 @@ import Store from './store';
 import { Parser } from './parser';
 import ParserError from './parser_error';
 import StoreError from './store_error';
+import FS from "fs";
 
 const DEFAULT_PORT = 6379;
 const DEFAULT_HOST = '127.0.0.1';
+const WRITE_COMMANDS = {
+  SET: true, //
+  APPEND: true, // always write to AOF when returning integer
+  TOUCH: true, // write to AOF when return val integer NOT 0 X
+  INCR: true, // always write to AOF when returning integer
+  DECR: true, // always write to AOF when returning integer
+  RENAME: true, // write to AOF when returning OK
+  RENAMENX: true, // write to AOF when returns 1 or 0
+  DEL: true, // write for any integer greater than 0 X
+  LREM: true, // write for any integer greater than 0 X
+  LPUSH: true, // write for any integer value
+  RPUSH: true, // write for any integer value
+  LPOP: true, // write when not nil X
+  RPOP: true, // write when not nil X
+  LSET: true, // write when returning OK
+  HSET: true, // write for 1 or 0
+  HMSET: true, // write when returning OK
+  HDEL: true, // write for any integer value
+  HSETNX: true, // write for 1 or 0
+  HINCRBY: true, // write for any float
+  ZINTERSTORE: true, // write for any integer value
+  ZUNIONSTORE: true, // write for any integer value
+  ZADD: true, // write for integer or bulk string reply
+  ZREM: true, // write for any integer value
+  ZINCRBY: true, // bulk string reply
+};
 
 class CorvoServer {
-  constructor() {
+  constructor(options) {
     this.store = new Store();
     this.storeCommandMap = {
       'GET': this.store.getString,
@@ -50,6 +77,7 @@ class CorvoServer {
       'ZINCRBY': this.store.zincrby,
       'ZSCORE': this.store.zscore,
     };
+    this.writer = FS.createWriteStream(options.aofWritePath);
   }
 
   prepareRespReturn(result, isError=false) {
@@ -146,6 +174,12 @@ class CorvoServer {
         } else {
           result = "ServerError: Command not found in storeCommandMap.";
         }
+
+        // write to AOF file if command and return val are correct
+        if (WRITE_COMMANDS[command]) {
+          this.aofCheckAndWrite(data, command, result);
+        }
+
         const stringToReturn = this.prepareRespReturn(result);
         conn.write(stringToReturn);
       } catch(err) {
@@ -159,6 +193,22 @@ class CorvoServer {
     }.bind(this));
   };
 
+  aofCheckAndWrite(data, command, result) {
+    if (command === 'TOUCH' && result === 0) {
+      return;
+    } else if (command === 'DEL' && result === 0) {
+      return;
+    } else if (command === 'LPOP' && result === null) {
+      return;
+    } else if (command === 'RPOP' && result === null) {
+      return;
+    } else if (command === 'LREM' && result === 0) {
+      return;
+    } else {
+      console.log("WRITING TO AOF FILE!");
+      this.writer.write(data, 'UTF8');
+    }
+  }
 }
 
 export default CorvoServer;
