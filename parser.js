@@ -277,6 +277,50 @@ class Parser {
     }
   }
 
+  static processZADDRequest(tokens) {
+    if (tokens.length >= 4) {
+      return tokens;
+    } else {
+      throw new ParserError("ParseError: Wrong number of arguments for ZADD command");
+    }
+  }
+
+  static processZREMRequest(tokens) {
+    if (tokens.length >= 3) {
+      return tokens;
+    } else {
+      throw new ParserError("ParseError: Wrong number of arguments for ZREM command");
+    }
+  }
+
+  static processZCARDRequest(tokens) {
+    if (tokens.length === 2) {
+      return tokens;
+    } else {
+      throw new ParserError("ParseError: Wrong number of arguments for ZCARD command");
+    }
+  }
+
+  static checkArgsCombination(tokens) {
+    const scoreIdx = tokens[tokens.length - 2];
+    const scoreVal = tokens[scoreIdx];
+    // score must be string representation of floating-point number
+    if (isNaN(parseFloat(scoreVal, 10))) {
+      throw new ParserError("ParseError: Invalid score value for ZADD command");
+    }
+    const flags = tokens.slice(2, scoreIdx);
+    if (flags.length > 3) {
+      throw new ParserError("ParseError: Invalid number of flags for ZADD command");
+    }
+
+    for (let i = 0; i < flags.length; i++) {
+      if (['NX', 'CH', 'INCR'].indexOf(flags[i]) < 0 && ['XX', 'CH', 'INCR'].indexOf(flags[i]) < 0 && ['nx', 'ch', 'incr'].indexOf(flags[i]) < 0 && ['xx', 'ch', 'incr'].indexOf(flags[i]) < 0)  {
+        throw new ParserError("ParseError: Invalid flag or flags for ZADD command");
+      }
+    }
+    return tokens;
+  }
+
   static chomp(s) {
     return s.slice().replace(/[\n|\r]*$/, '');
   }
@@ -383,6 +427,9 @@ const commandMap = {
   'HMGET': Parser.processHMGETRequest,
   'HINCRBY': Parser.processHINCRBYRequest,
   'HKEYS': Parser.processHKEYSRequest,
+  'ZADD': Parser.processZADDRequest,
+  'ZREM': Parser.processZREMRequest,
+  'ZCARD': Parser.processZCARDRequest,
 };
 
 export { commandMap, Parser };

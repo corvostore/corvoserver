@@ -42,6 +42,9 @@ class CorvoServer {
       'HSETNX': this.store.hsetnx,
       'HMGET': this.store.hmget,
       'HINCRBY': this.store.hincrby,
+      'ZADD': this.store.zadd,
+      'ZREM': this.store.zrem,
+      'ZCARD': this.store.zcard,
     };
   }
 
