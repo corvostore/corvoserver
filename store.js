@@ -420,7 +420,7 @@ class Store {
 
     const list = this.mainHash[key].val;
     this.touch(key);
-    let countRemoved = 0;;
+    let countRemoved = 0;
     let currListNode;
 
     if (count > 0) {
