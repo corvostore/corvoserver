@@ -337,6 +337,22 @@ class Parser {
     return tokens;
   }
 
+  static processZINCRBYRequest(tokens) {
+    if (tokens.length === 4) {
+      return tokens;
+    } else {
+      throw new ParserError("ParseError: Wrong number of arguments for ZINCRBY command");
+    }
+  }
+
+  static processZSCORERequest(tokens) {
+    if (tokens.length === 3) {
+      return tokens;
+    } else {
+      throw new ParserError("ParseError: Wrong number of arguments for ZSCORE command");
+    }
+  }
+
   static chomp(s) {
     return s.slice().replace(/[\n|\r]*$/, '');
   }
@@ -448,6 +464,8 @@ const commandMap = {
   'ZADD': Parser.processZADDRequest,
   'ZREM': Parser.processZREMRequest,
   'ZCARD': Parser.processZCARDRequest,
+  'ZINCRBY': Parser.processZINCRBYRequest,
+  'ZSCORE': Parser.processZSCORERequest,
 };
 
 export { commandMap, Parser };
