@@ -538,4 +538,37 @@ describe("Parser", () => {
     const errMessage = "ParseError: Wrong number of arguments for ZUNIONSTORE command";
     expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errMessage));
   });
+
+  it("returns array of tokens for valid ZADD command", () => {
+    const command = '*4\r\n$4\r\nZADD\r\n$3\r\nkey\r\n$2\r\n20\r\n$1\r\nv\r\n';
+    expect(Parser.processIncomingString(command)).toEqual(['ZADD', 'key', '20', 'v']);
+  });
+
+  it("throws an error if number of arguments for ZADD command is not valid", () => {
+    const command = '*3\r\n$4\r\nZADD\r\n$3\r\nkey\r\n$2\r\n20\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for ZADD command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("returns array of tokens for valid ZREM command", () => {
+    const command = '*4\r\n$4\r\nZREM\r\n$3\r\nkey\r\n$2\r\nhi\r\n$1\r\nv\r\n';
+    expect(Parser.processIncomingString(command)).toEqual(['ZREM', 'key', 'hi', 'v']);
+  });
+
+  it("throws an error if number of arguments for ZREM command is not valid", () => {
+    const command = '*2\r\n$4\r\nZREM\r\n$3\r\nkey\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for ZREM command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("returns array of tokens for valid ZCARD command", () => {
+    const command = '*2\r\n$5\r\nZCARD\r\n$3\r\nkey\r\n';
+    expect(Parser.processIncomingString(command)).toEqual(['ZCARD', 'key']);
+  });
+
+  it("throws an error if number of arguments for ZCARD command is not valid", () => {
+    const command = '*4\r\n$5\r\nZCARD\r\n$3\r\nkey\r\n$2\r\nhi\r\n$1\r\nv\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for ZCARD command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
 });

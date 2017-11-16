@@ -44,6 +44,9 @@ class CorvoServer {
       'HINCRBY': this.store.hincrby,
       'ZINTERSTORE': this.store.zinterstore,
       'ZUNIONSTORE': this.store.zunionstore,
+      'ZADD': this.store.zadd,
+      'ZREM': this.store.zrem,
+      'ZCARD': this.store.zcard,
     };
   }
 
