@@ -47,6 +47,8 @@ class CorvoServer {
       'ZADD': this.store.zadd,
       'ZREM': this.store.zrem,
       'ZCARD': this.store.zcard,
+      'ZINCRBY': this.store.zincrby,
+      'ZSCORE': this.store.zscore,
     };
   }
 

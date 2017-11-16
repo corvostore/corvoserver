@@ -887,6 +887,37 @@ class Store {
     };
   }
 
+  zaddIncrement(key, score, member, xxNxFlag) {
+    const nodeAtKey = this.mainHash[key];
+    let newScore = null;
+
+    if (!nodeAtKey) {
+      newScore = this.zincrby(key, score, member);
+    } else if (nodeAtKey.type !== "zset") {
+      throw new StoreError("StoreError: value at key not a sorted set.");
+    } else {
+      const sortedSet = this.mainHash[key].val;
+
+      if (isNaN(+score)) {
+        throw new StoreError("StoreError: score should be numeric.");
+      }
+
+      if (xxNxFlag === 'NX') {
+        if (!sortedSet.memberExists(member)) {
+          newScore = this.zincrby(key, score, member);
+        }
+      } else if (xxNxFlag === 'XX') {
+        if (sortedSet.memberExists(member)) {
+          newScore = this.zincrby(key, score, member);
+        }
+      } else {
+        newScore = this.zincrby(key, score, member);
+      }
+    }
+
+    return newScore;
+  }
+
   zadd(key, ...restOfParams) {
     const paramsObject = this.processZaddParams(...restOfParams);
     const xxNxFlag = paramsObject.xxNxFlag;
@@ -898,7 +929,7 @@ class Store {
       if (scoreAndMembers.length > 2) {
         throw new StoreError("StoreError: INCR option supports a single increment-element pair.");
       } else {
-        return this.zincrby(key, ...scoreAndMembers);
+        return this.zaddIncrement(key, ...scoreAndMembers, xxNxFlag);
       }
     }
 
@@ -1118,7 +1149,8 @@ class Store {
       this.lruCheckAndEvictToMaxMemory();
       return increment;
     } else {
-      const newScore = this.zscore(key, member) + increment;
+      let newScore = this.zscore(key, member) || 0;
+      newScore += increment;
       this.lruCheckAndEvictToMaxMemory();
       return this.mainHash[key].val.setScore(member, newScore);
     }
