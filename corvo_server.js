@@ -34,7 +34,7 @@ const WRITE_COMMANDS = {
   ZINCRBY: true, // bulk string reply
 };
 const DEF_OPTIONS = {
-  aofWritePath: 'corvoAOF.txt',
+  aofWritePath: 'corvoAOF.aof',
   aofPersistence: true
 };
 

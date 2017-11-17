@@ -1,8 +1,8 @@
 import CorvoServer from './corvo_server';
 
 const options = {
-  aofWritePath: 'corvoAOF.txt',
-  aofPersistence: false
+  aofWritePath: 'corvoAOF.aof',
+  aofPersistence: true
 };
 
 var server = new CorvoServer(options);
