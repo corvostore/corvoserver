@@ -348,7 +348,7 @@ class Store {
       this.touch(key);
       const list = this.mainHash[key].val;
 
-      return list.lpop().val;
+      return list.length ? list.lpop().val : null;
     } else {
       return null;
     }
@@ -359,7 +359,7 @@ class Store {
       this.touch(key);
       const list = this.mainHash[key].val;
 
-      return list.rpop().val;
+      return list.length ? list.rpop().val : null;
     } else {
       return null;
     }

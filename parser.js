@@ -150,7 +150,7 @@ class Parser {
   }
 
   static processRPUSHRequest(tokens) {
-    if (tokens.length === 3) {
+    if (tokens.length >= 3) {
       return tokens;
     } else {
       throw new ParserError("ParseError: Wrong number of arguments for RPUSH command");
