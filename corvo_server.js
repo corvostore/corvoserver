@@ -308,6 +308,43 @@ class CorvoServer {
       throw err;
     }
   }
+
+  static parseCommandLineIntoOptions(args) {
+    const options = {};
+
+    while (args.length) {
+      const token = args.shift();
+      if (token === '--maxMemory') {
+        const maxMemory = +args.shift();
+
+        if (isNaN(maxMemory)) {
+          throw new Error("Invalid option value for maxMemory.");
+        }
+
+        options['maxMemory'] = maxMemory;
+      } else if (token === '--aofWritePath') {
+        const path = args.shift();
+
+        if (!path.match(/.+\.aof$/i)) {
+          throw new Error("Invalid option value for aofWritePath.");
+        }
+
+        options['aofWritePath'] = path
+      } else if (token === '--aofPersistence') {
+        let persistenceBool = args.shift();
+
+        if (persistenceBool !== 'true' && persistenceBool !== 'false') {
+          throw new Error("Invalid option value for aofPersistence.");
+        }
+
+        persistenceBool = persistenceBool === 'true';
+
+        options['aofPersistence'] = persistenceBool;
+      }
+    };
+
+    return options;
+  }
 }
 
 export default CorvoServer;
