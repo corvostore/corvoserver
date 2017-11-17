@@ -221,43 +221,84 @@ class CorvoServer {
   }
 
   aofLoadFile(fileName) {
-    const buf = new Buffer(1024 * 1024);
+    // const CHUNK_SIZE = 1024;
+    const CHUNK_SIZE = 391;
+    const buf = new Buffer(CHUNK_SIZE);
 
     console.log("Going to open an existing file");
     const self = this;
+    this.prependString = "";
     FS.open(fileName, 'r', function(err, fd) {
       if (err) {
         return console.error(err);
       }
       console.log("File opened successfully!");
       console.log("Going to read the file");
-      FS.read(fd, buf, 0, buf.length, 0, function(err, bytes){
+      function readNextChunk() {
+        FS.read(fd, buf, 0, CHUNK_SIZE, 0, function(err, bytes){
           if (err){
             console.log(err);
           }
           console.log(bytes + " bytes read");
 
           // Print only read bytes to avoid junk.
-          if (bytes > 0){
-            console.log(buf.slice(0, bytes).toString());
+          if (bytes === 0){
+            // done reading file
+            FS.close(fd, function(err) {
+              if (err) {
+                throw err;
+              }
+              return - 1;
+            });
           }
 
-          const inputDataTokens = buf.slice(0, bytes).toString().split('\r\n').slice(0, -1);
+          console.log(buf.slice(0, bytes).toString());
+          let dataToProcess;
+
+          const dataReceived = buf.slice(0, bytes).toString();
+          if (bytes < CHUNK_SIZE) {
+            dataToProcess = self.prependString + dataReceived;
+          } else {
+console.log("here in else");
+            const bytesToChop = self.getTrailingCommandBytes(dataReceived);
+console.log("bytesToChop = ", bytesToChop);
+console.log("prependString = ", self.prependString);
+console.log("chopped dataReceived = ", dataReceived.slice(0, -bytesToChop));
+            dataToProcess = self.prependString + dataReceived.slice(0, -bytesToChop);
+            self.prependString = dataReceived.slice(-bytesToChop);
+          }
+          let inputDataTokens = dataToProcess.split('\r\n').slice(0, -1);
           console.log("inputDataTokens.length=", inputDataTokens.length);
           console.log("inputDataTokens[0]=", inputDataTokens[0], ":");
           console.log("inputDataTokens[1]=", inputDataTokens[1], ":");
           while (inputDataTokens.length) {
-            const countToken = inputDataTokens.shift();
-            const count = parseInt(countToken.slice(1), 10);
-            console.log("Inside fs.read, this=", this);
+            let countToken = inputDataTokens.shift();
+            let count = parseInt(countToken.slice(1), 10);
             // extract one command
-            const tokens = self.extractOneCommand(count, inputDataTokens);
+            let tokens = self.extractOneCommand(count, inputDataTokens);
 
             // apply that command
             self.aofCallStoreCommands(tokens);
           }
-      });
+        });
+        console.log("after FS.read");
+      }
+      readNextChunk();
+      console.log("after call to readNextChunk");
     });
+  }
+
+  getTrailingCommandBytes(dataReceived) {
+    let count = 0;
+    let idx = dataReceived.length - 1;
+
+    while (idx >= 0) {
+      count += 1;
+      if (dataReceived[idx] === '*') {
+        return count;
+      }
+      idx -= 1;
+    }
   }
 
   extractOneCommand(count, inputDataTokens) {
