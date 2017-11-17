@@ -78,7 +78,8 @@ class CorvoServer {
       'ZSCORE': this.store.zscore,
     };
     this.aofWritePath = options.aofWritePath;
-    this.writer = FS.createWriteStream(options.aofWritePath);
+    this.writer = FS.createWriteStream(options.aofWritePath, {'flags': 'a'
+    });
   }
 
   prepareRespReturn(result, isError=false) {
@@ -217,7 +218,7 @@ class CorvoServer {
 
     console.log("Going to open an existing file");
     const self = this;
-    FS.open(fileName, 'r+', function(err, fd) {
+    FS.open(fileName, 'r', function(err, fd) {
       if (err) {
           return console.error(err);
       }
@@ -244,7 +245,7 @@ class CorvoServer {
             console.log("Inside fs.read, this=", this);
             // extract one command
             const tokens = self.extractOneCommand(count, inputDataTokens);
-          
+
             // apply that command
             self.aofCallStoreCommands(tokens);
           }
@@ -296,13 +297,6 @@ class CorvoServer {
         result = "ServerError: Command not found in storeCommandMap.";
       }
 
-      // write to AOF file if command and return val are correct
-      if (WRITE_COMMANDS[command]) {
-        this.aofCheckAndWrite(data, command, result);
-      }
-
-      const stringToReturn = this.prepareRespReturn(result);
-      conn.write(stringToReturn);
     } catch(err) {
       throw err;
     }
