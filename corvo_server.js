@@ -80,6 +80,7 @@ class CorvoServer {
     this.aofWritePath = options.aofWritePath;
     this.writer = FS.createWriteStream(options.aofWritePath, {'flags': 'a'
     });
+    this.persist = options.aofPersistence;
   }
 
   prepareRespReturn(result, isError=false) {
@@ -220,7 +221,7 @@ class CorvoServer {
     const self = this;
     FS.open(fileName, 'r', function(err, fd) {
       if (err) {
-          return console.error(err);
+        return console.error(err);
       }
       console.log("File opened successfully!");
       console.log("Going to read the file");
@@ -231,7 +232,7 @@ class CorvoServer {
           console.log(bytes + " bytes read");
 
           // Print only read bytes to avoid junk.
-          if(bytes > 0){
+          if (bytes > 0){
             console.log(buf.slice(0, bytes).toString());
           }
 
