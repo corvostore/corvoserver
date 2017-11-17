@@ -177,7 +177,6 @@ class CorvoServer {
           }
 
         } else if (this.storeCommandMap[command]) {
-          console.log("TOKENS", tokens);
           result = this.storeCommandMap[command].apply(this.store, tokens.slice(1));
         } else {
           result = "ServerError: Command not found in storeCommandMap.";
@@ -215,7 +214,7 @@ class CorvoServer {
     } else if (command === 'LREM' && result === 0) {
       return;
     } else {
-      console.log("WRITING TO AOF FILE!");
+      console.log("Above command written to AOF file.");
       this.writer.write(data, 'UTF8');
     }
   }
@@ -229,28 +228,18 @@ class CorvoServer {
     this.prependString = "";
     const readStream = FS.createReadStream(fileName, {encoding: 'utf8', highWaterMark: CHUNK_SIZE});
     readStream.on('data', function(chunk) {
-          console.log("chunk = ", chunk.toString());
-          console.log("chunksize = ", chunk.length);
           let bytes = chunk.length;
-
           let dataToProcess;
 
           const dataReceived = chunk;
           if (bytes < CHUNK_SIZE) {
             dataToProcess = self.prependString + dataReceived;
           } else {
-console.log("here in else");
             const bytesToChop = self.getTrailingCommandBytes(dataReceived);
-console.log("bytesToChop = ", bytesToChop);
-console.log("prependString = ", self.prependString);
-console.log("chopped dataReceived = ", dataReceived.slice(0, -bytesToChop));
             dataToProcess = self.prependString + dataReceived.slice(0, -bytesToChop);
             self.prependString = dataReceived.slice(-bytesToChop);
           }
           let inputDataTokens = dataToProcess.split('\r\n').slice(0, -1);
-          console.log("inputDataTokens.length=", inputDataTokens.length);
-          console.log("inputDataTokens[0]=", inputDataTokens[0], ":");
-          console.log("inputDataTokens[1]=", inputDataTokens[1], ":");
           while (inputDataTokens.length) {
             let countToken = inputDataTokens.shift();
             let count = parseInt(countToken.slice(1), 10);
