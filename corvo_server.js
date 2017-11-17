@@ -223,39 +223,19 @@ class CorvoServer {
   aofLoadFile(fileName) {
     // const CHUNK_SIZE = 1024;
     const CHUNK_SIZE = 391;
-    const buf = new Buffer(CHUNK_SIZE);
 
     console.log("Going to open an existing file");
     const self = this;
     this.prependString = "";
-    FS.open(fileName, 'r', function(err, fd) {
-      if (err) {
-        return console.error(err);
-      }
-      console.log("File opened successfully!");
-      console.log("Going to read the file");
-      function readNextChunk() {
-        FS.read(fd, buf, 0, CHUNK_SIZE, 0, function(err, bytes){
-          if (err){
-            console.log(err);
-          }
-          console.log(bytes + " bytes read");
+    const readStream = FS.createReadStream(fileName, {encoding: 'utf8', highWaterMark: CHUNK_SIZE});
+    readStream.on('data', function(chunk) {
+          console.log("chunk = ", chunk.toString());
+          console.log("chunksize = ", chunk.length);
+          let bytes = chunk.length;
 
-          // Print only read bytes to avoid junk.
-          if (bytes === 0){
-            // done reading file
-            FS.close(fd, function(err) {
-              if (err) {
-                throw err;
-              }
-              return - 1;
-            });
-          }
-
-          console.log(buf.slice(0, bytes).toString());
           let dataToProcess;
 
-          const dataReceived = buf.slice(0, bytes).toString();
+          const dataReceived = chunk;
           if (bytes < CHUNK_SIZE) {
             dataToProcess = self.prependString + dataReceived;
           } else {
@@ -280,12 +260,9 @@ console.log("chopped dataReceived = ", dataReceived.slice(0, -bytesToChop));
             // apply that command
             self.aofCallStoreCommands(tokens);
           }
-        });
-        console.log("after FS.read");
-      }
-      readNextChunk();
-      console.log("after call to readNextChunk");
-    });
+      }).on('end', function() {
+        console.log("end of data reached");
+      });
   }
 
   getTrailingCommandBytes(dataReceived) {
