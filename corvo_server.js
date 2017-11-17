@@ -136,16 +136,18 @@ class CorvoServer {
   }
 
   startServer(port=DEFAULT_PORT, host=DEFAULT_HOST) {
-    const server = Net.createServer();
-    server.on('connection', this.handleConnection.bind(this));
+    this.server = Net.createServer();
+    this.server.on('connection', this.handleConnection.bind(this));
 
     if (this.persist) { this.aofLoadFile(this.aofWritePath); }
-    server.listen(port, host, function() {
-      console.log('server listening to %j', server.address());
+    const self = this;
+    this.server.listen(port, host, function() {
+      console.log('server listening to %j', self.server.address());
     });
   }
 
   handleConnection(conn) {
+    const self = this;
     conn.setEncoding('utf8');
     conn.on('data', function(data) {
       console.log("data =", data);
@@ -154,7 +156,10 @@ class CorvoServer {
         const command = tokens[0].toUpperCase();
         let result;
 
-        if (command === 'SET') {
+        if (command === 'SHUTDOWN') {
+          conn.destroy();
+          this.shutdownServer();
+        } else if (command === 'SET') {
           if (tokens.length > 3) {
             // add code to accommodate expiry later
             const flag = tokens[tokens.length - 1];
@@ -190,7 +195,9 @@ class CorvoServer {
         }
 
         const stringToReturn = this.prepareRespReturn(result);
-        conn.write(stringToReturn);
+        if (command !== 'SHUTDOWN') {
+          conn.write(stringToReturn);
+        }
       } catch(err) {
         if (err instanceof ParserError || err instanceof StoreError) {
           const stringToReturn = this.prepareRespReturn(err.message, true);
@@ -351,6 +358,11 @@ class CorvoServer {
     };
 
     return options;
+  }
+
+  shutdownServer() {
+    console.log("shutting down server...");
+    this.server.close();
   }
 }
 

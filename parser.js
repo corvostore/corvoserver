@@ -353,6 +353,14 @@ class Parser {
     }
   }
 
+  static processShutdownRequest(tokens) {
+    if (tokens.length === 1) {
+      return tokens;
+    } else {
+      throw new ParserError("ParseError: Wrong number of arguments for SHUTDOWN command");
+    }
+  }
+
   static chomp(s) {
     return s.slice().replace(/[\n|\r]*$/, '');
   }
@@ -466,6 +474,7 @@ const commandMap = {
   'ZCARD': Parser.processZCARDRequest,
   'ZINCRBY': Parser.processZINCRBYRequest,
   'ZSCORE': Parser.processZSCORERequest,
+  'SHUTDOWN': Parser.processShutdownRequest,
 };
 
 export { commandMap, Parser };
