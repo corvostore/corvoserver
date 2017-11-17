@@ -77,6 +77,7 @@ class CorvoServer {
       'ZINCRBY': this.store.zincrby,
       'ZSCORE': this.store.zscore,
     };
+    this.aofWritePath = options.aofWritePath;
     this.writer = FS.createWriteStream(options.aofWritePath);
   }
 
@@ -132,6 +133,7 @@ class CorvoServer {
     const server = Net.createServer();
     server.on('connection', this.handleConnection.bind(this));
 
+    this.aofLoadFile(this.aofWritePath);
     server.listen(port, host, function() {
         console.log('server listening to %j', server.address());
       });
@@ -207,6 +209,102 @@ class CorvoServer {
     } else {
       console.log("WRITING TO AOF FILE!");
       this.writer.write(data, 'UTF8');
+    }
+  }
+
+  aofLoadFile(fileName) {
+    const buf = new Buffer(1024 * 1024);
+
+    console.log("Going to open an existing file");
+    const self = this;
+    FS.open(fileName, 'r+', function(err, fd) {
+      if (err) {
+          return console.error(err);
+      }
+      console.log("File opened successfully!");
+      console.log("Going to read the file");
+      FS.read(fd, buf, 0, buf.length, 0, function(err, bytes){
+          if (err){
+            console.log(err);
+          }
+          console.log(bytes + " bytes read");
+
+          // Print only read bytes to avoid junk.
+          if(bytes > 0){
+            console.log(buf.slice(0, bytes).toString());
+          }
+
+          const inputDataTokens = buf.slice(0, bytes).toString().split('\r\n').slice(0, -1);
+          console.log("inputDataTokens.length=", inputDataTokens.length);
+          console.log("inputDataTokens[0]=", inputDataTokens[0], ":");
+          console.log("inputDataTokens[1]=", inputDataTokens[1], ":");
+          while (inputDataTokens.length) {
+            const countToken = inputDataTokens.shift();
+            const count = parseInt(countToken.slice(1), 10);
+            console.log("Inside fs.read, this=", this);
+            // extract one command
+            const tokens = self.extractOneCommand(count, inputDataTokens);
+          
+            // apply that command
+            self.aofCallStoreCommands(tokens);
+          }
+      });
+    });
+  }
+
+  extractOneCommand(count, inputDataTokens) {
+    const tokens = [];
+    for (let i = 0; i < count; i += 1) {
+      inputDataTokens.shift();
+      tokens.push(inputDataTokens.shift());
+    }
+
+    return tokens;
+  }
+
+  aofCallStoreCommands(tokens) {
+    try {
+      const command = tokens[0].toUpperCase();
+      let result;
+
+      if (command === 'SET') {
+        if (tokens.length > 3) {
+          // add code to accommodate expiry later
+          const flag = tokens[tokens.length - 1];
+
+          if (flag === 'NX') {
+            result = this.store.setStringNX(...tokens.slice(1));
+          } else if (flag === 'XX') {
+            result = this.store.setStringX(...tokens.slice(1));
+          }
+        } else {
+          result = this.store.setString(...tokens.slice(1));
+        }
+      } else if (command === 'LINSERT') {
+        const flag = tokens[2];
+
+        if (flag === 'BEFORE') {
+          result = this.store.linsertBefore(...tokens.slice(1));
+        } else if (flag === 'AFTER') {
+          result = this.store.linsertAfter(...tokens.slice(1));
+        }
+
+      } else if (this.storeCommandMap[command]) {
+        console.log("TOKENS", tokens);
+        result = this.storeCommandMap[command].apply(this.store, tokens.slice(1));
+      } else {
+        result = "ServerError: Command not found in storeCommandMap.";
+      }
+
+      // write to AOF file if command and return val are correct
+      if (WRITE_COMMANDS[command]) {
+        this.aofCheckAndWrite(data, command, result);
+      }
+
+      const stringToReturn = this.prepareRespReturn(result);
+      conn.write(stringToReturn);
+    } catch(err) {
+      throw err;
     }
   }
 }
