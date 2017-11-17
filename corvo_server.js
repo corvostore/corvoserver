@@ -8,7 +8,7 @@ import FS from "fs";
 const DEFAULT_PORT = 6379;
 const DEFAULT_HOST = '127.0.0.1';
 const WRITE_COMMANDS = {
-  SET: true, //
+  SET: true, // always write to AOF
   APPEND: true, // always write to AOF when returning integer
   TOUCH: true, // write to AOF when return val integer NOT 0 X
   INCR: true, // always write to AOF when returning integer
@@ -82,13 +82,13 @@ class CorvoServer {
       'ZSCORE': this.store.zscore,
     };
     this.aofWritePath = options.aofWritePath;
-    this.writer = FS.createWriteStream(options.aofWritePath, {'flags': 'a'
-    });
     this.persist = options.aofPersistence;
+    if (this.persist) {
+      this.writer = FS.createWriteStream(options.aofWritePath, {'flags': 'a' });
+    }
   }
 
   prepareRespReturn(result, isError=false) {
-
     // handle error
     if (isError) {
       return "-" + result + "\r\n";
@@ -139,10 +139,10 @@ class CorvoServer {
     const server = Net.createServer();
     server.on('connection', this.handleConnection.bind(this));
 
-    this.aofLoadFile(this.aofWritePath);
+    if (this.persist) { this.aofLoadFile(this.aofWritePath); }
     server.listen(port, host, function() {
-        console.log('server listening to %j', server.address());
-      });
+      console.log('server listening to %j', server.address());
+    });
   }
 
   handleConnection(conn) {
@@ -185,7 +185,9 @@ class CorvoServer {
 
         // write to AOF file if command and return val are correct
         if (WRITE_COMMANDS[command]) {
-          this.aofCheckAndWrite(data, command, result);
+          if (this.persist) {
+            this.aofCheckAndWrite(data, command, result);
+          }
         }
 
         const stringToReturn = this.prepareRespReturn(result);
