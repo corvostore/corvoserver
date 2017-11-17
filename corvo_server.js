@@ -33,9 +33,13 @@ const WRITE_COMMANDS = {
   ZREM: true, // write for any integer value
   ZINCRBY: true, // bulk string reply
 };
+const DEF_OPTIONS = {
+  aofWritePath: 'corvoAOF.txt',
+  aofPersistence: true
+};
 
 class CorvoServer {
-  constructor(options) {
+  constructor(options=DEF_OPTIONS) {
     this.store = new Store();
     this.storeCommandMap = {
       'GET': this.store.getString,
