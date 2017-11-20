@@ -31,4 +31,18 @@ describe("Set", () => {
 
     expect(testSet.cardinality).toBe(35);
   });
+
+  it("returns null if calling pop on empty set", () => {
+    const testSet = new Set();
+    expect(testSet.pop()).toBe(null);
+  });
+
+  it("uses memberExists to return appropriate truth values after checking for a member's existence", () => {
+    const testSet = new Set();
+    const testMember = "member";
+
+    testSet.add(testMember);
+    expect(testSet.memberExists(testMember)).toBe(true);
+    expect(testSet.memberExists("someOtherMember")).toBe(false);
+  });
 });
