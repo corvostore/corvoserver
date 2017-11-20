@@ -45,4 +45,23 @@ describe("Set", () => {
     expect(testSet.memberExists(testMember)).toBe(true);
     expect(testSet.memberExists("someOtherMember")).toBe(false);
   });
+
+  it("uses remove to remove a specific member and return 1", () => {
+    const testSet = new Set();
+    const testMember = "member";
+
+    testSet.add(testMember);
+    const returnVal = testSet.remove(testMember);
+
+    expect(returnVal).toBe(1);
+    expect(testSet.memberExists(testMember)).toBe(false);
+  });
+
+  it("uses remove to remove a specific member and return 1", () => {
+    const testSet = new Set();
+
+    const returnVal = testSet.remove('blahblahblah');
+
+    expect(returnVal).toBe(0);
+  });
 });

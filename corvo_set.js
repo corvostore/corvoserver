@@ -42,6 +42,18 @@ class CorvoSet {
   memberExists(member) {
     return this.memberHash[member] !== undefined;
   }
+
+  remove(member) {
+    const index = this.memberHash[member];
+
+    if (index !== undefined) {
+      delete this.memberHash[member];
+      delete this.indexHash[index];
+      return 1;
+    } else {
+      return 0;
+    }
+  }
 }
 
 export default CorvoSet;
