@@ -1,13 +1,3 @@
-// SADD key member [member...] * O(1)
-// SCARD key * O(1)
-// SDIFF  key [key...]
-// SISMEMBER key member O(1)
-// SMEMBERS key
-// SPOP key [count] * O(1)
-// SREM key member [member...] * O(1) per member
-// set is an unordered collection of unique string values
-// add, remove (via pop or explicit remove), test for existence in constant time
-
 class CorvoSet {
   constructor() {
     this.cardinality = 0;
@@ -16,9 +6,14 @@ class CorvoSet {
   };
 
   add(member) {
-    this.memberHash[member] = this.cardinality;
-    this.indexHash[this.cardinaity] = member;
-    this.cardinality += 1;
+    if (this.memberExists(member)) {
+      return 0;
+    } else {
+      this.memberHash[member] = this.cardinality;
+      this.indexHash[this.cardinaity] = member;
+      this.cardinality += 1;
+      return 1;
+    }
   }
 
   pop() {

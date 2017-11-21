@@ -706,7 +706,7 @@ describe("store", () => {
     expect(returnVal).toBe(2);
     expect(destSortedSet.hash).toEqual({ "aa": 10, "bb": 20 });
   });
- 
+
   it("uses zadd to add multiple new members to a sorted set with CH", () => {
     const key = 'k';
     const memberA = 'aa';
@@ -726,7 +726,7 @@ describe("store", () => {
     expect(returnVal).toBe(3);
     expect(destSortedSet.hash).toEqual({ "aa": 10, "bb": 220, "cc": 310, "dd": 400 });
   });
- 
+
   it("uses zadd to add multiple new members to a sorted set with CH", () => {
     const key = 'k';
     const memberA = 'aa';
@@ -777,7 +777,7 @@ describe("store", () => {
     expect(destSortedSet.hash).toEqual({ "aa": 210 });
   });
 
- 
+
   it("uses zunionstore to add the union of one or more sorted sets", () => {
     const key1 = "k1";
     const key2 = "k2";
@@ -1075,4 +1075,58 @@ describe("store", () => {
     const destSortedSet = testStore.mainHash[destKey].val;
     expect(destSortedSet.hash).toEqual({ "m2": 100, "m3": 3663 });
   });
+
+  it("uses sadd to instantiate a set an empty key and add a single value", () => {
+    const testStore = new Store();
+    const key = 'key';
+    const member = 'my member';
+
+    testStore.sadd(key, member);
+    expect(testStore.mainHash[key].val.cardinality).toBe(1);
+  });
+
+  it("uses sadd to add multiple members to a set at a key", () => {
+    const testStore = new Store();
+    const key = 'key';
+
+    testStore.sadd(key, '1', '2', '3', '4', '5', '6');
+    expect(testStore.mainHash[key].val.cardinality).toBe(6);
+  });
+
+  it("uses sadd to overwrite duplicate members thereby maintaining unique rule", () => {
+    const testStore = new Store();
+    const key = 'key';
+    const member = 'my member';
+
+    testStore.sadd(key, member);
+    testStore.sadd(key, member);
+    expect(testStore.mainHash[key].val.cardinality).toBe(1);
+  });
+
+  it("uses scard to return cardinality of set", () => {
+    const testStore = new Store();
+    const key = 'bigCardKey';
+
+    for (let i = 0; i < 371; i += 1) {
+      testStore.sadd(key, i.toString());
+    }
+
+    const card = testStore.scard(key);
+    expect(card).toBe(371);
+  });
+
+  it("uses scard to throw error if no val at key", () => {
+    const testStore = new Store();
+
+    expect(() => { testStore.scard('k'); }).toThrow(new Error("StoreError: value at key is not type set."));
+  });
+  // SADD key member [member...] * O(1)
+  // SCARD key * O(1)
+  // SDIFF  key [key...]
+  // SISMEMBER key member O(1)
+  // SMEMBERS key
+  // SPOP key [count] * O(1)
+  // SREM key member [member...] * O(1) per member
+  // set is an unordered collection of unique string values
+  // add, remove (via pop or explicit remove), test for existence in constant time
 });

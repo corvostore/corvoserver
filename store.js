@@ -3,6 +3,7 @@ import CorvoNode from './corvo_node';
 import CorvoListNode from './data_types/corvo_list_node';
 import MemoryTracker from './memory_tracker';
 import CorvoSortedSet from './data_types/corvo_sorted_set.js';
+import CorvoSet from './corvo_set.js';
 import StoreError from './store_error';
 
 const DEFAULT_MAX_MEMORY = 104857600; // equals 100MB
@@ -1323,6 +1324,42 @@ class Store {
     this.lruCheckAndEvictToMaxMemory();
     return Object.keys(interHash).length;
   }
+
+  sadd(key, ...members) {
+    let nodeAtKey = this.mainHash[key];
+
+    if (nodeAtKey === undefined) {
+      const newSet = new CorvoSet();
+      const newMainNode = new CorvoNode(key, newSet, 'set');
+      this.mainHash[key] = newMainNode;
+      this.mainList.append(newMainNode);
+      nodeAtKey = newMainNode;
+    }
+    const set = nodeAtKey.val;
+
+    members.forEach((member) => {
+      set.add(member);
+    });
+  }
+
+  scard(key) {
+    const nodeAtKey = this.mainHash[key];
+
+    if (nodeAtKey !== undefined && nodeAtKey.type === 'set') {
+      return nodeAtKey.val.cardinality;
+    } else {
+      throw new StoreError("StoreError: value at key is not type set.");
+    }
+  }
+  // SADD key member [member...] * O(1)
+  // SCARD key * O(1)
+  // SDIFF  key [key...]
+  // SISMEMBER key member O(1)
+  // SMEMBERS key
+  // SPOP key [count] * O(1)
+  // SREM key member [member...] * O(1) per member
+  // set is an unordered collection of unique string values
+  // add, remove (via pop or explicit remove), test for existence in constant time
 
   command() {
     return "*0\r\n";
