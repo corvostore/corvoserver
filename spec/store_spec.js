@@ -1089,8 +1089,9 @@ describe("store", () => {
     const testStore = new Store();
     const key = 'key';
 
-    testStore.sadd(key, '1', '2', '3', '4', '5', '6');
+    const returnVal = testStore.sadd(key, '1', '2', '3', '4', '5', '6');
     expect(testStore.mainHash[key].val.cardinality).toBe(6);
+    expect(returnVal).toBe(6);
   });
 
   it("uses sadd to overwrite duplicate members thereby maintaining unique rule", () => {
@@ -1107,12 +1108,15 @@ describe("store", () => {
     const testStore = new Store();
     const key = 'bigCardKey';
 
-    for (let i = 0; i < 371; i += 1) {
+    for (let i = 0; i < 370; i += 1) {
       testStore.sadd(key, i.toString());
     }
 
+    const returnVal = testStore.sadd(key, '371');
+
     const card = testStore.scard(key);
     expect(card).toBe(371);
+    expect(returnVal).toBe(1);
   });
 
   it("uses scard to throw error if no val at key", () => {
@@ -1120,8 +1124,8 @@ describe("store", () => {
 
     expect(() => { testStore.scard('k'); }).toThrow(new Error("StoreError: value at key is not type set."));
   });
-  // SADD key member [member...] * O(1)
-  // SCARD key * O(1)
+  // X SADD key member [member...] * O(1)
+  // X SCARD key * O(1)
   // SDIFF  key [key...]
   // SISMEMBER key member O(1)
   // SMEMBERS key

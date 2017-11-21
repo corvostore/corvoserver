@@ -1327,6 +1327,7 @@ class Store {
 
   sadd(key, ...members) {
     let nodeAtKey = this.mainHash[key];
+    let numAdded = 0;
 
     if (nodeAtKey === undefined) {
       const newSet = new CorvoSet();
@@ -1338,8 +1339,11 @@ class Store {
     const set = nodeAtKey.val;
 
     members.forEach((member) => {
+      numAdded += 1;
       set.add(member);
     });
+
+    return numAdded;
   }
 
   scard(key) {
