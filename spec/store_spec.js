@@ -1124,6 +1124,31 @@ describe("store", () => {
 
     expect(() => { testStore.scard('k'); }).toThrow(new Error("StoreError: value at key is not type set."));
   });
+
+  it("uses sismember to check for existence of a member", () => {
+    const testStore = new Store();
+    const key = 'k';
+    const member = 'memberooney';
+
+    testStore.sadd(key, member);
+
+    expect(testStore.sismember(key, member)).toBe(1);
+    expect(testStore.sismember(key, 'blah')).toBe(0);
+  });
+
+  it("uses sismember to return 0 for nonassigned key", () => {
+    const testStore = new Store();
+    expect(testStore.sismember('k', 'm')).toBe(0);
+  });
+
+  it("uses sismember to throw error if k is assigned to nonset valu", () => {
+    const testStore = new Store();
+    const key = 'k';
+
+    testStore.setString(key, 'some val');
+
+    expect(() => { testStore.sismember(key, 'mem'); }).toThrow(new Error("StoreError: value at key is not type set."));
+  });
   // X SADD key member [member...] * O(1)
   // X SCARD key * O(1)
   // SDIFF  key [key...]

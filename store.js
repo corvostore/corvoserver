@@ -1355,6 +1355,18 @@ class Store {
       throw new StoreError("StoreError: value at key is not type set.");
     }
   }
+
+  sismember(key, member) {
+    const nodeAtKey = this.mainHash[key];
+
+    if (nodeAtKey === undefined) {
+      return 0;
+    } else if (nodeAtKey.type !== 'set') {
+      throw new StoreError("StoreError: value at key is not type set.");
+    } else {
+      return nodeAtKey.val.memberExists(member) ? 1 : 0;
+    }
+  }
   // SADD key member [member...] * O(1)
   // SCARD key * O(1)
   // SDIFF  key [key...]
