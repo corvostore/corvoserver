@@ -42,6 +42,7 @@ class CorvoSet {
     const index = this.memberHash[member];
 
     if (index !== undefined) {
+      this.cardinality -= 1;
       delete this.memberHash[member];
       delete this.indexHash[index];
       return 1;

@@ -1149,13 +1149,73 @@ describe("store", () => {
 
     expect(() => { testStore.sismember(key, 'mem'); }).toThrow(new Error("StoreError: value at key is not type set."));
   });
+
+  it("uses spop to return and delete a random member", () => {
+    const testStore = new Store();
+    const key = 'k';
+
+    for (let i = 0; i < 20; i += 1) {
+      testStore.sadd(key, i.toString());
+    }
+    for (let j = 0; j < 11; j += 1) {
+      testStore.spop(key);
+    }
+
+    expect(testStore.scard(key)).toBe(9);
+  });
+
+  it("uses spop to throw an error when key holds nonset val", () => {
+    const testStore = new Store();
+
+    testStore.setString('key', 'someVal');
+
+    expect(() => { testStore.spop('key'); }).toThrow(new Error("StoreError: value at key is not type set."));
+  });
+
+  it("uses spop to return null when the key holds no val", () => {
+    const testStore = new Store();
+
+    expect(testStore.spop('key')).toBe(null);
+  });
+
+  it("uses srem to remove a specific member", () => {
+    const testStore = new Store();
+    const key = 'k';
+    const member = 'my member';
+
+    testStore.sadd(key, member);
+    const returnVal = testStore.srem(key, member);
+    expect(returnVal).toBe(1);
+
+    expect(testStore.mainHash[key].val.cardinality).toBe(0);
+  });
+
+  it("uses srem to remove multiple specific members", () => {
+    const testStore = new Store();
+    const key = 'k';
+
+    testStore.sadd(key, '1', '2', '3', '4', '5');
+    const returnVal = testStore.srem(key, '2', '3', '4');
+
+    expect(returnVal).toBe(3);
+    expect(testStore.mainHash[key].val.cardinality).toBe(2);
+  });
+
+  it("uses srem to throw error if val holds nonset type", () => {
+    const testStore = new Store();
+    const key = 'k';
+    const val = 'v';
+    testStore.setString(key, val);
+
+    expect(() => { testStore.srem(key, val); }).toThrow(new Error("StoreError: value at key is not type set."));
+  });
   // X SADD key member [member...] * O(1)
   // X SCARD key * O(1)
   // SDIFF  key [key...]
-  // SISMEMBER key member O(1)
+  // X SISMEMBER key member O(1)
   // SMEMBERS key
-  // SPOP key [count] * O(1)
-  // SREM key member [member...] * O(1) per member
+  // X SPOP key [count] * O(1)
+  // X SREM key member [member...] * O(1) per member
   // set is an unordered collection of unique string values
   // add, remove (via pop or explicit remove), test for existence in constant time
 });

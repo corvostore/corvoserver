@@ -1367,15 +1367,37 @@ class Store {
       return nodeAtKey.val.memberExists(member) ? 1 : 0;
     }
   }
-  // SADD key member [member...] * O(1)
-  // SCARD key * O(1)
-  // SDIFF  key [key...]
-  // SISMEMBER key member O(1)
-  // SMEMBERS key
-  // SPOP key [count] * O(1)
-  // SREM key member [member...] * O(1) per member
-  // set is an unordered collection of unique string values
-  // add, remove (via pop or explicit remove), test for existence in constant time
+
+  spop(key) {
+    const nodeAtKey = this.mainHash[key];
+
+    if (nodeAtKey === undefined) {
+      return null;
+    } else if (nodeAtKey.type !== 'set') {
+      throw new StoreError("StoreError: value at key is not type set.");
+    } else {
+      return nodeAtKey.val.pop();
+    }
+  }
+
+  srem(key, ...members) {
+    const nodeAtKey = this.mainHash[key];
+
+    if (nodeAtKey === undefined) {
+      return 0;
+    } else if (nodeAtKey.type !== 'set') {
+      throw new StoreError("StoreError: value at key is not type set.");
+    } else {
+      let numDeleted = 0;
+      const set = nodeAtKey.val;
+
+      members.forEach((member) => {
+        numDeleted += set.remove(member);
+      });
+
+      return numDeleted;
+    }
+  }
 
   command() {
     return "*0\r\n";
