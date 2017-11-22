@@ -38,6 +38,10 @@ class CorvoSet {
     return this.memberHash[member] !== undefined;
   }
 
+  getMembers() {
+    return Object.keys(this.memberHash);
+  }
+
   remove(member) {
     const index = this.memberHash[member];
 

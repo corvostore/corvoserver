@@ -64,4 +64,16 @@ describe("Set", () => {
 
     expect(returnVal).toBe(0);
   });
+
+  it("uses getMembers to return an array of all of the members", () => {
+    const testSet = new Set();
+    const movies = ['A New Hope', 'The Return of the Jedi', 'The Empire Strikes Back']
+
+    testSet.add('A New Hope');
+    testSet.add('The Empire Strikes Back');
+    testSet.add('The Return of the Jedi');
+    const members = testSet.getMembers(movies);
+
+    expect(members)
+  });
 });
