@@ -1399,6 +1399,18 @@ class Store {
     }
   }
 
+  smembers(key) {
+    const nodeAtKey = this.mainHash[key];
+
+    if (nodeAtKey === undefined) {
+      return null;
+    } else if (nodeAtKey.type !== 'set') {
+      throw new StoreError("StoreError: value at key is not type set.");
+    } else {
+      return nodeAtKey.val.getMembers();
+    }
+  }
+
   command() {
     return "*0\r\n";
   }

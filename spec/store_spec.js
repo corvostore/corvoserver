@@ -1209,6 +1209,26 @@ describe("store", () => {
 
     expect(() => { testStore.srem(key, val); }).toThrow(new Error("StoreError: value at key is not type set."));
   });
+
+  it("uses smembers to get all members", () => {
+    const testStore = new Store();
+    const key = 'k';
+    const movies = ['A New Hope', 'The Return of the Jedi', 'The Empire Strikes Back']
+
+    testStore.sadd(key, ...movies);
+    const returnVal = testStore.smembers(key);
+
+    expect(returnVal).toEqual(movies);
+  });
+
+  it("uses smembers to throw error when nonset type at key", () => {
+    const testStore = new Store();
+    const key = 'k';
+    const val = 'v';
+    testStore.setString(key, val);
+
+    expect(() => { testStore.smembers(key, val); }).toThrow(new Error("StoreError: value at key is not type set."));
+  });
   // X SADD key member [member...] * O(1)
   // X SCARD key * O(1)
   // SDIFF  key [key...]
