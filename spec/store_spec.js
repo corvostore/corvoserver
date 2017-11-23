@@ -1229,11 +1229,62 @@ describe("store", () => {
 
     expect(() => { testStore.smembers(key, val); }).toThrow(new Error("StoreError: value at key is not type set."));
   });
+
+  it("uses sunion to return the union of two sets", () => {
+    const testStore = new Store();
+    const keyA = 'A';
+    const keyB = 'B';
+    const union = ['a', 'b', 'c', 'd'];
+
+    testStore.sadd(keyA, 'a', 'b', 'c');
+    testStore.sadd(keyB, 'b', 'c', 'd');
+    const returnVal = testStore.sunion(keyA, keyB);
+
+    expect(returnVal).toEqual(union);
+  });
+
+  it("uses sunion to return the contents of a single set if other set empty", () => {
+    const testStore = new Store();
+    const keyA = 'A';
+    const keyB = 'B';
+    const union = ['a', 'b', 'c'];
+
+    testStore.sadd(keyA, 'a', 'b', 'c');
+    testStore.sadd(keyB);
+    const returnVal = testStore.sunion(keyA, keyB);
+
+    expect(returnVal).toEqual(union);
+  });
+
+  it("uses sunion to return the contents of a single set if other key has no val", () => {
+    const testStore = new Store();
+    const keyA = 'A';
+    const keyB = 'B';
+    const union = ['a', 'b', 'c'];
+
+    testStore.sadd(keyA, 'a', 'b', 'c');
+    const returnVal = testStore.sunion(keyA, keyB);
+
+    expect(returnVal).toEqual(union);
+  });
+
+  it("uses sunio to throw an error if one of the keys holds a nonset value", () => {
+    const testStore = new Store();
+    const keyA = 'A';
+    const keyB = 'B';
+    const union = ['a', 'b', 'c'];
+
+    testStore.sadd(keyA, 'a', 'b', 'c');
+    testStore.setString(keyB, "You can get anything you want, at Alice's restaurant");
+
+    expect(() => { testStore.sunion(keyA, keyB); }).toThrow(new Error("StoreError: value at key is not type set."));
+  });
   // X SADD key member [member...] * O(1)
   // X SCARD key * O(1)
   // SDIFF  key [key...]
+  // SUNION key [key...]
   // X SISMEMBER key member O(1)
-  // SMEMBERS key
+  // X SMEMBERS key
   // X SPOP key [count] * O(1)
   // X SREM key member [member...] * O(1) per member
   // set is an unordered collection of unique string values

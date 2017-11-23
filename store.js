@@ -1411,6 +1411,34 @@ class Store {
     }
   }
 
+  sunion(keyA, keyB) {
+    const nodeAAtKey = this.mainHash[keyA];
+    const nodeBAtKey = this.mainHash[keyB];
+    const unionHash = {};
+
+    if (nodeAAtKey !== undefined && nodeAAtKey.type === 'set') {
+      const membersA = Object.keys(nodeAAtKey.val.memberHash);
+
+      membersA.forEach((member) => {
+        unionHash[member] = true;
+      });
+    } else if (nodeAAtKey !== undefined && nodeAAtKey.type !== 'set') {
+      throw new StoreError("StoreError: value at key is not type set.");
+    }
+
+    if (nodeBAtKey !== undefined && nodeBAtKey.type === 'set') {
+      const membersB = Object.keys(nodeBAtKey.val.memberHash);
+
+      membersB.forEach((member) => {
+        unionHash[member] = true;
+      });
+    } else if (nodeBAtKey !== undefined && nodeBAtKey.type !== 'set') {
+      throw new StoreError("StoreError: value at key is not type set.");
+    }
+
+    return Object.keys(unionHash);
+  }
+
   command() {
     return "*0\r\n";
   }
