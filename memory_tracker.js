@@ -127,6 +127,15 @@ class MemoryTracker {
     return total;
   }
 
+  calculateSetSize(set) {
+    let total = 3 * REFERENCE_SIZE_BYTES;
+
+    total += this.calculateHashSize(set.memberHash);
+    total += this.calculateHashSize(set.indexHash);
+
+    return total;
+  }
+
   calculateStoreItemSize(key, val, type) {
     let returnVal;
     switch(type) {
@@ -141,6 +150,9 @@ class MemoryTracker {
         break;
       case "zset":
         returnVal = this.calculateMainHashKeySize(key) + this.calculateNodeSize(key, val, type) + this.calculateSortedSetSize(val);
+        break;
+      case "set":
+        returnVal = this.calculateMainHashKeySize(key) + this.calculateNodeSize(key, val, type) + this.calculateSetSize(val);
         break;
     }
     return returnVal;
