@@ -1155,7 +1155,7 @@ describe("store", () => {
     const key = 'k';
 
     for (let i = 0; i < 20; i += 1) {
-      testStore.sadd(key, i.toString());
+      testStore.sadd(key, 'member' + i.toString());
     }
     for (let j = 0; j < 11; j += 1) {
       testStore.spop(key);

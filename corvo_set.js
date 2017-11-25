@@ -10,7 +10,7 @@ class CorvoSet {
       return 0;
     } else {
       this.memberHash[member] = this.cardinality;
-      this.indexHash[this.cardinaity] = member;
+      this.indexHash[this.cardinality] = member;
       this.cardinality += 1;
       return 1;
     }

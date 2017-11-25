@@ -1341,6 +1341,7 @@ class Store {
     }
     const set = nodeAtKey.val;
 
+    // only add members that aren't already present in memberHash
     members.forEach((member) => {
       if (set.memberHash[member] === undefined) {
         numAdded += 1;
@@ -1387,7 +1388,9 @@ class Store {
       throw new StoreError("StoreError: value at key is not type set.");
     } else {
       this.touch(key);
-      return nodeAtKey.val.pop();
+      const poppedMember = nodeAtKey.val.pop();
+      this.memoryTracker.setRemoveMember(poppedMember);
+      return poppedMember;
     }
   }
 
@@ -1405,7 +1408,10 @@ class Store {
       const set = nodeAtKey.val;
 
       members.forEach((member) => {
-        numDeleted += set.remove(member);
+        if (this.sismember(key, member)) {
+          numDeleted += set.remove(member);
+          this.memoryTracker.setRemoveMember(member);
+        }
       });
 
       return numDeleted;

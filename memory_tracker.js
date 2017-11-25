@@ -70,6 +70,12 @@ class MemoryTracker {
     this.memoryUsed += 2 * (STRING_ONE_CHAR_BYTES * member.length);
   }
 
+  setRemoveMember(member) {
+    this.memoryUsed -= 2 * REFERENCE_SIZE_BYTES;
+    this.memoryUsed -= NUMBER_BYTES;
+    this.memoryUsed -= 2 * (STRING_ONE_CHAR_BYTES * member.length);
+  }
+
   deleteStoreItem(node) {
     this.memoryUsed -= this.calculateStoreItemSize(node.key, node.val, node.type);
   }
