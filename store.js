@@ -1335,14 +1335,18 @@ class Store {
       this.mainHash[key] = newMainNode;
       this.mainList.append(newMainNode);
       nodeAtKey = newMainNode;
+      this.memoryTracker.nodeCreation(nodeAtKey);
     } else {
       this.touch(key);
     }
     const set = nodeAtKey.val;
 
     members.forEach((member) => {
-      numAdded += 1;
-      set.add(member);
+      if (set.memberHash[member] === undefined) {
+        numAdded += 1;
+        set.add(member);
+        this.memoryTracker.setAddMember(member);
+      }
     });
 
     return numAdded;
