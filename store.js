@@ -1439,6 +1439,37 @@ class Store {
     return Object.keys(unionHash);
   }
 
+  sinter(keyA, keyB) {
+    const nodeAAtKey = this.mainHash[keyA];
+    const nodeBAtKey = this.mainHash[keyB];
+    let aMembers = [];
+    let bMembers = [];
+    const intersection = [];
+
+    // console.log(nodeAAtKey.val.memberHash);
+    // console.log(nodeBAtKey.val.memberHash);
+
+    if (nodeAAtKey !== undefined && nodeAAtKey.type === 'set') {
+      aMembers = nodeAAtKey.val.memberHash;
+    } else if (nodeAAtKey !== undefined && nodeAAtKey.type !== 'set') {
+      throw new StoreError("StoreError: value at key is not type set.");
+    }
+
+    if (nodeBAtKey !== undefined && nodeBAtKey.type === 'set') {
+      bMembers = nodeBAtKey.val.memberHash;
+    } else if (nodeBAtKey !== undefined && nodeBAtKey.type !== 'set') {
+      throw new StoreError("StoreError: value at key is not type set.");
+    }
+
+    Object.keys(aMembers).forEach((member) => {
+      if (bMembers[member] !== undefined) {
+        intersection.push(member);
+      }
+    });
+
+    return intersection;
+  }
+
   command() {
     return "*0\r\n";
   }

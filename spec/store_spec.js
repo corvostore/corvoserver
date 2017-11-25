@@ -1268,21 +1268,55 @@ describe("store", () => {
     expect(returnVal).toEqual(union);
   });
 
-  it("uses sunio to throw an error if one of the keys holds a nonset value", () => {
+  it("uses sunion to throw an error if one of the keys holds a nonset value", () => {
     const testStore = new Store();
     const keyA = 'A';
     const keyB = 'B';
-    const union = ['a', 'b', 'c'];
 
     testStore.sadd(keyA, 'a', 'b', 'c');
     testStore.setString(keyB, "You can get anything you want, at Alice's restaurant");
 
     expect(() => { testStore.sunion(keyA, keyB); }).toThrow(new Error("StoreError: value at key is not type set."));
   });
+
+  it("uses sinter to return the intersection of two sets", () => {
+    const testStore = new Store();
+    const keyA = 'A';
+    const keyB = 'B';
+    const intersection = ['b', 'c'];
+
+    testStore.sadd(keyA, 'a', 'b', 'c');
+    testStore.sadd(keyB, 'b', 'c', 'd');
+    const returnVal = testStore.sinter(keyA, keyB);
+
+    expect(returnVal).toEqual(intersection);
+  });
+
+  it("uses sinter to return an empty list if one of the keys is not assigned", () => {
+    const testStore = new Store();
+    const keyA = 'A';
+    const keyB = 'B';
+    const intersection = [];
+
+    testStore.sadd(keyA, 'a', 'b', 'c');
+    testStore.sinter(keyA, keyB);
+  });
+
+  it("uses sinter to throw an error if one of the keys holds a nonset value", () => {
+    const testStore = new Store();
+    const keyA = 'A';
+    const keyB = 'B';
+
+    testStore.sadd(keyA, 'a', 'b', 'c');
+    testStore.setString(keyB, "You can get anything you want, at Alice's restaurant");
+
+    expect(() => { testStore.sinter(keyA, keyB); }).toThrow(new Error("StoreError: value at key is not type set."));
+  });
   // X SADD key member [member...] * O(1)
   // X SCARD key * O(1)
   // SDIFF  key [key...]
-  // SUNION key [key...]
+  // X SUNION key [key...]
+  // SINTER key [key...]
   // X SISMEMBER key member O(1)
   // X SMEMBERS key
   // X SPOP key [count] * O(1)
