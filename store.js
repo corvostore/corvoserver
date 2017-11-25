@@ -1335,6 +1335,8 @@ class Store {
       this.mainHash[key] = newMainNode;
       this.mainList.append(newMainNode);
       nodeAtKey = newMainNode;
+    } else {
+      this.touch(key);
     }
     const set = nodeAtKey.val;
 
@@ -1350,6 +1352,7 @@ class Store {
     const nodeAtKey = this.mainHash[key];
 
     if (nodeAtKey !== undefined && nodeAtKey.type === 'set') {
+      this.touch(key);
       return nodeAtKey.val.cardinality;
     } else {
       throw new StoreError("StoreError: value at key is not type set.");
@@ -1362,8 +1365,10 @@ class Store {
     if (nodeAtKey === undefined) {
       return 0;
     } else if (nodeAtKey.type !== 'set') {
+      this.touch(key);
       throw new StoreError("StoreError: value at key is not type set.");
     } else {
+      this.touch(key);
       return nodeAtKey.val.memberExists(member) ? 1 : 0;
     }
   }
@@ -1374,8 +1379,10 @@ class Store {
     if (nodeAtKey === undefined) {
       return null;
     } else if (nodeAtKey.type !== 'set') {
+      this.touch(key);
       throw new StoreError("StoreError: value at key is not type set.");
     } else {
+      this.touch(key);
       return nodeAtKey.val.pop();
     }
   }
@@ -1386,8 +1393,10 @@ class Store {
     if (nodeAtKey === undefined) {
       return 0;
     } else if (nodeAtKey.type !== 'set') {
+      this.touch(key);
       throw new StoreError("StoreError: value at key is not type set.");
     } else {
+      this.touch(key);
       let numDeleted = 0;
       const set = nodeAtKey.val;
 
@@ -1405,8 +1414,10 @@ class Store {
     if (nodeAtKey === undefined) {
       return null;
     } else if (nodeAtKey.type !== 'set') {
+      this.touch(key);
       throw new StoreError("StoreError: value at key is not type set.");
     } else {
+      this.touch(key);
       return nodeAtKey.val.getMembers();
     }
   }
@@ -1415,6 +1426,7 @@ class Store {
     const nodeAAtKey = this.mainHash[keyA];
     const nodeBAtKey = this.mainHash[keyB];
     const unionHash = {};
+    this.touch(keyA, keyB);
 
     if (nodeAAtKey !== undefined && nodeAAtKey.type === 'set') {
       const membersA = Object.keys(nodeAAtKey.val.memberHash);
@@ -1445,6 +1457,7 @@ class Store {
     let aMembers = [];
     let bMembers = [];
     const intersection = [];
+    this.touch(keyA, keyB);
 
     if (nodeAAtKey !== undefined && nodeAAtKey.type === 'set') {
       aMembers = nodeAAtKey.val.memberHash;
@@ -1473,6 +1486,7 @@ class Store {
     let aMembers = [];
     let bMembers = [];
     const difference = [];
+    this.touch(keyA, keyB);
 
     if (nodeAAtKey !== undefined && nodeAAtKey.type === 'set') {
       aMembers = nodeAAtKey.val.memberHash;
