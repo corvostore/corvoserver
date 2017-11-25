@@ -1312,11 +1312,45 @@ describe("store", () => {
 
     expect(() => { testStore.sinter(keyA, keyB); }).toThrow(new Error("StoreError: value at key is not type set."));
   });
+
+  it("uses sdiff to return the difference of two sets", () => {
+    const testStore = new Store();
+    const keyA = 'A';
+    const keyB = 'B';
+    const difference = ['a', 'd'];
+
+    testStore.sadd(keyA, 'a', 'b', 'c');
+    testStore.sadd(keyB, 'b', 'c', 'd');
+    const returnVal = testStore.sdiff(keyA, keyB);
+
+    expect(returnVal).toEqual(difference);
+  });
+
+  it("uses sdiff to return an empty list if one of the keys is not assigned", () => {
+    const testStore = new Store();
+    const keyA = 'A';
+    const keyB = 'B';
+    const difference = [];
+
+    testStore.sadd(keyA, 'a', 'b', 'c');
+    testStore.sdiff(keyA, keyB);
+  });
+
+  it("uses sdiff to throw an error if one of the keys holds a nonset value", () => {
+    const testStore = new Store();
+    const keyA = 'A';
+    const keyB = 'B';
+
+    testStore.sadd(keyA, 'a', 'b', 'c');
+    testStore.setString(keyB, "You can get anything you want, at Alice's restaurant");
+
+    expect(() => { testStore.sdiff(keyA, keyB); }).toThrow(new Error("StoreError: value at key is not type set."));
+  });
   // X SADD key member [member...] * O(1)
   // X SCARD key * O(1)
   // SDIFF  key [key...]
   // X SUNION key [key...]
-  // SINTER key [key...]
+  // X SINTER key [key...]
   // X SISMEMBER key member O(1)
   // X SMEMBERS key
   // X SPOP key [count] * O(1)
