@@ -1464,33 +1464,42 @@ class Store {
     return Object.keys(unionHash);
   }
 
-  sinter(keyA, keyB) {
-    const nodeAAtKey = this.mainHash[keyA];
-    const nodeBAtKey = this.mainHash[keyB];
-    let aMembers = [];
-    let bMembers = [];
-    const intersection = [];
-    this.touch(keyA, keyB);
+  sinter(...keys) {
+    let smallestSet;
+    let emptyNodeAtKey = false;
 
-    if (nodeAAtKey !== undefined && nodeAAtKey.type === 'set') {
-      aMembers = nodeAAtKey.val.memberHash;
-    } else if (nodeAAtKey !== undefined && nodeAAtKey.type !== 'set') {
-      throw new StoreError("StoreError: value at key is not type set.");
-    }
+    keys.forEach((key) => {
+      const nodeAtKey = this.mainHash[key];
 
-    if (nodeBAtKey !== undefined && nodeBAtKey.type === 'set') {
-      bMembers = nodeBAtKey.val.memberHash;
-    } else if (nodeBAtKey !== undefined && nodeBAtKey.type !== 'set') {
-      throw new StoreError("StoreError: value at key is not type set.");
-    }
-
-    Object.keys(aMembers).forEach((member) => {
-      if (bMembers[member] !== undefined) {
-        intersection.push(member);
+      if (nodeAtKey === undefined) {
+        emptyNodeAtKey = true;
+      } else if (nodeAtKey.type !== 'set') {
+        throw new StoreError("StoreError: value at key is not type set.");
+      } else {
+        const set = Object.keys(nodeAtKey.val.memberHash);
+        if (smallestSet === undefined) {
+          smallestSet = set;
+        } else if (smallestSet.length > set.length) {
+          smallestSet = set;
+        }
       }
     });
 
-    return intersection;
+    if (emptyNodeAtKey) {
+      return [];
+    }
+
+    return smallestSet.filter((member) => {
+      let returnVal = true;
+      keys.forEach((key) => {
+        const setHash = this.mainHash[key].val.memberHash;
+
+        if (setHash[member] === undefined) {
+          returnVal = false;
+        }
+      });
+      return returnVal;
+    });
   }
 
   sdiff(keyA, keyB) {

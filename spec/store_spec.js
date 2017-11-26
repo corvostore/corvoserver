@@ -1337,7 +1337,7 @@ describe("store", () => {
     const keyA = 'A';
     const keyB = 'B';
     const keyC = 'C';
-    const intersection = ['c'];
+    const intersection = ['b'];
 
     testStore.sadd(keyA, 'a', 'b', 'c');
     testStore.sadd(keyB, 'b', 'c', 'd');
