@@ -1165,6 +1165,30 @@ describe("store", () => {
     expect(testStore.scard(key)).toBe(9);
   });
 
+  it("uses spop to return an array of random members and delete those members when passed a count argument", () => {
+    const testStore = new Store();
+    const key = 'k';
+
+    for (let i = 0; i < 20; i += 1) {
+      testStore.sadd(key, 'member' + i.toString());
+    }
+
+    const resultArr = testStore.spop(key, 11);
+
+    expect(testStore.scard(key)).toBe(9);
+    expect(resultArr.length).toBe(11);
+  });
+
+  it("uses spop to throw an error if count is less than 0 or non-number", () => {
+    const testStore = new Store();
+    const key = 'itskeytime';
+
+    testStore.sadd(key, '1', '2', '3');
+
+    expect(() => { testStore.spop(key, -1); }).toThrow(new Error("StoreError: count is not an integer or out of range"));
+    expect(() => { testStore.spop(key, 'not a number!'); }).toThrow(new Error("StoreError: count is not an integer or out of range"));
+  })
+
   it("uses spop to throw an error when key holds nonset val", () => {
     const testStore = new Store();
 
@@ -1244,6 +1268,21 @@ describe("store", () => {
     expect(returnVal).toEqual(union);
   });
 
+  it("uses sunion to return the union of more than two sets", () => {
+    const testStore = new Store();
+    const keyA = 'A';
+    const keyB = 'B';
+    const keyC = 'C';
+    const union = ['a', 'b', 'c', 'd', 'e', 'f'];
+
+    testStore.sadd(keyA, 'a', 'b', 'c');
+    testStore.sadd(keyB, 'b', 'c', 'd');
+    testStore.sadd(keyC, 'e', 'f');
+    const returnVal = testStore.sunion(keyA, keyB, keyC);
+
+    expect(returnVal).toEqual(union);
+  });
+
   it("uses sunion to return the contents of a single set if other set empty", () => {
     const testStore = new Store();
     const keyA = 'A';
@@ -1293,6 +1332,21 @@ describe("store", () => {
     expect(returnVal).toEqual(intersection);
   });
 
+  it("uses sinter to return the intersection of more than two sets", () => {
+    const testStore = new Store();
+    const keyA = 'A';
+    const keyB = 'B';
+    const keyC = 'C';
+    const intersection = ['c'];
+
+    testStore.sadd(keyA, 'a', 'b', 'c');
+    testStore.sadd(keyB, 'b', 'c', 'd');
+    testStore.sadd(keyC, 'b', 'z');
+    const returnVal = testStore.sinter(keyA, keyB, keyC);
+
+    expect(returnVal).toEqual(intersection);
+  });
+
   it("uses sinter to return an empty list if one of the keys is not assigned", () => {
     const testStore = new Store();
     const keyA = 'A';
@@ -1323,6 +1377,21 @@ describe("store", () => {
     testStore.sadd(keyA, 'a', 'b', 'c');
     testStore.sadd(keyB, 'b', 'c', 'd');
     const returnVal = testStore.sdiff(keyA, keyB);
+
+    expect(returnVal).toEqual(difference);
+  });
+
+  it("uses sdiff to return the difference of more than two sets", () => {
+    const testStore = new Store();
+    const keyA = 'A';
+    const keyB = 'B';
+    const keyC = 'C';
+    const difference = ['a', 'd', 'z'];
+
+    testStore.sadd(keyA, 'a', 'b', 'c');
+    testStore.sadd(keyB, 'b', 'c', 'd');
+    testStore.sadd(keyC, 'z');
+    const returnVal = testStore.sdiff(keyA, keyB, keyC);
 
     expect(returnVal).toEqual(difference);
   });

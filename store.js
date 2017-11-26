@@ -1378,19 +1378,33 @@ class Store {
     }
   }
 
-  spop(key) {
+  spop(key, count) {
     const nodeAtKey = this.mainHash[key];
+    let members = [];
+    if (count !== undefined) {
+      count = +count;
+      if (Number.isNaN(count) || count <= 0) {
+        throw new StoreError("StoreError: count is not an integer or out of range");
+      }
+    }
 
-    if (nodeAtKey === undefined) {
-      return null;
-    } else if (nodeAtKey.type !== 'set') {
-      this.touch(key);
-      throw new StoreError("StoreError: value at key is not type set.");
+    if (count === undefined) {
+      if (nodeAtKey === undefined) {
+        return null;
+      } else if (nodeAtKey.type !== 'set') {
+        this.touch(key);
+        throw new StoreError("StoreError: value at key is not type set.");
+      } else {
+        this.touch(key);
+        const poppedMember = nodeAtKey.val.pop();
+        this.memoryTracker.setRemoveMember(poppedMember);
+        return poppedMember;
+      }
     } else {
-      this.touch(key);
-      const poppedMember = nodeAtKey.val.pop();
-      this.memoryTracker.setRemoveMember(poppedMember);
-      return poppedMember;
+      for (let i = 0; i < count; i += 1) {
+        members.push(nodeAtKey.val.pop());
+      }
+      return members;
     }
   }
 
