@@ -353,6 +353,102 @@ class Parser {
     }
   }
 
+  static processSADDRequest(tokens) {
+    if (tokens.length >= 3) {
+      return tokens;
+    } else {
+      throw new ParserError("ParseError: Wrong number of arguments for SADD command");
+    }
+  }
+
+  static processSCARDRequest(tokens) {
+    if (tokens.length === 2) {
+      return tokens;
+    } else {
+      throw new ParserError("ParseError: Wrong number of arguments for SCARD command");
+    }
+  }
+
+  static processSDIFFRequest(tokens) {
+    if (tokens.length >= 3) {
+      return tokens;
+    } else {
+      throw new ParserError("ParseError: Wrong number of arguments for SDIFF command");
+    }
+  }
+
+  static processSUNIONRequest(tokens) {
+    if (tokens.length >= 3) {
+      return tokens;
+    } else {
+      throw new ParserError("ParseError: Wrong number of arguments for SUNION command");
+    }
+  }
+
+  static processSINTERRequest(tokens) {
+    if (tokens.length >= 3) {
+      return tokens;
+    } else {
+      throw new ParserError("ParseError: Wrong number of arguments for SINTER command");
+    }
+  }
+
+  static processSISMEMBERRequest(tokens) {
+    if (tokens.length === 3) {
+      return tokens;
+    } else {
+      throw new ParserError("ParseError: Wrong number of arguments for SISMEMBER command");
+    }
+  }
+
+  static processSMEMBERSRequest(tokens) {
+    if (tokens.length === 2) {
+      return tokens;
+    } else {
+      throw new ParserError("ParseError: Wrong number of arguments for SMEMBERS command");
+    }
+  }
+
+  static processSPOPRequest(tokens) {
+    if (tokens.length === 2 || tokens.length === 3) {
+      return tokens;
+    } else {
+      throw new ParserError("ParseError: Wrong number of arguments for SPOP command");
+    }
+  }
+
+  static processSREMRequest(tokens) {
+    if (tokens.length >= 3) {
+      return tokens;
+    } else {
+      throw new ParserError("ParseError: Wrong number of arguments for SREM command");
+    }
+  }
+
+  static processSDIFFSTORERequest(tokens) {
+    if (tokens.length >= 4) {
+      return tokens;
+    } else {
+      throw new ParserError("ParseError: Wrong number of arguments for SDIFFSTORE command");
+    }
+  }
+
+  static processSUNIONSTORERequest(tokens) {
+    if (tokens.length >= 4) {
+      return tokens;
+    } else {
+      throw new ParserError("ParseError: Wrong number of arguments for SUNIONSTORE command");
+    }
+  }
+
+  static processSINTERSTORERequest(tokens) {
+    if (tokens.length >= 4) {
+      return tokens;
+    } else {
+      throw new ParserError("ParseError: Wrong number of arguments for SINTERSTORE command");
+    }
+  }
+
   static processShutdownRequest(tokens) {
     if (tokens.length === 1) {
       return tokens;
@@ -475,6 +571,18 @@ const commandMap = {
   'ZINCRBY': Parser.processZINCRBYRequest,
   'ZSCORE': Parser.processZSCORERequest,
   'SHUTDOWN': Parser.processShutdownRequest,
+  'SADD': Parser.processSADDRequest,
+  'SCARD': Parser.processSCARDRequest,
+  'SDIFF': Parser.processSDIFFRequest,
+  'SUNION': Parser.processSUNIONRequest,
+  'SINTER': Parser.processSINTERRequest,
+  'SISMEMBER': Parser.processSISMEMBERRequest,
+  'SMEMBERS': Parser.processSMEMBERSRequest,
+  'SPOP': Parser.processSPOPRequest,
+  'SREM': Parser.processSREMRequest,
+  'SDIFFSTORE': Parser.processSDIFFSTORERequest,
+  'SINTERSTORE': Parser.processSINTERSTORERequest,
+  'SUNIONSTORE': Parser.processSUNIONSTORERequest,
 };
 
 export { commandMap, Parser };

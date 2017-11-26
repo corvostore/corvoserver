@@ -592,4 +592,88 @@ describe("Parser", () => {
     const errorMessage = "ParseError: Wrong number of arguments for ZSCORE command";
     expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
   });
+
+  it("throws an error if number of arguments for SADD command is not valid", () => {
+    const command = '*2\r\n$4\r\nSADD\r\n$1\r\nk\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for SADD command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("throws an error if number of arguments for SCARD command is not valid", () => {
+    const command = '*3\r\n$5\r\nSCARD\r\n$1\r\nk\r\n$2\r\nbl\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for SCARD command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("throws an error if number of arguments for SDIFF command is not valid", () => {
+    const command = '*2\r\n$5\r\nSDIFF\r\n$1\r\nk\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for SDIFF command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("throws an error if number of arguments for SUNION command is not valid", () => {
+    const command = '*2\r\n$6\r\nSUNION\r\n$1\r\nk\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for SUNION command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("throws an error if number of arguments for SINTER command is not valid", () => {
+    const command = '*2\r\n$6\r\nSINTER\r\n$1\r\nk\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for SINTER command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("throws an error if number of arguments for SISMEMBER command is not valid", () => {
+    const command = '*4\r\n$9\r\nSISMEMBER\r\n$1\r\nk\r\n$1\r\n1\r\n$1\r\nk\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for SISMEMBER command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("throws an error if number of arguments for SMEMBERS command is not valid", () => {
+    const command = '*3\r\n$8\r\nSMEMBERS\r\n$1\r\nk\r\n$1\r\nm\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for SMEMBERS command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("throws an error if number of arguments for SPOP command is not valid", () => {
+    const command = '*4\r\n$4\r\nSPOP\r\n$1\r\nk\r\n$4\r\n4571\r\n$1\r\nz\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for SPOP command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("throws an error if number of arguments for SREM command is not valid", () => {
+    const command = '*2\r\n$4\r\nSREM\r\n$1\r\nk\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for SREM command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("throws an error if number of arguments for SDIFFSTORE command is not valid", () => {
+    const command = '*2\r\n$10\r\nSDIFFSTORE\r\n$1\r\nk\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for SDIFFSTORE command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("throws an error if number of arguments for SUNIONSTORE command is not valid", () => {
+    const command = '*2\r\n$11\r\nSUNIONSTORE\r\n$1\r\nk\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for SUNIONSTORE command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+
+  it("throws an error if number of arguments for SINTERSTORE command is not valid", () => {
+    const command = '*2\r\n$11\r\nSINTERSTORE\r\n$1\r\nk\r\n';
+    const errorMessage = "ParseError: Wrong number of arguments for SINTERSTORE command";
+    expect(function() { Parser.processIncomingString(command) }).toThrow(new Error(errorMessage));
+  });
+  // X SADD key member [member...] * O(1)
+  // X SCARD key * O(1)
+  // X SDIFF  key [key...]
+  // X SUNION key [key...]
+  // X SINTER key [key...]
+  // X SISMEMBER key member O(1)
+  // X SMEMBERS key
+  // X SPOP key [count] * O(1)
+  // X SREM key member [member...] * O(1) per member
+  // X SDIFFSTORE
+  // X SINTERSTORE
+  // X SUNIONSTORE
 });

@@ -1399,8 +1399,11 @@ describe("store", () => {
   // X SINTER key [key...]
   // X SISMEMBER key member O(1)
   // X SMEMBERS key
-  // X SPOP key [count] * O(1)
+  // X SPOP key [count] * O(1) ADD COUNT!!!!
   // X SREM key member [member...] * O(1) per member
+  // X SDIFFSTORE
+  // X SINTERSTORE
+  // X SUNIONSTORE
   // set is an unordered collection of unique string values
   // add, remove (via pop or explicit remove), test for existence in constant time
 });
