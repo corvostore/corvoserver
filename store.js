@@ -1502,39 +1502,70 @@ class Store {
     });
   }
 
-  sdiff(keyA, keyB) {
-    const nodeAAtKey = this.mainHash[keyA];
-    const nodeBAtKey = this.mainHash[keyB];
-    let aMembers = [];
-    let bMembers = [];
-    const difference = [];
-    this.touch(keyA, keyB);
+  sdiff(...keys) {
+    const nodeAtKey = this.mainHash[key];
 
-    if (nodeAAtKey !== undefined && nodeAAtKey.type === 'set') {
-      aMembers = nodeAAtKey.val.memberHash;
-    } else if (nodeAAtKey !== undefined && nodeAAtKey.type !== 'set') {
+    if (nodeAtKey === undefined) {
+      emptyNodeAtKey = true;
+    } else if (nodeAtKey.type !== 'set') {
       throw new StoreError("StoreError: value at key is not type set.");
+    } else {
+      const set = Object.keys(nodeAtKey.val.memberHash);
+      if (smallestSet === undefined) {
+        smallestSet = set;
+      } else if (smallestSet.length > set.length) {
+        smallestSet = set;
+      }
     }
+  });
 
-    if (nodeBAtKey !== undefined && nodeBAtKey.type === 'set') {
-      bMembers = nodeBAtKey.val.memberHash;
-    } else if (nodeBAtKey !== undefined && nodeBAtKey.type !== 'set') {
-      throw new StoreError("StoreError: value at key is not type set.");
-    }
+  if (emptyNodeAtKey) {
+    return [];
+  }
 
-    Object.keys(aMembers).forEach((member) => {
-      if (bMembers[member] === undefined) {
-        difference.push(member);
+  return smallestSet.filter((member) => {
+    let returnVal = true;
+    keys.forEach((key) => {
+      const setHash = this.mainHash[key].val.memberHash;
+
+      if (setHash[member] !== undefined) {
+        returnVal = false;
       }
     });
-
-    Object.keys(bMembers).forEach((member) => {
-      if (aMembers[member] === undefined) {
-        difference.push(member);
-      }
-    });
-
-    return difference;
+    return returnVal;
+  });
+    // const nodeAAtKey = this.mainHash[keyA];
+    // const nodeBAtKey = this.mainHash[keyB];
+    // let aMembers = [];
+    // let bMembers = [];
+    // const difference = [];
+    // this.touch(keyA, keyB);
+    //
+    // if (nodeAAtKey !== undefined && nodeAAtKey.type === 'set') {
+    //   aMembers = nodeAAtKey.val.memberHash;
+    // } else if (nodeAAtKey !== undefined && nodeAAtKey.type !== 'set') {
+    //   throw new StoreError("StoreError: value at key is not type set.");
+    // }
+    //
+    // if (nodeBAtKey !== undefined && nodeBAtKey.type === 'set') {
+    //   bMembers = nodeBAtKey.val.memberHash;
+    // } else if (nodeBAtKey !== undefined && nodeBAtKey.type !== 'set') {
+    //   throw new StoreError("StoreError: value at key is not type set.");
+    // }
+    //
+    // Object.keys(aMembers).forEach((member) => {
+    //   if (bMembers[member] === undefined) {
+    //     difference.push(member);
+    //   }
+    // });
+    //
+    // Object.keys(bMembers).forEach((member) => {
+    //   if (aMembers[member] === undefined) {
+    //     difference.push(member);
+    //   }
+    // });
+    //
+    // return difference;
   }
 
   sunionstore(destination, ...keys) {
