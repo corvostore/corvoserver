@@ -1346,9 +1346,24 @@ describe("store", () => {
 
     expect(() => { testStore.sdiff(keyA, keyB); }).toThrow(new Error("StoreError: value at key is not type set."));
   });
+
+  it("uses sunionstore to store the union of two sets at destination", () => {
+    const testStore = new Store();
+    const keyA = 'A';
+    const keyB = 'B';
+    const destination = 'C';
+    const union = ['a', 'b', 'c', 'd'];
+
+    testStore.sadd(keyA, 'a', 'b', 'c');
+    testStore.sadd(keyB, 'b', 'c', 'd');
+    const returnVal = testStore.sunionstore(destination, keyA, keyB);
+
+    expect(returnVal).toBe(4);
+    expect(testStore.smembers(destination)).toEqual(union);
+  });
   // X SADD key member [member...] * O(1)
   // X SCARD key * O(1)
-  // SDIFF  key [key...]
+  // X SDIFF  key [key...]
   // X SUNION key [key...]
   // X SINTER key [key...]
   // X SISMEMBER key member O(1)

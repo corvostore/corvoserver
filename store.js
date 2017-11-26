@@ -1525,6 +1525,13 @@ class Store {
     return difference;
   }
 
+  sunionstore(destination, keyA, keyB) {
+    const union = this.sunion(keyA, keyB);
+
+    const returnVal = this.sadd(destination, ...union);
+    return returnVal;
+  }
+
   command() {
     return "*0\r\n";
   }
