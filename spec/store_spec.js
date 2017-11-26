@@ -1187,7 +1187,7 @@ describe("store", () => {
 
     expect(() => { testStore.spop(key, -1); }).toThrow(new Error("StoreError: count is not an integer or out of range"));
     expect(() => { testStore.spop(key, 'not a number!'); }).toThrow(new Error("StoreError: count is not an integer or out of range"));
-  })
+  });
 
   it("uses spop to throw an error when key holds nonset val", () => {
     const testStore = new Store();

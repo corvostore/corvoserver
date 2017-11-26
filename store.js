@@ -1446,31 +1446,20 @@ class Store {
     }
   }
 
-  sunion(keyA, keyB) {
-    const nodeAAtKey = this.mainHash[keyA];
-    const nodeBAtKey = this.mainHash[keyB];
+  sunion(...keys) {
     const unionHash = {};
-    this.touch(keyA, keyB);
+    this.touch(...keys);
 
-    if (nodeAAtKey !== undefined && nodeAAtKey.type === 'set') {
-      const membersA = Object.keys(nodeAAtKey.val.memberHash);
-
-      membersA.forEach((member) => {
-        unionHash[member] = true;
-      });
-    } else if (nodeAAtKey !== undefined && nodeAAtKey.type !== 'set') {
-      throw new StoreError("StoreError: value at key is not type set.");
-    }
-
-    if (nodeBAtKey !== undefined && nodeBAtKey.type === 'set') {
-      const membersB = Object.keys(nodeBAtKey.val.memberHash);
-
-      membersB.forEach((member) => {
-        unionHash[member] = true;
-      });
-    } else if (nodeBAtKey !== undefined && nodeBAtKey.type !== 'set') {
-      throw new StoreError("StoreError: value at key is not type set.");
-    }
+    keys.forEach((key) => {
+      const nodeAtKey = this.mainHash[key];
+      if (nodeAtKey !== undefined && nodeAtKey.type === 'set') {
+        Object.keys(nodeAtKey.val.memberHash).forEach((member) => {
+          unionHash[member] = true;
+        });
+      } else if (nodeAtKey !== undefined && nodeAtKey.type !== 'set') {
+        throw new StoreError("StoreError: value at key is not type set.");
+      }
+    });
 
     return Object.keys(unionHash);
   }
@@ -1539,22 +1528,22 @@ class Store {
     return difference;
   }
 
-  sunionstore(destination, keyA, keyB) {
-    const union = this.sunion(keyA, keyB);
+  sunionstore(destination, ...keys) {
+    const union = this.sunion(...keys);
 
     const returnVal = this.sadd(destination, ...union);
     return returnVal;
   }
 
-  sinterstore(destination, keyA, keyB) {
-    const intersection = this.sinter(keyA, keyB);
+  sinterstore(destination, ...keys) {
+    const intersection = this.sinter(...keys);
 
     const returnVal = this.sadd(destination, ...intersection);
     return returnVal;
   }
 
-  sdiffstore(destination, keyA, keyB) {
-    const intersection = this.sdiff(keyA, keyB);
+  sdiffstore(destination, ...keys) {
+    const intersection = this.sdiff(...keys);
 
     const returnVal = this.sadd(destination, ...intersection);
     return returnVal;
