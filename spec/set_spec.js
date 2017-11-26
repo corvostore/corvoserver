@@ -15,7 +15,7 @@ describe("Set", () => {
 
     testSet.add(member);
     expect(testSet.cardinality).toBe(1);
-    expect(testSet.memberHash[member]).toBe(0);
+    expect(testSet.memberHash[member]).toBe(1);
   });
 
   it("uses pop to remove an element", () => {

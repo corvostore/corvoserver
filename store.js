@@ -1532,6 +1532,20 @@ class Store {
     return returnVal;
   }
 
+  sinterstore(destination, keyA, keyB) {
+    const intersection = this.sinter(keyA, keyB);
+
+    const returnVal = this.sadd(destination, ...intersection);
+    return returnVal;
+  }
+
+  sdiffstore(destination, keyA, keyB) {
+    const intersection = this.sdiff(keyA, keyB);
+
+    const returnVal = this.sadd(destination, ...intersection);
+    return returnVal;
+  }
+
   command() {
     return "*0\r\n";
   }

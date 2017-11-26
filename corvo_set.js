@@ -9,9 +9,9 @@ class CorvoSet {
     if (this.memberExists(member)) {
       return 0;
     } else {
+      this.cardinality += 1;
       this.memberHash[member] = this.cardinality;
       this.indexHash[this.cardinality] = member;
-      this.cardinality += 1;
       return 1;
     }
   }
@@ -21,7 +21,7 @@ class CorvoSet {
       return null;
     }
 
-    const index = Math.round(Math.random() * this.cardinality);
+    const index = Math.round(Math.random() * (this.cardinality - 1)) + 1;
     const memberToRemove = this.indexHash[index];
     const lastMember = this.indexHash[this.cardinality];
 

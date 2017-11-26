@@ -1157,6 +1157,7 @@ describe("store", () => {
     for (let i = 0; i < 20; i += 1) {
       testStore.sadd(key, 'member' + i.toString());
     }
+
     for (let j = 0; j < 11; j += 1) {
       testStore.spop(key);
     }
@@ -1360,6 +1361,36 @@ describe("store", () => {
 
     expect(returnVal).toBe(4);
     expect(testStore.smembers(destination)).toEqual(union);
+  });
+
+  it("uses sdiffstore to store intersection of two sets at destination", () => {
+    const testStore = new Store();
+    const keyA = 'A';
+    const keyB = 'B';
+    const destination = 'C';
+    const difference = ['a', 'd'];
+
+    testStore.sadd(keyA, 'a', 'b', 'c');
+    testStore.sadd(keyB, 'b', 'c', 'd');
+    const returnVal = testStore.sdiffstore(destination, keyA, keyB);
+
+    expect(returnVal).toBe(2);
+    expect(testStore.smembers(destination)).toEqual(difference);
+  });
+
+  it("uses sinterstore to store intersection of two sets at destination", () => {
+    const testStore = new Store();
+    const keyA = 'A';
+    const keyB = 'B';
+    const destination = 'C';
+    const intersection = ['b', 'c'];
+
+    testStore.sadd(keyA, 'a', 'b', 'c');
+    testStore.sadd(keyB, 'b', 'c', 'd');
+    const returnVal = testStore.sinterstore(destination, keyA, keyB);
+
+    expect(returnVal).toBe(2);
+    expect(testStore.smembers(destination)).toEqual(intersection);
   });
   // X SADD key member [member...] * O(1)
   // X SCARD key * O(1)
