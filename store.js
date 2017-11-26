@@ -1503,69 +1503,33 @@ class Store {
   }
 
   sdiff(...keys) {
-    const nodeAtKey = this.mainHash[key];
+    const allMembers = {};
+    const diffMembers = [];
 
-    if (nodeAtKey === undefined) {
-      emptyNodeAtKey = true;
-    } else if (nodeAtKey.type !== 'set') {
-      throw new StoreError("StoreError: value at key is not type set.");
-    } else {
-      const set = Object.keys(nodeAtKey.val.memberHash);
-      if (smallestSet === undefined) {
-        smallestSet = set;
-      } else if (smallestSet.length > set.length) {
-        smallestSet = set;
-      }
-    }
-  });
-
-  if (emptyNodeAtKey) {
-    return [];
-  }
-
-  return smallestSet.filter((member) => {
-    let returnVal = true;
     keys.forEach((key) => {
-      const setHash = this.mainHash[key].val.memberHash;
+      const nodeAtKey = this.mainHash[key];
 
-      if (setHash[member] !== undefined) {
-        returnVal = false;
+      if (nodeAtKey !== undefined && nodeAtKey.type !== 'set') {
+        throw new StoreError("StoreError: value at key is not type set.");
+      } else if (nodeAtKey !== undefined) {
+        const members = Object.keys(nodeAtKey.val.memberHash);
+        members.forEach((member) => {
+          if (allMembers[member] !== undefined) {
+            allMembers[member] += 1;
+          } else {
+            allMembers[member] = 1;
+          }
+        });
       }
     });
-    return returnVal;
-  });
-    // const nodeAAtKey = this.mainHash[keyA];
-    // const nodeBAtKey = this.mainHash[keyB];
-    // let aMembers = [];
-    // let bMembers = [];
-    // const difference = [];
-    // this.touch(keyA, keyB);
-    //
-    // if (nodeAAtKey !== undefined && nodeAAtKey.type === 'set') {
-    //   aMembers = nodeAAtKey.val.memberHash;
-    // } else if (nodeAAtKey !== undefined && nodeAAtKey.type !== 'set') {
-    //   throw new StoreError("StoreError: value at key is not type set.");
-    // }
-    //
-    // if (nodeBAtKey !== undefined && nodeBAtKey.type === 'set') {
-    //   bMembers = nodeBAtKey.val.memberHash;
-    // } else if (nodeBAtKey !== undefined && nodeBAtKey.type !== 'set') {
-    //   throw new StoreError("StoreError: value at key is not type set.");
-    // }
-    //
-    // Object.keys(aMembers).forEach((member) => {
-    //   if (bMembers[member] === undefined) {
-    //     difference.push(member);
-    //   }
-    // });
-    //
-    // Object.keys(bMembers).forEach((member) => {
-    //   if (aMembers[member] === undefined) {
-    //     difference.push(member);
-    //   }
-    // });
-    //
-    // return difference;
+
+    Object.keys(allMembers).forEach((member) => {
+      if (allMembers[member] === 1) {
+        diffMembers.push(member);
+      }
+    });
+
+    return diffMembers;
   }
 
   sunionstore(destination, ...keys) {
