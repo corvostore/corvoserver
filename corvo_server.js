@@ -104,6 +104,8 @@ class CorvoServer {
     if (this.persist) {
       this.writer = FS.createWriteStream(options.aofWritePath, {'flags': 'a' });
     }
+
+    this.connections = [];
   }
 
   prepareRespReturn(result, isError=false) {
@@ -165,6 +167,7 @@ class CorvoServer {
   }
 
   handleConnection(conn) {
+    this.connections.push(conn);
     const self = this;
     conn.setEncoding('utf8');
     conn.on('data', function(data) {
@@ -175,7 +178,6 @@ class CorvoServer {
         let result;
 
         if (command === 'SHUTDOWN') {
-          conn.destroy();
           this.shutdownServer();
         } else if (command === 'SET') {
           if (tokens.length > 3) {
@@ -380,6 +382,9 @@ class CorvoServer {
 
   shutdownServer() {
     console.log("shutting down server...");
+    this.connections.forEach((conn) => {
+      conn.destroy();
+    });
     this.server.close();
   }
 }

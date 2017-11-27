@@ -1554,9 +1554,6 @@ class Store {
     return returnVal;
   }
 
-  command() {
-    return "*0\r\n";
-  }
 }
 
 export default Store;
