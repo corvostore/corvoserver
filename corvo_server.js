@@ -99,10 +99,10 @@ class CorvoServer {
       'SINTERSTORE': this.store.sinterstore,
       'SUNIONSTORE': this.store.sunionstore,
     };
-    this.aofWritePath = options.aofWritePath;
-    this.persist = options.aofPersistence;
+    this.aofWritePath = options["aofWritePath"] ? options.aofWritePath : DEF_OPTIONS.aofWritePath;
+    this.persist = options["aofPersistence"] ? options.aofPersistence : DEF_OPTIONS.aofPersistence;
     if (this.persist) {
-      this.writer = FS.createWriteStream(options.aofWritePath, {'flags': 'a' });
+      this.writer = FS.createWriteStream(this.aofWritePath, {'flags': 'a' });
     }
 
     this.connections = [];
