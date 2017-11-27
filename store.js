@@ -1323,10 +1323,6 @@ class Store {
     this.lruCheckAndEvictToMaxMemory();
     return Object.keys(interHash).length;
   }
-
-  command() {
-    return "*0\r\n";
-  }
 }
 
 export default Store;
