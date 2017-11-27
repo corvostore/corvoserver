@@ -32,6 +32,19 @@ const WRITE_COMMANDS = {
   ZADD: true, // write for integer or bulk string reply
   ZREM: true, // write for any integer value
   ZINCRBY: true, // bulk string reply
+  // SADD: true,
+  // SCARD: true,
+  // SCARD: true,
+  // SDIFF: true,
+  // SUNION: true,
+  // SINTER: true,
+  // SISMEMBER: true,
+  // SMEMBERS: true,
+  // SPOP: true,
+  // SREM: true,
+  // SDIFFSTORE: true,
+  // SINTERSTORE: true,
+  // SUNIONSTORE: true,
 };
 const DEF_OPTIONS = {
   aofWritePath: 'corvoAOF.aof',
@@ -80,6 +93,18 @@ class CorvoServer {
       'ZCARD': this.store.zcard,
       'ZINCRBY': this.store.zincrby,
       'ZSCORE': this.store.zscore,
+      'SADD': this.store.sadd,
+      'SCARD': this.store.scard,
+      'SDIFF': this.store.sdiff,
+      'SUNION': this.store.sunion,
+      'SINTER': this.store.sinter,
+      'SISMEMBER': this.store.sismember,
+      'SMEMBERS': this.store.smembers,
+      'SPOP': this.store.spop,
+      'SREM': this.store.srem,
+      'SDIFFSTORE': this.store.sdiffstore,
+      'SINTERSTORE': this.store.sinterstore,
+      'SUNIONSTORE': this.store.sunionstore,
     };
     this.aofWritePath = options.aofWritePath;
     this.persist = options.aofPersistence;
