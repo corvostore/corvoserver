@@ -32,19 +32,12 @@ const WRITE_COMMANDS = {
   ZADD: true, // write for integer or bulk string reply
   ZREM: true, // write for any integer value
   ZINCRBY: true, // bulk string reply
-  // SADD: true,
-  // SCARD: true,
-  // SCARD: true,
-  // SDIFF: true,
-  // SUNION: true,
-  // SINTER: true,
-  // SISMEMBER: true,
-  // SMEMBERS: true,
-  // SPOP: true,
-  // SREM: true,
-  // SDIFFSTORE: true,
-  // SINTERSTORE: true,
-  // SUNIONSTORE: true,
+  SADD: true,
+  SPOP: true,
+  SREM: true,
+  SDIFFSTORE: true,
+  SINTERSTORE: true,
+  SUNIONSTORE: true,
 };
 const DEF_OPTIONS = {
   aofWritePath: 'corvoAOF.aof',
