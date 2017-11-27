@@ -66,13 +66,11 @@ class MemoryTracker {
 
   setAddMember(member) {
     this.memoryUsed += 2 * REFERENCE_SIZE_BYTES;
-    this.memoryUsed += NUMBER_BYTES;
     this.memoryUsed += 2 * (STRING_ONE_CHAR_BYTES * member.length);
   }
 
   setRemoveMember(member) {
     this.memoryUsed -= 2 * REFERENCE_SIZE_BYTES;
-    this.memoryUsed -= NUMBER_BYTES;
     this.memoryUsed -= 2 * (STRING_ONE_CHAR_BYTES * member.length);
   }
 

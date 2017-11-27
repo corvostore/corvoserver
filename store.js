@@ -1379,6 +1379,7 @@ class Store {
   }
 
   spop(key, count) {
+    // add node test code to loop
     const nodeAtKey = this.mainHash[key];
     let members = [];
     if (count !== undefined) {
