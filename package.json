@@ -1,7 +1,7 @@
 {
-  "name": "corvo",
+  "name": "corvoserver",
   "version": "1.0.0",
-  "description": "",
+  "description": "An experimental, in-memory, key-value store with complex datatypes and optional persistence.",
   "main": "index.js",
   "scripts": {
     "test": "babel-node node_modules/.bin/jasmine",
