@@ -3,7 +3,7 @@ import CorvoNode from './corvo_node';
 import CorvoListNode from './data_types/corvo_list_node';
 import MemoryTracker from './memory_tracker';
 import CorvoSortedSet from './data_types/corvo_sorted_set.js';
-import CorvoSet from './corvo_set.js';
+import CorvoSet from './data_types/corvo_set.js';
 import StoreError from './store_error';
 
 const DEFAULT_MAX_MEMORY = 104857600; // equals 100MB
@@ -69,6 +69,9 @@ class Store {
     const accessedNode = this.mainHash[key];
     if (accessedNode === undefined) {
       return null;
+    } else if (accessedNode && accessedNode.type !== "string") {
+      this.touch(key);
+      throw new StoreError("StoreError: value at key not a string.");
     }
 
     const returnValue = accessedNode.val;

@@ -1,6 +1,6 @@
 import Store from "../store.js";
 import StoreError from "../store_error";
-import Set from "../corvo_set.js";
+import Set from "../data_types/corvo_set.js";
 import MemoryTracker from "../memory_tracker";
 
 describe("Set", () => {
