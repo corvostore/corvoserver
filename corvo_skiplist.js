@@ -19,7 +19,7 @@ class CorvoSkipList {
     this.height = 0; // Height of skip list
   }
 
-  findNode(score, member) { // finds skip list node with key that is <= specified key
+  findNode(score, member) {
     let p = this.head; // pointer to head
     while (true) {
       while (p.right.score != CorvoSkipListNode.posInf && p.right.score <= score && p.right.member <= member) {
@@ -111,10 +111,10 @@ class CorvoSkipList {
     this.height += 1;
   }
 
-  remove(key) {
-    let p = this.findNode(key);
+  remove(score, member) {
+    let p = this.findNode(score, member);
 
-    if (p.key !== key) {
+    if (p.score !== score) {
       return null;
     }
 

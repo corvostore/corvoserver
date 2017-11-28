@@ -30,12 +30,15 @@ class CorvoSortedSet {
   }
 
   setScore(member, newScore) {
+    this.skipList.remove(this.hash[member], member);
+    this.skipList.insert(newScore, member);
     this.hash[member] = newScore;
+
     return newScore;
   }
 
   remove(member) {
-    this.skipList.remove(this.hash[member]);
+    this.skipList.remove(this.hash[member], member);
     delete this.hash[member];
     this.cardinality -= 1;
   }
