@@ -247,8 +247,7 @@ class CorvoServer {
   }
 
   aofLoadFile(fileName) {
-    // const CHUNK_SIZE = 1024;
-    const CHUNK_SIZE = 391;
+    const CHUNK_SIZE = 1024;
 
     console.log("Going to open an existing file");
     const self = this;
