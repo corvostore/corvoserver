@@ -171,7 +171,6 @@ class CorvoServer {
     const self = this;
     conn.setEncoding('utf8');
     conn.on('data', function(data) {
-      console.log("data =", data);
       try {
         const tokens = Parser.processIncomingString(data);
         const command = tokens[0].toUpperCase();
@@ -241,7 +240,6 @@ class CorvoServer {
     } else if (command === 'LREM' && result === 0) {
       return;
     } else {
-      console.log("Above command written to AOF file.");
       this.writer.write(data, 'UTF8');
     }
   }
@@ -249,7 +247,6 @@ class CorvoServer {
   aofLoadFile(fileName) {
     const CHUNK_SIZE = 1024;
 
-    console.log("Going to open an existing file");
     const self = this;
     this.prependString = "";
     const readStream = FS.createReadStream(fileName, {encoding: 'utf8', highWaterMark: CHUNK_SIZE});
@@ -276,7 +273,6 @@ class CorvoServer {
             self.aofCallStoreCommands(tokens);
           }
       }).on('end', function() {
-        console.log("end of data reached");
       });
   }
 
@@ -331,7 +327,6 @@ class CorvoServer {
         }
 
       } else if (this.storeCommandMap[command]) {
-        console.log("TOKENS", tokens);
         result = this.storeCommandMap[command].apply(this.store, tokens.slice(1));
       } else {
         result = "ServerError: Command not found in storeCommandMap.";
@@ -380,7 +375,6 @@ class CorvoServer {
   }
 
   shutdownServer() {
-    console.log("shutting down server...");
     this.connections.forEach((conn) => {
       conn.destroy();
     });
