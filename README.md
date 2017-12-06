@@ -5,6 +5,7 @@ CorvoStore uses the TCP protocol provided by Node’s Net module to facilitate c
 
 Key-value stores are a subset of NoSQL databases. NoSQL databases in general are more performant than relational databases. Retrieving data from relational databases can be an expensive operation since the schema, or structure, of the data needs to be maintained. Key-value stores are useful for cases where data does not have a predefined structure.
 
+# Features
 ## Overview
 
 Here is a brief overview of CorvoStore’s data flow:
@@ -18,10 +19,10 @@ Here is a brief overview of CorvoStore’s data flow:
 
 ## LRU Eviction
 
-CorvoStore allows you to specify the maximum allowable memory for the key-value store, and evicts the least recently used key if the max memory is exceeded
-Multiple data types
-You can store complex data types in the key-value store
-Persistence
+CorvoStore allows you to specify the maximum allowable memory for the key-value store, and evicts the least recently used key if the max memory is exceeded.
+## Multiple data types
+You can store complex data types in the key-value store.
+## Persistence
 CorvoStore optionally supports AOF (append-only file) persistence. Write operations that modify data are logged to a file, and the file is used to reconstruct the dataset when the server is started.   
 
 # Installation
