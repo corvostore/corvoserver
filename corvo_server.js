@@ -171,6 +171,7 @@ class CorvoServer {
     const self = this;
     conn.setEncoding('utf8');
     conn.on('data', function(data) {
+      console.log("data =", data);
       try {
         const tokens = Parser.processIncomingString(data);
         const command = tokens[0].toUpperCase();
@@ -327,6 +328,7 @@ class CorvoServer {
         }
 
       } else if (this.storeCommandMap[command]) {
+        console.log("TOKENS", tokens);
         result = this.storeCommandMap[command].apply(this.store, tokens.slice(1));
       } else {
         result = "ServerError: Command not found in storeCommandMap.";
@@ -375,6 +377,7 @@ class CorvoServer {
   }
 
   shutdownServer() {
+    console.log("shutting down server...");
     this.connections.forEach((conn) => {
       conn.destroy();
     });
