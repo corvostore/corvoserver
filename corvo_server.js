@@ -306,6 +306,7 @@ class CorvoServer {
       let result;
 
       if (command === 'SET') {
+        console.log("TOKENS", tokens);
         if (tokens.length > 3) {
           // add code to accommodate expiry later
           const flag = tokens[tokens.length - 1];
@@ -319,6 +320,7 @@ class CorvoServer {
           result = this.store.setString(...tokens.slice(1));
         }
       } else if (command === 'LINSERT') {
+        console.log("TOKENS", tokens);
         const flag = tokens[2];
 
         if (flag === 'BEFORE') {
