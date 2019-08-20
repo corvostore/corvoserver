@@ -171,6 +171,7 @@ class CorvoServer {
     const self = this;
     conn.setEncoding('utf8');
     conn.on('data', function(data) {
+      console.log("data =", data);
       try {
         const tokens = Parser.processIncomingString(data);
         const command = tokens[0].toUpperCase();
@@ -305,6 +306,7 @@ class CorvoServer {
       let result;
 
       if (command === 'SET') {
+        console.log("TOKENS", tokens);
         if (tokens.length > 3) {
           // add code to accommodate expiry later
           const flag = tokens[tokens.length - 1];
@@ -318,6 +320,7 @@ class CorvoServer {
           result = this.store.setString(...tokens.slice(1));
         }
       } else if (command === 'LINSERT') {
+        console.log("TOKENS", tokens);
         const flag = tokens[2];
 
         if (flag === 'BEFORE') {
@@ -327,6 +330,7 @@ class CorvoServer {
         }
 
       } else if (this.storeCommandMap[command]) {
+        console.log("TOKENS", tokens);
         result = this.storeCommandMap[command].apply(this.store, tokens.slice(1));
       } else {
         result = "ServerError: Command not found in storeCommandMap.";
@@ -375,6 +379,7 @@ class CorvoServer {
   }
 
   shutdownServer() {
+    console.log("shutting down server...");
     this.connections.forEach((conn) => {
       conn.destroy();
     });

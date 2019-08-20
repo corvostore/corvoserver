@@ -1,6 +1,6 @@
 {
   "name": "corvoserver",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "bin": "./cli.js",
   "description": "An experimental, in-memory, key-value store with complex datatypes and optional persistence.",
   "main": "index.js",

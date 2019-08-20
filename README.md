@@ -45,3 +45,25 @@ After installation is complete, execute the following command:
 `$ npm start`
 
 Now, the server is listening on localhost:6793!
+
+# CorvoStore Command Line Arguments
+
+CorvoStore accepts three command-line arguments:
+
+### `maxMemory`
+
+Use this argument to set a max memory setting. If you don't provide this argument, a default value of 104857600 (100MB) is used.
+
+    --maxMemory <bytes>
+
+### `aofPersistence`
+
+Use this argument to specify if AOF persistence has be to turned on. The argument has a default of `false`, so AOF persistence is off by default.
+
+    --aofPersistence <true/false>
+
+### `aofWritePath`
+
+Use this argument to specify the file to be used for AOF persistence. If this argument is not supplied, the default file used is corvoAOF.aof in the current directory (current working directory when the command to start the server is issued).
+
+    --aofWritePath path/to/file/filename
